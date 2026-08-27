@@ -51,8 +51,10 @@ function dateChoices(){
   const now=new Date();
   now.setHours(0,0,0,0);
 
-  const end=new Date(now);
-  end.setMonth(end.getMonth()+3);
+  // Vai de hoje até o ÚLTIMO DIA do 3º mês à frente.
+  // Exemplo: 27/08/2026 -> 30/11/2026.
+  const end=new Date(now.getFullYear(), now.getMonth()+4, 0);
+  end.setHours(23,59,59,999);
 
   let i=0;
   for(let d=new Date(now); d<=end; d.setDate(d.getDate()+1), i++){
