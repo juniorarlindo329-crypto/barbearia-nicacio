@@ -182,5 +182,22 @@ function renderBookings(){
 $('#myBookingsBtn').onclick=()=>{ renderBookings(); $('#bookingsModal').classList.remove('hidden'); };
 $('#closeModal').onclick=()=>$('#bookingsModal').classList.add('hidden');
 
+
+function playIntro(){
+  const intro1 = document.getElementById('intro1');
+  const intro2 = document.getElementById('intro2');
+  const stepService = document.getElementById('stepService');
+
+  setTimeout(()=> intro1?.classList.add('show'), 250);
+  setTimeout(()=> intro2?.classList.add('show'), 950);
+  setTimeout(()=>{
+    if(stepService){
+      stepService.classList.remove('intro-step-hidden');
+      stepService.classList.add('intro-step-show');
+    }
+  }, 1650);
+}
+
 renderServices();
+playIntro();
 

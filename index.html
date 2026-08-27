@@ -19,10 +19,10 @@
     </header>
 
     <section id="chat" class="chat">
-      <div class="bubble bot">Como vai! Que bom que você voltou!</div>
-      <div class="bubble bot">Por qual serviço você está procurando?</div>
+      <div id="intro1" class="bubble bot intro-bubble">Como vai! Que bom que você voltou!</div>
+      <div id="intro2" class="bubble bot intro-bubble">Por qual serviço você está procurando?</div>
 
-      <div id="stepService" class="step">
+      <div id="stepService" class="step intro-step-hidden">
         <h3>SELECIONE OS SERVIÇOS:</h3>
         <div id="services" class="cards horizontal"></div>
         <p class="swipe">← ARRASTE PARA O LADO PARA VER MAIS →</p>
@@ -74,6 +74,6 @@
       caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
     }
   </script>
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>
