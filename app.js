@@ -51,22 +51,29 @@ function dateChoices(){
   const now=new Date();
   now.setHours(0,0,0,0);
 
-  // Vai de hoje até o ÚLTIMO DIA do 3º mês à frente.
-  // Exemplo: 27/08/2026 -> 30/11/2026.
+  // Exibe todos os dias em sequência, começando HOJE,
+  // sem pular datas: 27, 28, 29, 30, 31, 01, 02...
+  // e vai até o último dia do 3º mês à frente.
   const end=new Date(now.getFullYear(), now.getMonth()+4, 0);
   end.setHours(23,59,59,999);
 
-  let i=0;
-  for(let d=new Date(now); d<=end; d.setDate(d.getDate()+1), i++){
-    const copy=new Date(d);
+  let index=0;
+  const cursor=new Date(now);
+
+  while(cursor <= end){
+    const copy=new Date(cursor);
+
     out.push({
-      d:copy,
-      key:localDateKey(copy),
-      dow:names[copy.getDay()],
-      month:months[copy.getMonth()],
-      label:i===0?'HOJE':String(copy.getDate()).padStart(2,'0'),
-      disabled:copy.getDay()===0
+      d: copy,
+      key: localDateKey(copy),
+      dow: names[copy.getDay()],
+      month: months[copy.getMonth()],
+      label: index===0 ? 'HOJE' : String(copy.getDate()).padStart(2,'0'),
+      disabled: false
     });
+
+    cursor.setDate(cursor.getDate()+1);
+    index++;
   }
 
   return out;
