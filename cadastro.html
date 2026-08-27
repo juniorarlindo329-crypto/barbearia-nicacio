@@ -3,52 +3,117 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111722">
+<meta name="theme-color" content="#0d1118">
 <title>Entrar • Barbearia Nicácio</title>
-<link rel="stylesheet" href="styles.css?v=13">
+<link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body>
-<main class="auth-page">
-  <section class="auth-card">
-    <div class="auth-logo">✂️</div>
-    <h1>Barbearia Nicácio</h1>
-    <p class="auth-sub">Cadastre seus dados uma vez. Eles serão usados para identificar seu horário para o barbeiro.</p>
+<main class="login-shell">
+  <section class="login-card">
+    <div class="login-brand">
+      <div class="login-logo">✂️</div>
+      <div>
+        <h1>Barbearia Nicácio</h1>
+        <p>Seu horário, do seu jeito.</p>
+      </div>
+    </div>
 
-    <form id="profileForm">
-      <label>Seu nome</label>
-      <input id="name" type="text" autocomplete="name" placeholder="Ex.: João da Silva" required>
+    <div class="login-tabs">
+      <button id="tabEntrar" class="login-tab active" type="button">Entrar</button>
+      <button id="tabCriar" class="login-tab" type="button">Criar conta</button>
+    </div>
 
-      <label>E-mail</label>
-      <input id="email" type="email" autocomplete="email" placeholder="seuemail@gmail.com" required>
+    <section id="loginView">
+      <div class="login-heading">
+        <h2>Bem-vindo de volta</h2>
+        <p>Entre para ver seus agendamentos e marcar um novo horário.</p>
+      </div>
 
-      <label>Telefone / WhatsApp</label>
-      <input id="phone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000">
+      <form id="loginForm">
+        <label for="loginEmail">E-mail</label>
+        <div class="input-wrap">
+          <span>✉️</span>
+          <input id="loginEmail" type="email" autocomplete="email" placeholder="seuemail@gmail.com" required>
+        </div>
 
-      <button class="primary auth-primary" type="submit">ENTRAR E AGENDAR</button>
-    </form>
+        <button class="primary login-primary" type="submit">ENTRAR</button>
+      </form>
+    </section>
 
-    <div class="auth-divider"><span>ou</span></div>
+    <section id="registerView" class="hidden">
+      <div class="login-heading">
+        <h2>Crie seu cadastro</h2>
+        <p>Preencha seus dados para o barbeiro saber quem reservou o horário.</p>
+      </div>
 
-    <button id="googleBtn" class="social-btn" type="button">
-      <span class="social-icon">G</span>
-      Continuar com Google
-    </button>
+      <form id="registerForm">
+        <label for="name">Nome completo</label>
+        <div class="input-wrap">
+          <span>👤</span>
+          <input id="name" type="text" autocomplete="name" placeholder="Seu nome" required>
+        </div>
 
-    <p class="auth-note">
-      O nome informado ficará visível no painel do barbeiro junto com o seu agendamento.
+        <label for="email">E-mail</label>
+        <div class="input-wrap">
+          <span>✉️</span>
+          <input id="email" type="email" autocomplete="email" placeholder="seuemail@gmail.com" required>
+        </div>
+
+        <label for="phone">WhatsApp</label>
+        <div class="input-wrap">
+          <span>📱</span>
+          <input id="phone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000">
+        </div>
+
+        <button class="primary login-primary" type="submit">CRIAR CONTA E AGENDAR</button>
+      </form>
+    </section>
+
+    <div class="login-divider"><span>ou continue com</span></div>
+
+    <div class="social-grid">
+      <button id="googleBtn" class="social-login" type="button"><b>G</b> Google</button>
+      <button id="facebookBtn" class="social-login" type="button"><b>f</b> Facebook</button>
+    </div>
+
+    <p class="login-foot">
+      Seus dados são usados apenas para identificar seus agendamentos.
     </p>
   </section>
 </main>
 
 <script>
+const tabEntrar = document.getElementById('tabEntrar');
+const tabCriar = document.getElementById('tabCriar');
+const loginView = document.getElementById('loginView');
+const registerView = document.getElementById('registerView');
+
+function showLogin(){
+  tabEntrar.classList.add('active');
+  tabCriar.classList.remove('active');
+  loginView.classList.remove('hidden');
+  registerView.classList.add('hidden');
+}
+function showRegister(){
+  tabCriar.classList.add('active');
+  tabEntrar.classList.remove('active');
+  registerView.classList.remove('hidden');
+  loginView.classList.add('hidden');
+}
+tabEntrar.onclick = showLogin;
+tabCriar.onclick = showRegister;
+
 const existing = JSON.parse(localStorage.getItem('nicacio_profile') || 'null');
 if(existing){
+  document.getElementById('loginEmail').value = existing.email || '';
   document.getElementById('name').value = existing.name || '';
   document.getElementById('email').value = existing.email || '';
   document.getElementById('phone').value = existing.phone || '';
+}else{
+  showRegister();
 }
 
-document.getElementById('profileForm').addEventListener('submit', (e)=>{
+document.getElementById('registerForm').addEventListener('submit', (e)=>{
   e.preventDefault();
   const profile = {
     name: document.getElementById('name').value.trim(),
@@ -61,9 +126,26 @@ document.getElementById('profileForm').addEventListener('submit', (e)=>{
   window.location.href='index.html';
 });
 
-document.getElementById('googleBtn').addEventListener('click', ()=>{
-  alert('Para o login real com Google, precisamos conectar o aplicativo a um sistema de autenticação online. Por enquanto, use seu nome e e-mail acima.');
+document.getElementById('loginForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const saved = JSON.parse(localStorage.getItem('nicacio_profile') || 'null');
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+
+  if(saved && (saved.email || '').toLowerCase() === email){
+    window.location.href='index.html';
+    return;
+  }
+
+  alert('Cadastro não encontrado neste aparelho. Toque em "Criar conta".');
+  showRegister();
+  document.getElementById('email').value = email;
 });
+
+function socialSoon(provider){
+  alert('O login real com ' + provider + ' será ativado quando conectarmos o aplicativo ao sistema de autenticação online.');
+}
+document.getElementById('googleBtn').onclick=()=>socialSoon('Google');
+document.getElementById('facebookBtn').onclick=()=>socialSoon('Facebook');
 </script>
 </body>
 </html>
