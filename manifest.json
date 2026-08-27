@@ -1,0 +1,9 @@
+{
+  "name": "Barbearia Nicácio",
+  "short_name": "Nicácio",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#111722",
+  "theme_color": "#111722",
+  "icons": []
+}

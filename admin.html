@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel • Barbearia Nicácio</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="app">
+  <header class="topbar">
+    <div><div class="brand">Painel do Barbeiro</div><div class="sub">Barbearia Nicácio</div></div>
+    <a class="light-btn" href="index.html" style="text-decoration:none">ÁREA DO CLIENTE</a>
+  </header>
+  <section class="step">
+    <div class="bubble bot">Agenda da barbearia</div>
+    <div id="adminList"></div>
+  </section>
+</main>
+<script>
+function bookings(){return JSON.parse(localStorage.getItem('nicacio_bookings')||'[]')}
+function money(v){return Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function render(){
+ const el=document.getElementById('adminList');
+ const data=bookings().filter(b=>b.status!=='cancelado').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+ if(!data.length){el.innerHTML='<div class="empty">Nenhum agendamento confirmado.</div>';return}
+ el.innerHTML=data.map(b=>`<div class="booking-item"><strong>${b.dateLabel} • ${b.time}</strong>${b.serviceName}<br>${money(b.price)} • ${b.duration} min<br>Status: confirmado</div>`).join('');
+}
+render();
+</script>
+</body></html>

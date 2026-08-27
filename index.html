@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111722" />
+  <title>Barbearia Nicácio</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <div class="brand">Barbearia Nicácio</div>
+        <div class="sub">Agendamento online</div>
+      </div>
+      <button id="myBookingsBtn" class="light-btn">MEUS AGENDAMENTOS</button>
+    </header>
+
+    <section id="chat" class="chat">
+      <div class="bubble bot">Como vai! Que bom que você voltou!</div>
+      <div class="bubble bot">Por qual serviço você está procurando?</div>
+
+      <div id="stepService" class="step">
+        <h3>SELECIONE OS SERVIÇOS:</h3>
+        <div id="services" class="cards horizontal"></div>
+        <p class="swipe">← ARRASTE PARA O LADO PARA VER MAIS →</p>
+        <button id="serviceNext" class="primary" disabled>Enviar</button>
+      </div>
+
+      <div id="stepDate" class="step hidden">
+        <div id="chosenServiceBubble" class="bubble user"></div>
+        <div class="bubble bot">Certo, e qual o melhor dia e horário para você ser atendido?</div>
+        <h3>SELECIONE O DIA E HORÁRIO:</h3>
+        <div id="dates" class="cards horizontal"></div>
+        <p class="swipe">← ARRASTE PARA O LADO PARA VER MAIS →</p>
+
+        <div id="timesBox" class="times-box">
+          <div id="timesMessage">Selecione um dia para ver os horários.</div>
+          <div id="times" class="times"></div>
+        </div>
+
+        <div id="selectedDateLabel" class="selected-label">Nenhum dia selecionado</div>
+        <button id="confirmBooking" class="primary" disabled>Enviar</button>
+        <button id="backToService" class="secondary">Voltar</button>
+      </div>
+
+      <div id="stepDone" class="step hidden">
+        <div class="bubble bot">Agendamento confirmado ✅</div>
+        <div id="bookingSummary" class="summary"></div>
+        <button id="newBooking" class="primary">Fazer outro agendamento</button>
+      </div>
+    </section>
+
+    <section id="bookingsModal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2>Meus agendamentos</h2>
+          <button id="closeModal" class="icon-btn">✕</button>
+        </div>
+        <div id="bookingsList"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
