@@ -51,24 +51,23 @@ function dateChoices(){
   const now=new Date();
   now.setHours(0,0,0,0);
 
-  // Exibe todos os dias em sequência, começando HOJE,
-  // sem pular datas: 27, 28, 29, 30, 31, 01, 02...
-  // e vai até o último dia do 3º mês à frente.
-  const end=new Date(now.getFullYear(), now.getMonth()+4, 0);
+  // Ex.: 27/08 -> 28/08 -> 29/08 -> 30/08 -> 31/08 -> 01/09...
+  // Vai até o último dia do terceiro mês seguinte.
+  const end = new Date(now.getFullYear(), now.getMonth()+4, 0);
   end.setHours(23,59,59,999);
 
-  let index=0;
-  const cursor=new Date(now);
+  const cursor = new Date(now);
+  let index = 0;
 
   while(cursor <= end){
-    const copy=new Date(cursor);
+    const copy = new Date(cursor);
 
     out.push({
       d: copy,
       key: localDateKey(copy),
       dow: names[copy.getDay()],
       month: months[copy.getMonth()],
-      label: index===0 ? 'HOJE' : String(copy.getDate()).padStart(2,'0'),
+      label: index === 0 ? 'HOJE' : String(copy.getDate()).padStart(2,'0'),
       disabled: false
     });
 
@@ -185,6 +184,3 @@ $('#closeModal').onclick=()=>$('#bookingsModal').classList.add('hidden');
 
 renderServices();
 
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-}

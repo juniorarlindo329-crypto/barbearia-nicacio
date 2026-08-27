@@ -64,6 +64,16 @@
     </section>
   </main>
 
-  <script src="app.js"></script>
+
+  <script>
+    // Remove versões antigas salvas no celular para sempre carregar a versão atual.
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+    }
+    if ('caches' in window) {
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    }
+  </script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>
