@@ -1,81 +1,89 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#111722" />
-  <title>Barbearia Nicácio</title>
-  <link rel="manifest" href="manifest.json" />
-
-  <script>
-    const nicacioProfile = JSON.parse(localStorage.getItem('nicacio_profile') || 'null');
-    if (!nicacioProfile || !nicacioProfile.name || !nicacioProfile.email) {
-      window.location.replace('cadastro.html');
-    }
-  </script>
-
-  <link rel="stylesheet" href="styles.css?v=17" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#151a23">
+<title>Barbearia Nicácio Pro</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="barbeiro.css?v=1">
 </head>
 <body>
-  <main class="app">
-    <header class="topbar">
+<main class="barber-app">
+  <header class="barber-top">
+    <div>
+      <h1 id="helloBarber">Olá, Nicácio</h1>
+      <button class="agenda-selector">Você está em sua agenda. ▾</button>
+    </div>
+    <div class="top-actions">
+      <button id="togglePrivacy" class="icon-btn" title="Ocultar valores">◉</button>
+      <button id="openMenu" class="icon-btn">☰</button>
+    </div>
+  </header>
+
+  <section class="week-head">
+    <div class="week-title-row">
+      <button id="prevWeek" class="nav-arrow">‹</button>
+      <div class="week-title">📅 <span id="weekRange"></span></div>
+      <button id="nextWeek" class="nav-arrow">›</button>
+    </div>
+    <div id="weekDays" class="week-days"></div>
+  </section>
+
+  <section class="stats-grid">
+    <article class="stat-card stat-today">
+      <div><strong>Hoje</strong><span class="money-line">🪙 <b id="todayRevenue">R$ 0,00</b></span></div>
+      <div class="stat-number" id="todayCount">0</div><div class="chair">💺</div>
+    </article>
+    <article class="stat-card stat-week">
+      <div><strong>Esta semana</strong><span class="money-line">🪙 <b id="weekRevenue">R$ 0,00</b></span></div>
+      <div class="stat-number" id="weekCount">0</div><div class="chair">💺</div>
+    </article>
+  </section>
+
+  <section class="timeline-wrap">
+    <div class="timeline-top">
       <div>
-        <div class="brand">Barbearia Nicácio</div>
-        <div class="sub">Agendamento online</div>
-      <div class="top-actions">
-        <button id="installAppBtn" class="install-btn hidden" type="button">INSTALAR APP</button>
-        <a class="light-btn" href="agendamentos.html" style="text-decoration:none">MEUS AGENDAMENTOS</a>
+        <h2 id="selectedDayTitle">Agenda de hoje</h2>
+        <p id="selectedDaySub">Horários e clientes do dia selecionado</p>
       </div>
-      </div>
-      
-    </header>
+      <button id="editDayBtn" class="mini-btn">Modificar este dia</button>
+    </div>
+    <div id="timeline" class="timeline"></div>
+  </section>
 
-    <section id="chat" class="chat">
-      <div id="intro1" class="bubble bot intro-bubble">Olá!</div>
-      <div id="intro2" class="bubble bot intro-bubble">Por qual serviço você está procurando?</div>
+  <section class="hours-info">
+    <p>Seu horário de funcionamento cadastrado é das <b id="hoursText">09:00 às 18:00</b>.</p>
+    <button id="editHoursBtn" class="link-btn">Editar horários</button>
+  </section>
 
-      <div id="stepService" class="step intro-step-hidden"><div class="step-progress"><span class="active"></span><span></span><span></span></div><div class="helper-card"><span>✂️</span><div><b>1. Escolha o serviço</b><br>Toque em uma opção e depois em Enviar.</div></div>
-        <h3>SELECIONE OS SERVIÇOS:</h3>
-        <div id="services" class="cards horizontal"></div>
-        <p class="swipe">← ARRASTE PARA O LADO PARA VER MAIS →</p>
-        <button id="serviceNext" class="primary" disabled>Enviar</button>
-      </div>
+  <div class="bottom-actions">
+    <button id="lockDayBtn" class="lock-btn">🔒</button>
+    <button id="newBookingBtn" class="new-booking-btn">Novo Agendamento <span>→</span></button>
+  </div>
+</main>
 
-      <div id="stepDate" class="step hidden"><div class="step-progress"><span class="active"></span><span class="active"></span><span></span></div><div class="helper-card"><span>📅</span><div><b>2. Escolha dia e horário</b><br>Domingos e dias bloqueados não podem ser selecionados.</div></div>
-        <div id="chosenServiceBubble" class="bubble user"></div>
-        <div class="bubble bot">Certo, e qual o melhor dia e horário para você ser atendido?</div>
-        <h3>SELECIONE O DIA E HORÁRIO:</h3>
-        <div id="dates" class="cards horizontal"></div>
-        <p class="swipe">← ARRASTE PARA O LADO PARA VER MAIS →</p>
+<aside id="sideMenu" class="side-menu hidden">
+  <div class="menu-head"><div class="menu-logo">NICÁCIO</div><button id="closeMenu" class="icon-btn">✕</button></div>
+  <nav class="menu-list">
+    <button data-page="link">Meu link</button>
+    <button data-page="clients">Clientes</button>
+    <button data-page="cancelled">Cancelados</button>
+    <button data-page="recurrence">Minhas recorrências</button>
+    <button data-page="revenue">Faturamento</button>
+    <button data-page="help">Ajuda p/ configurar</button>
+    <button data-page="settings">Configurações</button>
+  </nav>
+</aside>
+<div id="menuOverlay" class="menu-overlay hidden"></div>
 
-        <div id="timesBox" class="times-box">
-          <div id="timesMessage">Selecione um dia para ver os horários.</div>
-          <div id="times" class="times"></div>
-        </div>
+<section id="modal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head"><h2 id="modalTitle">Novo Agendamento</h2><button id="closeModal" class="icon-btn">✕</button></div>
+    <div id="modalContent"></div>
+  </div>
+</section>
 
-        <div id="selectedDateLabel" class="selected-label">Nenhum dia selecionado</div>
-        <button id="confirmBooking" class="primary" disabled>Enviar</button>
-        <button id="backToService" class="secondary">Voltar</button>
-      </div>
-
-      <div id="stepDone" class="step hidden"><div class="step-progress"><span class="active"></span><span class="active"></span><span class="active"></span></div>
-        <div class="bubble bot">Agendamento confirmado ✅</div>
-        <div id="bookingSummary" class="summary"></div>
-        <button id="newBooking" class="primary">Fazer outro agendamento</button>
-      </div>
-    </section>
-  </main>
-
-
-  <script>
-    // Remove versões antigas salvas no celular para sempre carregar a versão atual.
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
-    }
-    if ('caches' in window) {
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-    }
-  </script>
-  <script src="app.js?v=16"></script>
+<script src="barbeiro.js?v=1"></script>
 </body>
 </html>
