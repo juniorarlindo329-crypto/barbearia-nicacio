@@ -272,3 +272,37 @@ $('#newBooking')?.addEventListener('click',()=>location.reload());
 
 renderServices();
 playIntro();
+
+
+// Instalação do aplicativo no celular (PWA)
+let deferredInstallPrompt = null;
+const installBtn = document.getElementById('installAppBtn');
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  if (installBtn) installBtn.classList.remove('hidden');
+});
+
+installBtn?.addEventListener('click', async () => {
+  if (!deferredInstallPrompt) {
+    alert('No Chrome, toque no menu ⋮ e escolha "Adicionar à tela inicial" ou "Instalar app".');
+    return;
+  }
+
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  installBtn.classList.add('hidden');
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  installBtn?.classList.add('hidden');
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js?v=16').catch(() => {});
+  });
+}

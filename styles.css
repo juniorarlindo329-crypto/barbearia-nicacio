@@ -311,3 +311,60 @@ h3{margin-bottom:12px;font-size:13px;letter-spacing:.5px;font-weight:800;color:#
   pointer-events:auto;
   transition:opacity .4s ease,transform .4s ease;
 }
+
+
+/* V16 — botão de dia menor + instalar aplicativo */
+.top-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.install-btn{
+  border:0;
+  border-radius:13px;
+  padding:10px 12px;
+  background:linear-gradient(135deg,#d39a70,#b8754e);
+  color:#111;
+  font-weight:900;
+  font-size:11px;
+}
+.date-card{
+  min-width:82px !important;
+  width:82px !important;
+  height:96px !important;
+  padding:6px !important;
+  border-radius:16px !important;
+}
+.date-card .dow{
+  font-size:12px !important;
+}
+.date-card .day{
+  font-size:21px !important;
+  margin-top:3px !important;
+}
+.date-card .month{
+  font-size:10px !important;
+}
+.blocked-tag{
+  margin-top:4px !important;
+  font-size:7px !important;
+}
+@media(max-width:560px){
+  .topbar{
+    gap:8px;
+  }
+  .top-actions{
+    gap:6px;
+  }
+  .install-btn,.light-btn{
+    font-size:9px !important;
+    padding:9px 9px !important;
+  }
+  .date-card{
+    min-width:76px !important;
+    width:76px !important;
+    height:90px !important;
+  }
+}

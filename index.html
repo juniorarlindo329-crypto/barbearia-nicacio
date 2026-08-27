@@ -14,7 +14,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=15" />
+  <link rel="stylesheet" href="styles.css?v=16" />
 </head>
 <body>
   <main class="app">
@@ -22,8 +22,12 @@
       <div>
         <div class="brand">Barbearia Nicácio</div>
         <div class="sub">Agendamento online</div>
+      <div class="top-actions">
+        <button id="installAppBtn" class="install-btn hidden" type="button">INSTALAR APP</button>
+        <a class="light-btn" href="agendamentos.html" style="text-decoration:none">MEUS AGENDAMENTOS</a>
       </div>
-      <a class="light-btn" href="agendamentos.html" style="text-decoration:none">MEUS AGENDAMENTOS</a>
+      </div>
+      
     </header>
 
     <section id="chat" class="chat">
@@ -72,6 +76,6 @@
       caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
     }
   </script>
-  <script src="app.js?v=15"></script>
+  <script src="app.js?v=16"></script>
 </body>
 </html>
