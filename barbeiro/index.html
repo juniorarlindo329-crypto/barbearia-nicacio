@@ -1,1 +1,88 @@
-<!-- Aplicativo do Barbeiro -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#151a23">
+<title>Painel do Barbeiro • Barbearia Nicácio</title>
+<link rel="stylesheet" href="barbeiro.css?v=1">
+</head>
+<body>
+<main class="barber-app">
+  <header class="barber-top">
+    <div>
+      <h1 id="helloBarber">Olá, Nicácio</h1>
+      <button class="agenda-selector">Você está em sua agenda. ▾</button>
+    </div>
+    <div class="top-actions">
+      <button id="togglePrivacy" class="icon-btn" title="Ocultar valores">◉</button>
+      <button id="openMenu" class="icon-btn">☰</button>
+    </div>
+  </header>
+
+  <section class="week-head">
+    <div class="week-title-row">
+      <button id="prevWeek" class="nav-arrow">‹</button>
+      <div class="week-title">📅 <span id="weekRange"></span></div>
+      <button id="nextWeek" class="nav-arrow">›</button>
+    </div>
+    <div id="weekDays" class="week-days"></div>
+  </section>
+
+  <section class="stats-grid">
+    <article class="stat-card stat-today">
+      <div><strong>Hoje</strong><span class="money-line">🪙 <b id="todayRevenue">R$ 0,00</b></span></div>
+      <div class="stat-number" id="todayCount">0</div><div class="chair">💺</div>
+    </article>
+    <article class="stat-card stat-week">
+      <div><strong>Esta semana</strong><span class="money-line">🪙 <b id="weekRevenue">R$ 0,00</b></span></div>
+      <div class="stat-number" id="weekCount">0</div><div class="chair">💺</div>
+    </article>
+  </section>
+
+  <section class="timeline-wrap">
+    <div class="timeline-top">
+      <div>
+        <h2 id="selectedDayTitle">Agenda de hoje</h2>
+        <p id="selectedDaySub">Horários e clientes do dia selecionado</p>
+      </div>
+      <button id="editDayBtn" class="mini-btn">Modificar este dia</button>
+    </div>
+    <div id="timeline" class="timeline"></div>
+  </section>
+
+  <section class="hours-info">
+    <p>Seu horário de funcionamento cadastrado é das <b id="hoursText">09:00 às 18:00</b>.</p>
+    <button id="editHoursBtn" class="link-btn">Editar horários</button>
+  </section>
+
+  <div class="bottom-actions">
+    <button id="lockDayBtn" class="lock-btn">🔒</button>
+    <button id="newBookingBtn" class="new-booking-btn">Novo Agendamento <span>→</span></button>
+  </div>
+</main>
+
+<aside id="sideMenu" class="side-menu hidden">
+  <div class="menu-head"><div class="menu-logo">NICÁCIO</div><button id="closeMenu" class="icon-btn">✕</button></div>
+  <nav class="menu-list">
+    <button data-page="link">Meu link</button>
+    <button data-page="clients">Clientes</button>
+    <button data-page="cancelled">Cancelados</button>
+    <button data-page="recurrence">Minhas recorrências</button>
+    <button data-page="revenue">Faturamento</button>
+    <button data-page="help">Ajuda p/ configurar</button>
+    <button data-page="settings">Configurações</button>
+  </nav>
+</aside>
+<div id="menuOverlay" class="menu-overlay hidden"></div>
+
+<section id="modal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head"><h2 id="modalTitle">Novo Agendamento</h2><button id="closeModal" class="icon-btn">✕</button></div>
+    <div id="modalContent"></div>
+  </div>
+</section>
+
+<script src="barbeiro.js?v=1"></script>
+</body>
+</html>

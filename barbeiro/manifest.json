@@ -1,0 +1,8 @@
+{
+  "name": "Barbearia Nicácio - Barbeiro",
+  "short_name": "Nicácio Pro",
+  "start_url": "./barbeiro.html",
+  "display": "standalone",
+  "background_color": "#151a23",
+  "theme_color": "#151a23"
+}
