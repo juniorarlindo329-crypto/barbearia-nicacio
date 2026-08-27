@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111722">
+<title>Entrar • Barbearia Nicácio</title>
+<link rel="stylesheet" href="styles.css?v=12">
+</head>
+<body>
+<main class="auth-page">
+  <section class="auth-card">
+    <div class="auth-logo">✂️</div>
+    <h1>Barbearia Nicácio</h1>
+    <p class="auth-sub">Informe seus dados para fazer seu agendamento.</p>
+
+    <form id="profileForm">
+      <label>Seu nome</label>
+      <input id="name" type="text" autocomplete="name" placeholder="Ex.: João da Silva" required>
+
+      <label>E-mail</label>
+      <input id="email" type="email" autocomplete="email" placeholder="seuemail@gmail.com" required>
+
+      <label>Telefone / WhatsApp</label>
+      <input id="phone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000">
+
+      <button class="primary auth-primary" type="submit">CONTINUAR</button>
+    </form>
+
+    <div class="auth-divider"><span>ou</span></div>
+
+    <button id="googleBtn" class="social-btn" type="button">
+      <span class="social-icon">G</span>
+      Continuar com Google
+    </button>
+
+    <p class="auth-note">
+      O nome informado ficará visível no painel do barbeiro junto com o seu agendamento.
+    </p>
+  </section>
+</main>
+
+<script>
+const existing = JSON.parse(localStorage.getItem('nicacio_profile') || 'null');
+if(existing){
+  document.getElementById('name').value = existing.name || '';
+  document.getElementById('email').value = existing.email || '';
+  document.getElementById('phone').value = existing.phone || '';
+}
+
+document.getElementById('profileForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const profile = {
+    name: document.getElementById('name').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    provider: 'email',
+    createdAt: new Date().toISOString()
+  };
+  localStorage.setItem('nicacio_profile', JSON.stringify(profile));
+  window.location.href='index.html';
+});
+
+document.getElementById('googleBtn').addEventListener('click', ()=>{
+  alert('Para o login real com Google, precisamos conectar o aplicativo a um sistema de autenticação online. Por enquanto, use seu nome e e-mail acima.');
+});
+</script>
+</body>
+</html>
