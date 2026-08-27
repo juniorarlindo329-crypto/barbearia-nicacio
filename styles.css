@@ -288,3 +288,26 @@ h3{margin-bottom:12px;font-size:13px;letter-spacing:.5px;font-weight:800;color:#
   .login-brand h1{font-size:20px}
   .login-heading h2{font-size:21px}
 }
+
+
+/* V15 — saudação personalizada e agendamento corrigido */
+.intro-bubble{
+  opacity:0;
+  transform:translateY(10px);
+  transition:opacity .4s ease,transform .4s ease;
+}
+.intro-bubble.show{
+  opacity:1;
+  transform:translateY(0);
+}
+.intro-step-hidden{
+  opacity:0;
+  transform:translateY(10px);
+  pointer-events:none;
+}
+.intro-step-show{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+  transition:opacity .4s ease,transform .4s ease;
+}
