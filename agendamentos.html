@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111722">
+<title>Meus Agendamentos • Barbearia Nicácio</title>
+<link rel="stylesheet" href="styles.css?v=11">
+</head>
+<body>
+<main class="app bookings-page">
+  <header class="topbar">
+    <div>
+      <div class="brand">Meus Agendamentos</div>
+      <div class="sub">Barbearia Nicácio</div>
+    </div>
+    <a class="light-btn" href="index.html" style="text-decoration:none">NOVO AGENDAMENTO</a>
+  </header>
+
+  <section class="bookings-only">
+    <div id="bookingsList"></div>
+  </section>
+</main>
+
+<script>
+function bookings(){
+  return JSON.parse(localStorage.getItem('nicacio_bookings')||'[]');
+}
+function saveBookings(v){
+  localStorage.setItem('nicacio_bookings',JSON.stringify(v));
+}
+function money(v){
+  return Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+function renderBookings(){
+  const list=document.getElementById('bookingsList');
+
+  const data=bookings()
+    .filter(b=>b.status!=='cancelado')
+    .sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+
+  if(!data.length){
+    list.innerHTML=`
+      <div class="empty-bookings">
+        <div class="empty-icon">✂️</div>
+        <h2>Nenhum agendamento</h2>
+        <p>Quando você marcar um horário, ele aparecerá aqui.</p>
+        <a href="index.html" class="primary link-button">Fazer agendamento</a>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML='';
+  data.forEach(b=>{
+    const el=document.createElement('article');
+    el.className='booking-card';
+    el.innerHTML=`
+      <div class="booking-top">
+        <div>
+          <strong>${b.serviceName}</strong>
+          <span class="booking-status">CONFIRMADO</span>
+        </div>
+      </div>
+      <div class="booking-info">
+        <div><span>📅</span><b>${b.dateLabel}</b></div>
+        <div><span>🕒</span><b>${b.time}</b></div>
+        <div><span>⏱️</span><b>${b.duration} min</b></div>
+        <div><span>💰</span><b>${money(b.price)}</b></div>
+      </div>
+      <button class="cancel-booking">Cancelar agendamento</button>
+    `;
+
+    el.querySelector('.cancel-booking').onclick=()=>{
+      const ok=confirm('Deseja cancelar este agendamento?');
+      if(!ok) return;
+
+      const all=bookings();
+      const item=all.find(x=>x.id===b.id);
+      if(item){
+        item.status='cancelado';
+        item.cancelledAt=new Date().toISOString();
+      }
+      saveBookings(all);
+      renderBookings();
+    };
+    list.appendChild(el);
+  });
+}
+renderBookings();
+</script>
+</body>
+</html>

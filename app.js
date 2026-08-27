@@ -178,26 +178,6 @@ $('#confirmBooking').onclick=()=>{
 
 $('#newBooking').onclick=()=>location.reload();
 
-function renderBookings(){
-  const list=$('#bookingsList');
-  const data=bookings().filter(b=>b.status!=='cancelado').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
-  if(!data.length){ list.innerHTML='<div class="empty">Você ainda não possui agendamentos.</div>'; return; }
-  list.innerHTML='';
-  data.forEach(b=>{
-    const el=document.createElement('div');
-    el.className='booking-item';
-    el.innerHTML=`<strong>${b.serviceName}</strong>${b.dateLabel} às ${b.time}<br>${money(b.price)} • ${b.duration} min
-    <br><button class="cancel">Cancelar agendamento</button>`;
-    el.querySelector('.cancel').onclick=()=>{
-      if(confirm('Deseja cancelar este agendamento?')){
-        const all=bookings(); const item=all.find(x=>x.id===b.id); if(item)item.status='cancelado'; saveBookings(all); renderBookings();
-      }
-    };
-    list.appendChild(el);
-  });
-}
-$('#myBookingsBtn').onclick=()=>{ renderBookings(); $('#bookingsModal').classList.remove('hidden'); };
-$('#closeModal').onclick=()=>$('#bookingsModal').classList.add('hidden');
 
 
 function playIntro(){

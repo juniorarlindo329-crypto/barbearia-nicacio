@@ -212,3 +212,87 @@ h3{font-size:16px;font-weight:500;color:var(--muted);margin:0 0 16px 2px}
   .admin-day{min-height:96px;border-radius:15px;padding:8px 4px}
   .admin-day strong{font-size:22px}
 }
+
+
+/* V11 — Agendamentos separados em página própria */
+.bookings-only{
+  padding-top:18px;
+}
+.booking-card{
+  background:linear-gradient(145deg,#303641,#252b35);
+  border-radius:22px;
+  padding:18px;
+  margin-bottom:14px;
+  box-shadow:0 8px 24px #0002;
+}
+.booking-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.booking-top strong{
+  display:block;
+  font-size:20px;
+  margin-bottom:8px;
+}
+.booking-status{
+  display:inline-block;
+  font-size:10px;
+  letter-spacing:.6px;
+  font-weight:900;
+  border-radius:99px;
+  padding:5px 8px;
+  background:#214b36;
+  color:#b9f5ce;
+}
+.booking-info{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:16px;
+}
+.booking-info div{
+  background:#1d232c;
+  border-radius:14px;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.booking-info b{
+  font-size:14px;
+}
+.cancel-booking{
+  width:100%;
+  margin-top:16px;
+  border:0;
+  border-radius:16px;
+  padding:14px;
+  background:#5d2931;
+  color:white;
+  font-weight:800;
+}
+.empty-bookings{
+  text-align:center;
+  padding:60px 18px;
+  color:var(--muted);
+}
+.empty-bookings h2{
+  color:white;
+  margin:8px 0;
+}
+.empty-icon{
+  font-size:42px;
+}
+.link-button{
+  display:block;
+  text-decoration:none;
+  text-align:center;
+  margin-top:24px;
+}
+@media(max-width:560px){
+  .booking-info{
+    grid-template-columns:1fr 1fr;
+  }
+}

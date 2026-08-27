@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#111722" />
   <title>Barbearia Nicácio</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=10" />
+  <link rel="stylesheet" href="styles.css?v=11" />
 </head>
 <body>
   <main class="app">
@@ -15,7 +15,7 @@
         <div class="brand">Barbearia Nicácio</div>
         <div class="sub">Agendamento online</div>
       </div>
-      <button id="myBookingsBtn" class="light-btn">MEUS AGENDAMENTOS</button>
+      <a class="light-btn" href="agendamentos.html" style="text-decoration:none">MEUS AGENDAMENTOS</a>
     </header>
 
     <section id="chat" class="chat">
@@ -52,16 +52,6 @@
         <button id="newBooking" class="primary">Fazer outro agendamento</button>
       </div>
     </section>
-
-    <section id="bookingsModal" class="modal hidden">
-      <div class="modal-card">
-        <div class="modal-head">
-          <h2>Meus agendamentos</h2>
-          <button id="closeModal" class="icon-btn">✕</button>
-        </div>
-        <div id="bookingsList"></div>
-      </div>
-    </section>
   </main>
 
 
@@ -74,6 +64,6 @@
       caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
     }
   </script>
-  <script src="app.js?v=10"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>
