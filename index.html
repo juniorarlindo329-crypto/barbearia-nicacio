@@ -14,7 +14,7 @@
     }
   </script>
 
-  <link rel="stylesheet" href="styles.css?v=12" />
+  <link rel="stylesheet" href="styles.css?v=13" />
 </head>
 <body>
   <main class="app">
@@ -30,14 +30,14 @@
       <div id="intro1" class="bubble bot intro-bubble">Como vai! Que bom que você voltou!</div>
       <div id="intro2" class="bubble bot intro-bubble">Por qual serviço você está procurando?</div>
 
-      <div id="stepService" class="step intro-step-hidden">
+      <div id="stepService" class="step intro-step-hidden"><div class="step-progress"><span class="active"></span><span></span><span></span></div><div class="helper-card"><span>✂️</span><div><b>1. Escolha o serviço</b><br>Toque em uma opção e depois em Enviar.</div></div>
         <h3>SELECIONE OS SERVIÇOS:</h3>
         <div id="services" class="cards horizontal"></div>
         <p class="swipe">← ARRASTE PARA O LADO PARA VER MAIS →</p>
         <button id="serviceNext" class="primary" disabled>Enviar</button>
       </div>
 
-      <div id="stepDate" class="step hidden">
+      <div id="stepDate" class="step hidden"><div class="step-progress"><span class="active"></span><span class="active"></span><span></span></div><div class="helper-card"><span>📅</span><div><b>2. Escolha dia e horário</b><br>Domingos e dias bloqueados não podem ser selecionados.</div></div>
         <div id="chosenServiceBubble" class="bubble user"></div>
         <div class="bubble bot">Certo, e qual o melhor dia e horário para você ser atendido?</div>
         <h3>SELECIONE O DIA E HORÁRIO:</h3>
@@ -54,7 +54,7 @@
         <button id="backToService" class="secondary">Voltar</button>
       </div>
 
-      <div id="stepDone" class="step hidden">
+      <div id="stepDone" class="step hidden"><div class="step-progress"><span class="active"></span><span class="active"></span><span class="active"></span></div>
         <div class="bubble bot">Agendamento confirmado ✅</div>
         <div id="bookingSummary" class="summary"></div>
         <button id="newBooking" class="primary">Fazer outro agendamento</button>
