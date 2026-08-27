@@ -17,3 +17,7 @@ Observação:
 Esta versão salva os agendamentos no navegador (localStorage).
 Para uso real com vários clientes, o próximo passo é ligar a um banco de dados/backend
 (Supabase/Firebase/Node + PostgreSQL) e adicionar login, usuários, barbeiros e notificações.
+
+ATUALIZAÇÃO V2:
+- Calendário permite agendar até 3 meses à frente.
+- Domingos continuam bloqueados.

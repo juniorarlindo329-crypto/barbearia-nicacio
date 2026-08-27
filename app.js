@@ -44,12 +44,29 @@ function renderServices(){
 }
 
 function dateChoices(){
-  const out=[]; const names=['DOM','SEG','TER','QUA','QUI','SEX','SAB']; const months=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const out=[];
+  const names=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
+  const months=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+
   const now=new Date();
-  for(let i=0;i<10;i++){
-    const d=new Date(now); d.setDate(now.getDate()+i);
-    out.push({d, key:localDateKey(d), dow:names[d.getDay()], month:months[d.getMonth()], label:i===0?'HOJE':String(d.getDate()).padStart(2,'0'), disabled:d.getDay()===0});
+  now.setHours(0,0,0,0);
+
+  const end=new Date(now);
+  end.setMonth(end.getMonth()+3);
+
+  let i=0;
+  for(let d=new Date(now); d<=end; d.setDate(d.getDate()+1), i++){
+    const copy=new Date(d);
+    out.push({
+      d:copy,
+      key:localDateKey(copy),
+      dow:names[copy.getDay()],
+      month:months[copy.getMonth()],
+      label:i===0?'HOJE':String(copy.getDate()).padStart(2,'0'),
+      disabled:copy.getDay()===0
+    });
   }
+
   return out;
 }
 
