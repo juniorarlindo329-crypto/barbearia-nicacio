@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Painel • Barbearia Nicácio</title>
-<link rel="stylesheet" href="styles.css?v=10">
+<link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
 <main class="app">
@@ -69,7 +69,7 @@ function renderBookings(){
  const el=document.getElementById('adminList');
  const data=bookings().filter(b=>b.status!=='cancelado').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
  if(!data.length){el.innerHTML='<div class="empty">Nenhum agendamento confirmado.</div>';return}
- el.innerHTML=data.map(b=>`<div class="booking-item"><strong>${b.dateLabel} • ${b.time}</strong>${b.serviceName}<br>${money(b.price)} • ${b.duration} min<br>Status: confirmado</div>`).join('');
+ el.innerHTML=data.map(b=>`<div class="booking-item"><strong>${b.dateLabel} • ${b.time}</strong><b>Cliente: ${b.clientName || 'Cliente'}</b><br>${b.clientPhone ? 'Telefone: '+b.clientPhone+'<br>' : ''}${b.clientEmail ? 'Email: '+b.clientEmail+'<br>' : ''}${b.serviceName}<br>${money(b.price)} • ${b.duration} min<br>Status: confirmado</div>`).join('');
 }
 renderCalendar();
 renderBookings();

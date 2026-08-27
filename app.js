@@ -2,15 +2,8 @@
 const SERVICES = [
   { id:'corte', name:'Corte', price:30, duration:30 },
   { id:'barba', name:'Barba', price:20, duration:30 },
-  { id:'corte_barba', name:'Corte+Barba', price:45, duration:60 },
-  { id:'corte_sobrancelha', name:'Corte+Sobrancelha', price:40, duration:30 },
-  { id:'corte_barba_sobra', name:'Corte+Barba+Sobra', price:50, duration:60 },
-  { id:'barba_sobrancelha', name:'Barba+Sobrancelha', price:30, duration:30 },
-  { id:'corte_alisante_pintura', name:'Corte +Alisante ou pintura', price:60, duration:60 },
-  { id:'alisante_pintura', name:'Alisante ou pintura', price:30, duration:30 },
-  { id:'closed', name:'Closed', price:0, duration:60 },
-  { id:'cmt', name:'CMT', price:38, duration:10 },
-  { id:'cs', name:'CS', price:12, duration:10 }
+  { id:'corte_barba', name:'Corte + Barba', price:45, duration:60 },
+  { id:'sobrancelha', name:'Sobrancelha', price:15, duration:15 }
 ];
 
 const OPEN_TIMES = ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
@@ -31,10 +24,6 @@ function localDateKey(d){
 }
 function bookings(){ return JSON.parse(localStorage.getItem('nicacio_bookings')||'[]'); }
 function saveBookings(v){ localStorage.setItem('nicacio_bookings',JSON.stringify(v)); }
-
-function blockedDays(){ return JSON.parse(localStorage.getItem('nicacio_blocked_days')||'[]'); }
-function isBlockedDay(key){ return blockedDays().includes(key); }
-
 
 function renderServices(){
   servicesEl.innerHTML='';
@@ -62,28 +51,20 @@ function dateChoices(){
   const now=new Date();
   now.setHours(0,0,0,0);
 
-  // Ex.: 27/08 -> 28/08 -> 29/08 -> 30/08 -> 31/08 -> 01/09...
-  // Vai até o último dia do terceiro mês seguinte.
-  const end = new Date(now.getFullYear(), now.getMonth()+4, 0);
-  end.setHours(23,59,59,999);
+  const end=new Date(now);
+  end.setMonth(end.getMonth()+3);
 
-  const cursor = new Date(now);
-  let index = 0;
-
-  while(cursor <= end){
-    const copy = new Date(cursor);
-
+  let i=0;
+  for(let d=new Date(now); d<=end; d.setDate(d.getDate()+1), i++){
+    const copy=new Date(d);
     out.push({
-      d: copy,
-      key: localDateKey(copy),
-      dow: names[copy.getDay()],
-      month: months[copy.getMonth()],
-      label: index === 0 ? 'HOJE' : String(copy.getDate()).padStart(2,'0'),
-      disabled: copy.getDay() === 0 || isBlockedDay(localDateKey(copy))
+      d:copy,
+      key:localDateKey(copy),
+      dow:names[copy.getDay()],
+      month:months[copy.getMonth()],
+      label:i===0?'HOJE':String(copy.getDate()).padStart(2,'0'),
+      disabled:copy.getDay()===0
     });
-
-    cursor.setDate(cursor.getDate()+1);
-    index++;
   }
 
   return out;
@@ -95,8 +76,7 @@ function renderDates(){
     const el=document.createElement('button');
     el.className='card date-card'+(x.disabled?' disabled':'');
     el.disabled=x.disabled;
-    const blockText = x.disabled ? '<div class="blocked-tag">BLOQUEADO</div>' : '';
-    el.innerHTML=`<div class="dow">${x.dow}</div><div class="day">${x.label}</div><div class="month">${x.month}</div>${blockText}`;
+    el.innerHTML=`<div class="dow">${x.dow}</div><div class="day">${x.label}</div><div class="month">${x.month}</div>`;
     el.onclick=()=>{
       selectedDate=x;
       selectedTime=null;
@@ -111,11 +91,6 @@ function renderDates(){
 
 function renderTimes(){
   timesEl.innerHTML='';
-  if(selectedDate && selectedDate.disabled){
-    $('#timesMessage').textContent='ESTE DIA ESTÁ BLOQUEADO.';
-    $('#confirmBooking').disabled=true;
-    return;
-  }
   const taken = bookings().filter(b=>b.date===selectedDate.key && b.status!=='cancelado').map(b=>b.time);
   const free = OPEN_TIMES.filter(t=>!taken.includes(t));
   if(!free.length){
@@ -178,23 +153,29 @@ $('#confirmBooking').onclick=()=>{
 
 $('#newBooking').onclick=()=>location.reload();
 
-
-
-function playIntro(){
-  const intro1 = document.getElementById('intro1');
-  const intro2 = document.getElementById('intro2');
-  const stepService = document.getElementById('stepService');
-
-  setTimeout(()=> intro1?.classList.add('show'), 250);
-  setTimeout(()=> intro2?.classList.add('show'), 950);
-  setTimeout(()=>{
-    if(stepService){
-      stepService.classList.remove('intro-step-hidden');
-      stepService.classList.add('intro-step-show');
-    }
-  }, 1650);
+function renderBookings(){
+  const list=$('#bookingsList');
+  const data=bookings().filter(b=>b.status!=='cancelado').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  if(!data.length){ list.innerHTML='<div class="empty">Você ainda não possui agendamentos.</div>'; return; }
+  list.innerHTML='';
+  data.forEach(b=>{
+    const el=document.createElement('div');
+    el.className='booking-item';
+    el.innerHTML=`<strong>${b.serviceName}</strong>${b.dateLabel} às ${b.time}<br>${money(b.price)} • ${b.duration} min
+    <br><button class="cancel">Cancelar agendamento</button>`;
+    el.querySelector('.cancel').onclick=()=>{
+      if(confirm('Deseja cancelar este agendamento?')){
+        const all=bookings(); const item=all.find(x=>x.id===b.id); if(item)item.status='cancelado'; saveBookings(all); renderBookings();
+      }
+    };
+    list.appendChild(el);
+  });
 }
+$('#myBookingsBtn').onclick=()=>{ renderBookings(); $('#bookingsModal').classList.remove('hidden'); };
+$('#closeModal').onclick=()=>$('#bookingsModal').classList.add('hidden');
 
 renderServices();
-playIntro();
 
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
