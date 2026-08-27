@@ -93,3 +93,62 @@ h3{font-size:16px;font-weight:500;color:var(--muted);margin:0 0 16px 2px}
   pointer-events:auto;
   transition:opacity .45s ease, transform .45s ease;
 }
+
+
+/* V8 — cards de serviço e dia mais compactos */
+.card{
+  min-width:145px;
+  width:145px;
+  height:165px;
+  border-radius:20px;
+  padding:14px;
+}
+.service-name{
+  font-size:18px;
+}
+.service-meta{
+  font-size:13px;
+  margin-top:10px;
+  gap:8px;
+}
+.check{
+  width:32px;
+  height:32px;
+  right:12px;
+  top:12px;
+  border-radius:9px;
+}
+.card.selected .check::after{
+  font-size:19px;
+}
+.date-card{
+  min-width:105px;
+  width:105px;
+  height:120px;
+  padding:8px;
+  border-radius:20px;
+}
+.date-card .dow{
+  font-size:17px;
+}
+.date-card .day{
+  font-size:27px;
+  margin-top:6px;
+}
+.date-card .month{
+  font-size:13px;
+}
+@media(max-width:560px){
+  .card{
+    min-width:138px;
+    width:138px;
+    height:158px;
+    padding:13px;
+  }
+  .date-card{
+    min-width:98px;
+    width:98px;
+    height:112px;
+    padding:7px;
+  }
+}
