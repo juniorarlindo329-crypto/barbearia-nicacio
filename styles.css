@@ -368,3 +368,43 @@ h3{margin-bottom:12px;font-size:13px;letter-spacing:.5px;font-weight:800;color:#
     height:90px !important;
   }
 }
+
+
+/* V17 — cartões de selecionar serviço menores */
+.card:not(.date-card){
+  min-width:118px !important;
+  width:118px !important;
+  height:132px !important;
+  padding:11px !important;
+  border-radius:17px !important;
+}
+.card:not(.date-card) .service-name{
+  font-size:14px !important;
+  line-height:1.15 !important;
+}
+.card:not(.date-card) .service-meta{
+  font-size:10px !important;
+  gap:5px !important;
+  margin-top:7px !important;
+}
+.card:not(.date-card) .check{
+  width:25px !important;
+  height:25px !important;
+  right:8px !important;
+  top:8px !important;
+  border-radius:7px !important;
+}
+.card:not(.date-card).selected .check::after{
+  font-size:15px !important;
+}
+@media(max-width:560px){
+  .card:not(.date-card){
+    min-width:110px !important;
+    width:110px !important;
+    height:124px !important;
+    padding:9px !important;
+  }
+  .card:not(.date-card) .service-name{
+    font-size:13px !important;
+  }
+}
