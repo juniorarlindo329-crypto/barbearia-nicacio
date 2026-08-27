@@ -2,8 +2,15 @@
 const SERVICES = [
   { id:'corte', name:'Corte', price:30, duration:30 },
   { id:'barba', name:'Barba', price:20, duration:30 },
-  { id:'corte_barba', name:'Corte + Barba', price:45, duration:60 },
-  { id:'sobrancelha', name:'Sobrancelha', price:15, duration:15 }
+  { id:'corte_barba', name:'Corte+Barba', price:45, duration:60 },
+  { id:'corte_sobrancelha', name:'Corte+Sobrancelha', price:40, duration:30 },
+  { id:'corte_barba_sobra', name:'Corte+Barba+Sobra', price:50, duration:60 },
+  { id:'barba_sobrancelha', name:'Barba+Sobrancelha', price:30, duration:30 },
+  { id:'corte_alisante_pintura', name:'Corte +Alisante ou pintura', price:60, duration:60 },
+  { id:'alisante_pintura', name:'Alisante ou pintura', price:30, duration:30 },
+  { id:'closed', name:'Closed', price:0, duration:60 },
+  { id:'cmt', name:'CMT', price:38, duration:10 },
+  { id:'cs', name:'CS', price:12, duration:10 }
 ];
 
 const OPEN_TIMES = ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
@@ -24,6 +31,10 @@ function localDateKey(d){
 }
 function bookings(){ return JSON.parse(localStorage.getItem('nicacio_bookings')||'[]'); }
 function saveBookings(v){ localStorage.setItem('nicacio_bookings',JSON.stringify(v)); }
+
+function blockedDays(){ return JSON.parse(localStorage.getItem('nicacio_blocked_days')||'[]'); }
+function isBlockedDay(key){ return blockedDays().includes(key); }
+
 
 function renderServices(){
   servicesEl.innerHTML='';
@@ -68,7 +79,7 @@ function dateChoices(){
       dow: names[copy.getDay()],
       month: months[copy.getMonth()],
       label: index === 0 ? 'HOJE' : String(copy.getDate()).padStart(2,'0'),
-      disabled: false
+      disabled: copy.getDay() === 0 || isBlockedDay(localDateKey(copy))
     });
 
     cursor.setDate(cursor.getDate()+1);
@@ -84,7 +95,8 @@ function renderDates(){
     const el=document.createElement('button');
     el.className='card date-card'+(x.disabled?' disabled':'');
     el.disabled=x.disabled;
-    el.innerHTML=`<div class="dow">${x.dow}</div><div class="day">${x.label}</div><div class="month">${x.month}</div>`;
+    const blockText = x.disabled ? '<div class="blocked-tag">BLOQUEADO</div>' : '';
+    el.innerHTML=`<div class="dow">${x.dow}</div><div class="day">${x.label}</div><div class="month">${x.month}</div>${blockText}`;
     el.onclick=()=>{
       selectedDate=x;
       selectedTime=null;
@@ -99,6 +111,11 @@ function renderDates(){
 
 function renderTimes(){
   timesEl.innerHTML='';
+  if(selectedDate && selectedDate.disabled){
+    $('#timesMessage').textContent='ESTE DIA ESTÁ BLOQUEADO.';
+    $('#confirmBooking').disabled=true;
+    return;
+  }
   const taken = bookings().filter(b=>b.date===selectedDate.key && b.status!=='cancelado').map(b=>b.time);
   const free = OPEN_TIMES.filter(t=>!taken.includes(t));
   if(!free.length){

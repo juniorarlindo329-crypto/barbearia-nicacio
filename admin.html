@@ -3,28 +3,75 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Painel • Barbearia Nicácio</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body>
 <main class="app">
   <header class="topbar">
-    <div><div class="brand">Painel do Barbeiro</div><div class="sub">Barbearia Nicácio</div></div>
+    <div>
+      <div class="brand">Painel do Barbeiro</div>
+      <div class="sub">Barbearia Nicácio</div>
+    </div>
     <a class="light-btn" href="index.html" style="text-decoration:none">ÁREA DO CLIENTE</a>
   </header>
-  <section class="step">
+
+  <section class="step admin-section">
+    <div class="bubble bot">Bloquear dias que não vou trabalhar</div>
+    <p class="admin-help">Domingos já ficam bloqueados automaticamente. Toque em qualquer outro dia para bloquear ou liberar.</p>
+    <div id="blockCalendar" class="admin-calendar"></div>
+  </section>
+
+  <section class="step admin-section">
     <div class="bubble bot">Agenda da barbearia</div>
     <div id="adminList"></div>
   </section>
 </main>
+
 <script>
 function bookings(){return JSON.parse(localStorage.getItem('nicacio_bookings')||'[]')}
+function blockedDays(){return JSON.parse(localStorage.getItem('nicacio_blocked_days')||'[]')}
+function saveBlockedDays(v){localStorage.setItem('nicacio_blocked_days',JSON.stringify(v))}
 function money(v){return Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
-function render(){
+function key(d){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function renderCalendar(){
+  const wrap=document.getElementById('blockCalendar');
+  wrap.innerHTML='';
+  const now=new Date(); now.setHours(0,0,0,0);
+  const end=new Date(now.getFullYear(), now.getMonth()+4, 0);
+  const blocked=blockedDays();
+  const names=['DOM','SEG','TER','QUA','QUI','SEX','SAB'];
+  const months=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+
+  for(let d=new Date(now); d<=end; d.setDate(d.getDate()+1)){
+    const copy=new Date(d);
+    const k=key(copy);
+    const sunday=copy.getDay()===0;
+    const manual=blocked.includes(k);
+
+    const btn=document.createElement('button');
+    btn.className='admin-day'+((sunday||manual)?' blocked':'');
+    btn.innerHTML=`<span>${names[copy.getDay()]}</span><strong>${String(copy.getDate()).padStart(2,'0')}</strong><small>${months[copy.getMonth()]}</small><em>${sunday?'DOMINGO':manual?'BLOQUEADO':'DISPONÍVEL'}</em>`;
+    btn.disabled=sunday;
+    btn.onclick=()=>{
+      let all=blockedDays();
+      if(all.includes(k)) all=all.filter(x=>x!==k);
+      else all.push(k);
+      saveBlockedDays(all);
+      renderCalendar();
+    };
+    wrap.appendChild(btn);
+  }
+}
+function renderBookings(){
  const el=document.getElementById('adminList');
  const data=bookings().filter(b=>b.status!=='cancelado').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
  if(!data.length){el.innerHTML='<div class="empty">Nenhum agendamento confirmado.</div>';return}
  el.innerHTML=data.map(b=>`<div class="booking-item"><strong>${b.dateLabel} • ${b.time}</strong>${b.serviceName}<br>${money(b.price)} • ${b.duration} min<br>Status: confirmado</div>`).join('');
 }
-render();
+renderCalendar();
+renderBookings();
 </script>
 </body></html>
