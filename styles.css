@@ -620,3 +620,40 @@ h3{margin-bottom:12px;font-size:13px;letter-spacing:.5px;font-weight:800;color:#
   .booking-info > div b{font-size:13px}
   .cancel-booking{padding:11px 12px;font-size:12px}
 }
+
+/* V24 — destaque visual dos serviços, sem alterar o layout */
+.card:not(.date-card) .service-name{
+  font-size:16px !important;
+  line-height:1.12 !important;
+  font-weight:900 !important;
+  color:#ffffff !important;
+  letter-spacing:-0.2px !important;
+  text-shadow:0 1px 2px #0008 !important;
+}
+.card:not(.date-card) .check{
+  width:32px !important;
+  height:32px !important;
+  right:8px !important;
+  top:8px !important;
+  border-radius:9px !important;
+  box-shadow:0 2px 8px #0004 !important;
+}
+.card:not(.date-card).selected{
+  border-color:#d59a6f !important;
+  box-shadow:0 0 0 2px #d59a6f44,0 10px 26px #0003 !important;
+}
+.card:not(.date-card).selected .service-name{
+  color:#ffffff !important;
+}
+.card:not(.date-card).selected .check::after{
+  font-size:20px !important;
+}
+@media(max-width:560px){
+  .card:not(.date-card) .service-name{
+    font-size:15px !important;
+  }
+  .card:not(.date-card) .check{
+    width:31px !important;
+    height:31px !important;
+  }
+}
