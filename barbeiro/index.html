@@ -3,86 +3,80 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#151a23">
-<title>Painel do Barbeiro • Barbearia Nicácio</title>
-<link rel="stylesheet" href="barbeiro.css?v=1">
+<meta name="theme-color" content="#151922">
+<title>Agenda • Barbearia Nicácio</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="barbeiro.css?v=2">
 </head>
 <body>
 <main class="barber-app">
   <header class="barber-top">
-    <div>
-      <h1 id="helloBarber">Olá, Nicácio</h1>
-      <button class="agenda-selector">Você está em sua agenda. ▾</button>
+    <div class="hello-block">
+      <h1>Olá, <span id="barberName">Nicácio</span></h1>
+      <button id="agendaSelector" class="agenda-selector">Você está em sua agenda. <span>⌄</span></button>
     </div>
     <div class="top-actions">
-      <button id="togglePrivacy" class="icon-btn" title="Ocultar valores">◉</button>
-      <button id="openMenu" class="icon-btn">☰</button>
+      <button id="togglePrivacy" class="icon-btn" aria-label="Ocultar valores">◉</button>
+      <button id="openMenu" class="icon-btn" aria-label="Abrir menu">☰</button>
     </div>
   </header>
 
   <section class="week-head">
     <div class="week-title-row">
-      <button id="prevWeek" class="nav-arrow">‹</button>
-      <div class="week-title">📅 <span id="weekRange"></span></div>
-      <button id="nextWeek" class="nav-arrow">›</button>
+      <div class="week-title">🗓 <span id="weekRange"></span></div>
+      <div class="week-arrows"><button id="prevWeek" class="nav-arrow" aria-label="Semana anterior">‹</button><button id="nextWeek" class="nav-arrow" aria-label="Próxima semana">›</button></div>
     </div>
     <div id="weekDays" class="week-days"></div>
   </section>
 
   <section class="stats-grid">
     <article class="stat-card stat-today">
-      <div><strong>Hoje</strong><span class="money-line">🪙 <b id="todayRevenue">R$ 0,00</b></span></div>
-      <div class="stat-number" id="todayCount">0</div><div class="chair">💺</div>
+      <div><strong>Hoje</strong><span class="money-line"><b id="todayRevenue">R$ 0,00</b></span></div>
+      <div class="stat-number" id="todayCount">0</div><div class="chair">♟</div>
     </article>
     <article class="stat-card stat-week">
-      <div><strong>Esta semana</strong><span class="money-line">🪙 <b id="weekRevenue">R$ 0,00</b></span></div>
-      <div class="stat-number" id="weekCount">0</div><div class="chair">💺</div>
+      <div><strong>Esta semana</strong><span class="money-line"><b id="weekRevenue">R$ 0,00</b></span></div>
+      <div class="stat-number" id="weekCount">0</div><div class="chair">♟</div>
     </article>
   </section>
 
   <section class="timeline-wrap">
     <div class="timeline-top">
-      <div>
-        <h2 id="selectedDayTitle">Agenda de hoje</h2>
-        <p id="selectedDaySub">Horários e clientes do dia selecionado</p>
-      </div>
+      <div><h2 id="selectedDayTitle">Agenda de hoje</h2><p id="selectedDaySub">Horários e clientes do dia selecionado</p></div>
       <button id="editDayBtn" class="mini-btn">Modificar este dia</button>
     </div>
     <div id="timeline" class="timeline"></div>
   </section>
 
-  <section class="hours-info">
-    <p>Seu horário de funcionamento cadastrado é das <b id="hoursText">09:00 às 18:00</b>.</p>
-    <button id="editHoursBtn" class="link-btn">Editar horários</button>
-  </section>
-
+  <div class="bottom-spacer"></div>
   <div class="bottom-actions">
-    <button id="lockDayBtn" class="lock-btn">🔒</button>
+    <button id="lockDayBtn" class="lock-btn" aria-label="Bloquear dia">🔒</button>
     <button id="newBookingBtn" class="new-booking-btn">Novo Agendamento <span>→</span></button>
   </div>
 </main>
 
-<aside id="sideMenu" class="side-menu hidden">
-  <div class="menu-head"><div class="menu-logo">NICÁCIO</div><button id="closeMenu" class="icon-btn">✕</button></div>
+<aside id="sideMenu" class="side-menu hidden" aria-hidden="true">
+  <div class="menu-head"><div><div class="menu-logo">NICÁCIO</div><small>Painel do profissional</small></div><button id="closeMenu" class="icon-btn" aria-label="Fechar menu">✕</button></div>
   <nav class="menu-list">
-    <button data-page="link">Meu link</button>
-    <button data-page="clients">Clientes</button>
-    <button data-page="cancelled">Cancelados</button>
-    <button data-page="recurrence">Minhas recorrências</button>
-    <button data-page="revenue">Faturamento</button>
-    <button data-page="help">Ajuda p/ configurar</button>
-    <button data-page="settings">Configurações</button>
+    <button data-page="link"><span>🔗</span> Meu link</button>
+    <button data-page="services"><span>✂️</span> Serviços e preços</button>
+    <button data-page="clients"><span>👥</span> Clientes</button>
+    <button data-page="cancelled"><span>✖</span> Cancelados</button>
+    <button data-page="recurrence"><span>↻</span> Minhas recorrências</button>
+    <button data-page="revenue"><span>💰</span> Faturamento</button>
+    <button data-page="settings"><span>⚙️</span> Configurações</button>
   </nav>
 </aside>
 <div id="menuOverlay" class="menu-overlay hidden"></div>
 
-<section id="modal" class="modal hidden">
+<section id="modal" class="modal hidden" aria-hidden="true">
   <div class="modal-card">
-    <div class="modal-head"><h2 id="modalTitle">Novo Agendamento</h2><button id="closeModal" class="icon-btn">✕</button></div>
+    <div class="modal-head"><h2 id="modalTitle">Painel</h2><button id="closeModal" class="icon-btn" aria-label="Fechar">✕</button></div>
     <div id="modalContent"></div>
   </div>
 </section>
 
-<script src="barbeiro.js?v=1"></script>
+<div id="toast" class="toast hidden" role="status"></div>
+<script src="barbeiro.js?v=2"></script>
 </body>
 </html>
