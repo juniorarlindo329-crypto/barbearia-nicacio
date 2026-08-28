@@ -39,12 +39,42 @@ function renderWeek(){
 }
 function renderStats(){const today=dayBookings(new Date()),week=weekBookings(),tRev=today.reduce((s,b)=>s+Number(b.price||0),0),wRev=week.reduce((s,b)=>s+Number(b.price||0),0);$('#todayCount').textContent=today.length;$('#weekCount').textContent=week.length;$('#todayRevenue').textContent=valuesHidden?'••••':money(tRev);$('#weekRevenue').textContent=valuesHidden?'••••':money(wRev)}
 function renderTimeline(){
- const dkey=key(selectedDate),list=dayBookings(selectedDate).sort((a,b)=>a.time.localeCompare(b.time)),wrap=$('#timeline');$('#selectedDayTitle').textContent=selectedDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});wrap.innerHTML='';
+ const dkey=key(selectedDate),list=dayBookings(selectedDate).sort((a,b)=>a.time.localeCompare(b.time)),wrap=$('#timeline');
+ $('#selectedDayTitle').textContent=selectedDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+ wrap.innerHTML='';
  const fullBlocked=selectedDate.getDay()===0||blockedDays().includes(dkey);
- slotsForDay().forEach(time=>{const row=document.createElement('div');row.className='slot-row';row.innerHTML=`<div class="slot-time">${time}</div>`;const appt=list.find(b=>b.time===time);const closed=fullBlocked||isSlotClosed(dkey,time);
- if(closed){const c=document.createElement('div');c.className='slot-card closed';c.innerHTML=`<div class="slot-head"><span>${time} - ${timeFromMins(mins(time)+Number(settings().interval||30))}</span><button class="mini-icon" title="Abrir horário">▣</button></div><strong>Horário fechado</strong>`;c.querySelector('button').addEventListener('click',()=>toggleSlot(dkey,time));row.appendChild(c)}
- else if(appt){const c=document.createElement('div');c.className='slot-card';c.innerHTML=`<div class="slot-head"><span>${appt.time} - ${timeFromMins(mins(appt.time)+Number(appt.duration||30))}</span><div><button class="mini-icon more-btn">•••</button></div></div><div><div class="client-name">${escapeHtml(appt.clientName||'Cliente')}</div><div class="service-name">${escapeHtml(appt.serviceName||'Serviço')}</div></div><div class="slot-price">${valuesHidden?'••••':money(appt.price)}</div>`;c.querySelector('.more-btn').addEventListener('click',()=>bookingActions(appt.id));row.appendChild(c)}
- else {const e=document.createElement('div');e.className='empty-slot';e.textContent='Sem agendamento';e.addEventListener('click',()=>newBookingModal(time));row.appendChild(e)}wrap.appendChild(row)});
+ const slots=slotsForDay();
+ const interval=Number(settings().interval||30);
+ const consumed=new Set();
+ slots.forEach(time=>{
+   if(consumed.has(time)) return;
+   const row=document.createElement('div');
+   row.className='slot-row';
+   row.innerHTML=`<div class="slot-time">${time}</div>`;
+   const appt=list.find(b=>b.time===time);
+   const closed=fullBlocked||isSlotClosed(dkey,time);
+   if(closed){
+     row.classList.add('has-card');
+     const c=document.createElement('div');c.className='slot-card closed';
+     c.innerHTML=`<div class="slot-head"><span>${time} - ${timeFromMins(mins(time)+interval)}</span><button class="mini-icon" title="Abrir horário">▣</button></div><strong>Horário fechado</strong>`;
+     c.querySelector('button').addEventListener('click',()=>toggleSlot(dkey,time));row.appendChild(c);
+   } else if(appt){
+     row.classList.add('has-card');
+     const span=Math.max(1,Math.ceil(Number(appt.duration||interval)/interval));
+     if(span>1) row.classList.add(`span-${Math.min(span,3)}`);
+     for(let i=1;i<span;i++){
+       const t=timeFromMins(mins(time)+interval*i);
+       if(slots.includes(t)) consumed.add(t);
+     }
+     const c=document.createElement('div');c.className='slot-card';
+     c.innerHTML=`<div class="slot-head"><span>${appt.time} - ${timeFromMins(mins(appt.time)+Number(appt.duration||interval))}</span><div><button class="mini-icon more-btn">•••</button></div></div><div><div class="client-name">${escapeHtml(appt.clientName||'Cliente')}</div><div class="service-name">${escapeHtml(appt.serviceName||'Serviço')}</div></div><div class="slot-price">${valuesHidden?'••••':money(appt.price)}</div>`;
+     c.querySelector('.more-btn').addEventListener('click',()=>bookingActions(appt.id));row.appendChild(c);
+   } else {
+     const e=document.createElement('div');e.className='empty-slot';e.textContent='Sem agendamento';
+     e.addEventListener('click',()=>newBookingModal(time));row.appendChild(e);
+   }
+   wrap.appendChild(row);
+ });
 }
 function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function renderAll(){renderProfile();renderWeek();renderStats();renderTimeline()}

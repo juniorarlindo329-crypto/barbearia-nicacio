@@ -87,3 +87,94 @@ body{background:#151922}
 .stat-today .barber-chair{color:#a85e3e}
 .stat-week .barber-chair{color:#8fa3c6}
 @media(max-width:560px){.coin-icon{font-size:19px}.barber-chair{width:66px;height:66px;right:18px;bottom:16px}}
+
+/* V6 — agenda no estilo da foto de referência */
+.timeline{margin-top:22px}
+.slot-row{
+  position:relative;
+  min-height:132px;
+  border-top:1px solid rgba(255,255,255,.18);
+  padding:0 0 6px 88px;
+}
+.slot-time{
+  position:absolute;
+  left:0;
+  top:-10px;
+  width:72px;
+  color:#8e959f;
+  font-size:14px;
+  line-height:20px;
+}
+.slot-card{
+  min-height:124px;
+  border-radius:18px;
+  background:#565a63;
+  padding:14px 16px 15px;
+  margin:0 0 6px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+.slot-card.closed{
+  background:repeating-linear-gradient(45deg,#3b4049 0,#3b4049 12px,#484d56 12px,#484d56 24px);
+}
+.slot-card.closed strong{
+  font-size:20px;
+  line-height:1.15;
+  margin-top:32px;
+}
+.slot-card .slot-head{
+  font-size:15px;
+  line-height:1.2;
+  font-weight:750;
+}
+.slot-card .client-name{
+  font-size:21px;
+  line-height:1.15;
+  font-weight:750;
+  margin-top:20px;
+}
+.slot-card .service-name{
+  margin-top:4px;
+  font-size:13px;
+  line-height:1.15;
+  color:#c8ccd3;
+}
+.slot-price{
+  position:absolute;
+  right:16px;
+  bottom:14px;
+  min-width:78px;
+  text-align:center;
+  font-size:12px;
+  color:#fff;
+  background:rgba(255,255,255,.12);
+  border-radius:8px;
+  padding:6px 9px;
+}
+.empty-slot{
+  min-height:124px;
+  padding:48px 16px 14px;
+  color:#707782;
+  font-size:13px;
+  border-radius:17px;
+}
+.slot-row.has-card + .slot-row{margin-top:2px}
+.slot-row.span-2{min-height:264px}
+.slot-row.span-2 .slot-card{min-height:256px}
+.slot-row.span-3{min-height:396px}
+.slot-row.span-3 .slot-card{min-height:388px}
+@media(max-width:560px){
+  .slot-row{min-height:126px;padding-left:76px}
+  .slot-time{width:64px;font-size:13px}
+  .slot-card{min-height:118px;padding:13px 14px 14px}
+  .slot-card.closed strong{font-size:19px;margin-top:30px}
+  .slot-card .client-name{font-size:20px}
+  .empty-slot{min-height:118px;padding-top:45px}
+  .slot-row.span-2{min-height:252px}
+  .slot-row.span-2 .slot-card{min-height:244px}
+  .slot-row.span-3{min-height:378px}
+  .slot-row.span-3 .slot-card{min-height:370px}
+}
