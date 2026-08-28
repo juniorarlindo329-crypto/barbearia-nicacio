@@ -178,3 +178,74 @@ body{background:#151922}
   .slot-row.span-3{min-height:378px}
   .slot-row.span-3 .slot-card{min-height:370px}
 }
+
+/* V7 - menu lateral inspirado na referência enviada */
+.side-menu{
+  width:min(620px,80vw);
+  padding:26px 34px 44px;
+  background:#151a22;
+  box-shadow:-18px 0 48px rgba(0,0,0,.34);
+}
+.menu-head-ref{
+  position:relative;
+  min-height:118px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.menu-logo-ref{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:42px;
+  font-weight:800;
+  letter-spacing:1px;
+  color:#d7835d;
+  text-align:center;
+}
+.menu-close-ref{
+  position:absolute;
+  left:0;
+  top:8px;
+  width:58px;
+  height:58px;
+  border:0;
+  border-radius:18px;
+  background:#242a33;
+  color:#f3f4f6;
+  font-size:34px;
+  line-height:1;
+  display:grid;
+  place-items:center;
+}
+.menu-list-ref{
+  margin-top:42px;
+  gap:0;
+}
+.menu-list-ref button{
+  width:100%;
+  min-height:72px;
+  padding:14px 18px;
+  border:0;
+  border-bottom:0;
+  background:transparent;
+  color:#c8ccd3;
+  font-size:22px;
+  font-weight:400;
+  text-align:right;
+  justify-content:flex-end;
+  border-radius:12px;
+}
+.menu-list-ref button:active,
+.menu-list-ref button:focus-visible{
+  background:rgba(255,255,255,.055);
+  color:#fff;
+  outline:none;
+}
+@media(max-width:560px){
+  .side-menu{width:80vw;padding:22px 24px 38px}
+  .menu-head-ref{min-height:104px}
+  .menu-logo-ref{font-size:34px}
+  .menu-close-ref{width:52px;height:52px;font-size:30px;border-radius:16px}
+  .menu-list-ref{margin-top:28px}
+  .menu-list-ref button{min-height:62px;font-size:18px;padding:10px 8px}
+}
+.field-input{width:100%;box-sizing:border-box;margin-top:12px;background:#0f141b;border:1px solid #303743;color:#eef0f3;border-radius:12px;padding:13px;font:inherit;resize:vertical}
