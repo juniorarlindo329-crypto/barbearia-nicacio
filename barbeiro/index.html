@@ -6,14 +6,14 @@
 <meta name="theme-color" content="#151922">
 <title>Agenda • Barbearia Nicácio</title>
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="barbeiro.css?v=2">
+<link rel="stylesheet" href="barbeiro.css?v=3">
 </head>
 <body>
 <main class="barber-app">
   <header class="barber-top">
     <div class="hello-block">
       <h1>Olá, <span id="barberName">Nicácio</span></h1>
-      <button id="agendaSelector" class="agenda-selector">Você está em sua agenda. <span>⌄</span></button>
+      <button id="agendaSelector" class="agenda-selector">Você está em sua agenda. <span>▾</span></button>
     </div>
     <div class="top-actions">
       <button id="togglePrivacy" class="icon-btn" aria-label="Ocultar valores">◉</button>
@@ -23,8 +23,9 @@
 
   <section class="week-head">
     <div class="week-title-row">
-      <div class="week-title">🗓 <span id="weekRange"></span></div>
-      <div class="week-arrows"><button id="prevWeek" class="nav-arrow" aria-label="Semana anterior">‹</button><button id="nextWeek" class="nav-arrow" aria-label="Próxima semana">›</button></div>
+      <button id="prevWeek" class="nav-arrow" aria-label="Semana anterior">‹</button>
+      <div class="week-title">📅 <span id="weekRange"></span></div>
+      <button id="nextWeek" class="nav-arrow" aria-label="Próxima semana">›</button>
     </div>
     <div id="weekDays" class="week-days"></div>
   </section>
@@ -77,6 +78,6 @@
 </section>
 
 <div id="toast" class="toast hidden" role="status"></div>
-<script src="barbeiro.js?v=2"></script>
+<script src="barbeiro.js?v=3"></script>
 </body>
 </html>
