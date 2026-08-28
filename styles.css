@@ -408,3 +408,12 @@ h3{margin-bottom:12px;font-size:13px;letter-spacing:.5px;font-weight:800;color:#
     font-size:13px !important;
   }
 }
+
+/* V19 — fluxo conversacional da assistente virtual */
+.chat-form-card{background:#151b24;border:1px solid #ffffff14;border-radius:20px;padding:16px;margin-top:22px}
+.chat-form-card label{display:block;color:#c5cad2;font-size:12px;font-weight:800;margin-bottom:9px;letter-spacing:.4px}
+.chat-input{width:100%;border:1px solid #ffffff20;outline:0;background:#0d131c;color:#fff;border-radius:15px;padding:15px 14px;font-size:16px}
+.chat-input:focus{border-color:#d59a6f;box-shadow:0 0 0 3px #d59a6f1f}
+.final-message{margin-top:10px}.final-bubble{max-width:100%;line-height:1.55;font-size:17px}.final-bubble strong{font-size:15px;line-height:1.5}
+#stepNotify .primary{margin-top:8px}
+@media(max-width:560px){.chat-form-card{padding:13px}.final-bubble{font-size:16px}}

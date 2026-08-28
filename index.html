@@ -6,76 +6,74 @@
   <meta name="theme-color" content="#111722" />
   <title>Barbearia Nicácio</title>
   <link rel="manifest" href="manifest.json" />
-
-  <script>
-    const nicacioProfile = JSON.parse(localStorage.getItem('nicacio_profile') || 'null');
-    if (!nicacioProfile || !nicacioProfile.name || !nicacioProfile.email) {
-      window.location.replace('cadastro.html');
-    }
-  </script>
-
-  <link rel="stylesheet" href="styles.css?v=17" />
+  <link rel="stylesheet" href="styles.css?v=19" />
 </head>
 <body>
   <main class="app">
     <header class="topbar">
-      <div>
-        <div class="brand">Barbearia Nicácio</div>
-        <div class="sub">Agendamento online</div>
+      <div><div class="brand">Barbearia Nicácio</div><div class="sub">Agendamento online</div></div>
       <div class="top-actions">
         <button id="installAppBtn" class="install-btn hidden" type="button">INSTALAR APP</button>
         <a class="light-btn" href="agendamentos.html" style="text-decoration:none">MEUS AGENDAMENTOS</a>
       </div>
-      </div>
-      
     </header>
 
     <section id="chat" class="chat">
-      <div id="intro1" class="bubble bot intro-bubble">Olá!</div>
-      <div id="intro2" class="bubble bot intro-bubble">Por qual serviço você está procurando?</div>
+      <div id="welcomeBubble" class="bubble bot intro-bubble">Olá, tudo bem? Sou assistente virtual da Barbearia Nicácio e cuido dos agendamentos dos serviços dos profissionais dela.</div>
+      <div id="nameQuestion" class="bubble bot intro-bubble">Qual seu nome? Escreva seu nome e seu sobrenome, por favor.</div>
 
-      <div id="stepService" class="step intro-step-hidden"><div class="step-progress"><span class="active"></span><span></span><span></span></div><div class="helper-card"><span>✂️</span><div><b>1. Escolha o serviço</b><br>Toque em uma opção e depois em Enviar.</div></div>
+      <div id="stepName" class="step intro-step-hidden chat-form-card">
+        <label for="clientName">SEU NOME E SOBRENOME:</label>
+        <input id="clientName" class="chat-input" type="text" autocomplete="name" placeholder="Ex.: João da Silva" />
+        <button id="sendName" class="primary" disabled>Enviar</button>
+      </div>
+
+      <div id="stepNotify" class="step hidden">
+        <div id="nameReply" class="bubble user"></div>
+        <div id="howAreYou" class="bubble bot"></div>
+        <div class="bubble bot">Para que possamos lembrá-lo de seu agendamento, ative suas notificações clicando abaixo.</div>
+        <button id="enableNotifications" class="primary">🔔 ATIVAR NOTIFICAÇÕES</button>
+        <button id="continueWithoutNotifications" class="secondary">Continuar</button>
+      </div>
+
+      <div id="stepService" class="step hidden">
+        <div class="bubble bot">Por qual serviço você está procurando?</div>
+        <div class="step-progress"><span class="active"></span><span></span><span></span></div>
+        <div class="helper-card"><span>✂️</span><div><b>1. Escolha o serviço</b><br>Toque em uma opção e depois em Enviar.</div></div>
         <h3>SELECIONE OS SERVIÇOS:</h3>
         <div id="services" class="cards horizontal"></div>
         <p class="swipe">← ARRASTE PARA O LADO PARA VER MAIS →</p>
         <button id="serviceNext" class="primary" disabled>Enviar</button>
       </div>
 
-      <div id="stepDate" class="step hidden"><div class="step-progress"><span class="active"></span><span class="active"></span><span></span></div><div class="helper-card"><span>📅</span><div><b>2. Escolha dia e horário</b><br>Domingos e dias bloqueados não podem ser selecionados.</div></div>
+      <div id="stepDate" class="step hidden">
+        <div class="step-progress"><span class="active"></span><span class="active"></span><span></span></div>
+        <div class="helper-card"><span>📅</span><div><b>2. Escolha dia e horário</b><br>Domingos e dias bloqueados não podem ser selecionados.</div></div>
         <div id="chosenServiceBubble" class="bubble user"></div>
         <div class="bubble bot">Certo, e qual o melhor dia e horário para você ser atendido?</div>
         <h3>SELECIONE O DIA E HORÁRIO:</h3>
         <div id="dates" class="cards horizontal"></div>
         <p class="swipe">← ARRASTE PARA O LADO PARA VER MAIS →</p>
-
-        <div id="timesBox" class="times-box">
-          <div id="timesMessage">Selecione um dia para ver os horários.</div>
-          <div id="times" class="times"></div>
-        </div>
-
+        <div id="timesBox" class="times-box"><div id="timesMessage">Selecione um dia para ver os horários.</div><div id="times" class="times"></div></div>
         <div id="selectedDateLabel" class="selected-label">Nenhum dia selecionado</div>
-        <button id="confirmBooking" class="primary" disabled>Enviar</button>
+        <button id="confirmDate" class="primary" disabled>Enviar</button>
         <button id="backToService" class="secondary">Voltar</button>
       </div>
 
-      <div id="stepDone" class="step hidden"><div class="step-progress"><span class="active"></span><span class="active"></span><span class="active"></span></div>
-        <div class="bubble bot">Agendamento confirmado ✅</div>
-        <div id="bookingSummary" class="summary"></div>
+      <div id="stepPhone" class="step hidden chat-form-card">
+        <div class="bubble bot">Que bom, qual seu telefone?</div>
+        <label for="clientPhone">SEU TELEFONE:</label>
+        <input id="clientPhone" class="chat-input" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ex.: (33) 99999-9999" />
+        <button id="finishBooking" class="primary" disabled>Enviar</button>
+      </div>
+
+      <div id="stepDone" class="step hidden">
+        <div id="bookingSummary" class="final-message"></div>
         <button id="newBooking" class="primary">Fazer outro agendamento</button>
       </div>
     </section>
   </main>
 
-
-  <script>
-    // Remove versões antigas salvas no celular para sempre carregar a versão atual.
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
-    }
-    if ('caches' in window) {
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-    }
-  </script>
-  <script src="app.js?v=16"></script>
+  <script src="app.js?v=19"></script>
 </body>
 </html>
