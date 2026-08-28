@@ -151,7 +151,7 @@ function clientsPage(){
   arr.sort((a,b)=>Number(!!b.favorite)-Number(!!a.favorite)||String(a.name||'').localeCompare(String(b.name||''),'pt-BR'));
   const list=$('#clientList');
   if(!arr.length){list.innerHTML='<div class="clients-empty">Nenhum cliente encontrado.</div>';return}
-  list.innerHTML=arr.map(c=>{const cnt=clientBookingCount(c),phone=escapeHtml(c.phone||'Sem telefone');return `<article class="client-card" data-id="${escapeHtml(c.id)}"><div class="client-main"><strong>${escapeHtml(c.name||'Cliente')}</strong><span>${phone}</span>${c.favorite?'<small>★ Favorito</small>':''}</div><div class="client-actions">${normalizePhone(c.phone)?'<button class="client-wa" type="button" title="WhatsApp">◉</button>':''}<button class="client-history" type="button" title="Histórico"><span>▥</span><small>${cnt}</small></button><button class="client-edit" type="button" title="Editar">✎</button></div></article>`}).join('');
+  list.innerHTML=arr.map(c=>{const cnt=clientBookingCount(c),phone=escapeHtml(c.phone||'Sem telefone');return `<article class="client-card" data-id="${escapeHtml(c.id)}"><div class="client-main"><strong>${escapeHtml(c.name||'Cliente')}</strong><span>${phone}</span>${c.favorite?'<small>★ Favorito</small>':''}</div><div class="client-actions">${normalizePhone(c.phone)?`<button class="client-wa" type="button" title="WhatsApp" aria-label="Abrir WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.52 3.48A11.76 11.76 0 0 0 12.06 0C5.49 0 .14 5.35.14 11.93c0 2.1.55 4.16 1.6 5.97L.04 24l6.25-1.64a11.9 11.9 0 0 0 5.76 1.47h.01c6.57 0 11.92-5.35 11.92-11.93 0-3.19-1.23-6.18-3.46-8.42ZM12.06 21.8h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.71.98.99-3.62-.24-.37a9.84 9.84 0 0 1-1.52-5.27c0-5.45 4.44-9.89 9.9-9.89a9.82 9.82 0 0 1 7 2.9 9.83 9.83 0 0 1 2.89 7c0 5.45-4.44 9.88-9.91 9.88Zm5.42-7.41c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47a8.9 8.9 0 0 1-1.65-2.05c-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.08-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.09 3.2 5.07 4.49.7.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35Z"/></svg></button>`:''}<button class="client-history" type="button" title="Analisar cliente" aria-label="Analisar cliente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V10h4v11H4Zm6 0V3h4v18h-4Zm6 0v-7h4v7h-4Z"/></svg><small>${cnt}</small></button><button class="client-edit" type="button" title="Editar" aria-label="Editar cliente">✎</button></div></article>`}).join('');
   list.querySelectorAll('.client-card').forEach(card=>{
    const c=syncClientsFromBookings().find(x=>x.id===card.dataset.id);if(!c)return;
    const wa=card.querySelector('.client-wa');if(wa)wa.onclick=()=>{const p=phoneForWhatsApp(c.phone);if(p)window.open('https://wa.me/'+p,'_blank','noopener')};
@@ -177,10 +177,41 @@ function clientEditor(id=''){
 }
 function clientHistoryPage(id){
  const c=syncClientsFromBookings().find(x=>x.id===id);if(!c){clientsPage();return}
- const bs=bookings().filter(b=>clientMatchesBooking(c,b)).sort((a,b)=>(b.date+' '+b.time).localeCompare(a.date+' '+a.time));
- openModal('Histórico',`<div class="client-history-head"><strong>${escapeHtml(c.name||'Cliente')}</strong><span>${escapeHtml(c.phone||'Sem telefone')}</span><button id="toggleFavoriteClient" class="small-btn" type="button">${c.favorite?'★ Remover favorito':'☆ Favoritar'}</button></div><div class="client-history-list">${bs.length?bs.map(b=>`<div class="history-card"><b>${escapeHtml(b.serviceName||'Serviço')}</b><span>${escapeHtml(b.dateLabel||b.date)} às ${escapeHtml(b.time||'')}</span><small>${money(b.price)} • ${escapeHtml(b.status||'confirmado')}</small></div>`).join(''):'<p>Nenhum agendamento deste cliente.</p>'}</div><button id="backToClients" class="primary-btn" type="button">VOLTAR AOS CLIENTES</button>`);
- $('#toggleFavoriteClient').onclick=()=>{const arr=storedClients(),x=arr.find(v=>v.id===id);if(x){x.favorite=!x.favorite;saveClients(arr)}clientHistoryPage(id)};
- $('#backToClients').onclick=clientsPage;
+ const bs=bookings().filter(b=>clientMatchesBooking(c,b)&&b.status!=='cancelado').sort((a,b)=>(b.date+' '+(b.time||'')).localeCompare(a.date+' '+(a.time||'')));
+ const total=bs.reduce((sum,b)=>sum+Number(b.price||0),0);
+ const avg=bs.length?total/bs.length:0;
+ const minutes=bs.reduce((sum,b)=>sum+Number(b.duration||0),0);
+ const hours=minutes/60;
+ const byService={};bs.forEach(b=>{const n=b.serviceName||'Serviço';byService[n]=(byService[n]||0)+1});
+ const topServices=Object.entries(byService).sort((a,b)=>b[1]-a[1]);
+ const serviceCards=topServices.length?topServices.map(([name,count])=>`<div class="analysis-service-card"><strong>${count}</strong><span>${escapeHtml(name)}</span></div>`).join(''):'<div class="analysis-empty">Nenhum serviço realizado.</div>';
+ const apptCards=bs.length?bs.map(b=>`<article class="analysis-booking-card" data-booking-id="${escapeHtml(b.id||'')}"><div class="analysis-booking-top"><span>${escapeHtml(b.time||'--:--')} - ${formatAnalysisDate(b.date)}</span><button class="analysis-more" type="button" aria-label="Opções do agendamento">•••</button></div><strong>${escapeHtml(c.name||b.clientName||'Cliente')}</strong><div class="analysis-booking-bottom"><span>${escapeHtml((b.serviceName||'Serviço').toUpperCase())}</span><b>${money(b.price)}</b></div></article>`).join(''):'<div class="analysis-empty">Nenhum agendamento deste cliente.</div>';
+ openModal('',`<div class="client-analysis-screen">
+   <button id="analysisBack" class="analysis-back" type="button" aria-label="Voltar">←</button>
+   <div class="analysis-eyebrow">Analisar</div>
+   <h2>${escapeHtml(c.name||'Cliente')}</h2>
+   <div class="analysis-phone">${escapeHtml(c.phone||'Sem telefone')}</div>
+   <div class="analysis-kpis">
+     <div class="analysis-kpi accent"><strong>${money(avg)}</strong><span>TICKET MÉDIO</span></div>
+     <div class="analysis-kpi"><strong>${formatActivityHours(hours)}</strong><span>EM ATIVIDADE</span></div>
+   </div>
+   <div class="analysis-section-label">SERVIÇOS REALIZADOS</div>
+   <div class="analysis-service-scroller">${serviceCards}</div>
+   ${topServices.length>2?'<div class="analysis-drag-hint">ARRESTE PARA O LADO PARA VER MAIS →</div>':''}
+   <div class="analysis-bookings">${apptCards}</div>
+  </div>`);
+ $('#modal').classList.add('clients-modal','analysis-modal');
+ $('#analysisBack').onclick=()=>{$('#modal').classList.remove('analysis-modal');clientsPage()};
+ document.querySelectorAll('.analysis-booking-card').forEach(card=>{const btn=card.querySelector('.analysis-more');if(btn)btn.onclick=()=>{const bid=card.dataset.bookingId;if(bid)bookingActions(bid)}});
+}
+function formatAnalysisDate(dateStr){
+ if(!dateStr)return'';const [y,m,d]=String(dateStr).split('-').map(Number);if(!y||!m||!d)return escapeHtml(dateStr);
+ return new Date(y,m-1,d).toLocaleDateString('pt-BR',{day:'numeric',month:'short',year:'numeric'}).replace('.','');
+}
+function formatActivityHours(hours){
+ if(!Number.isFinite(hours)||hours<=0)return'0 hrs';
+ if(Math.abs(hours-Math.round(hours))<0.01)return`${Math.round(hours)} hrs`;
+ return`${hours.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})} hrs`;
 }
 function cancelledPage(){const data=bookings().filter(b=>b.status==='cancelado').sort((a,b)=>(b.cancelledAt||'').localeCompare(a.cancelledAt||''));openModal('Cancelados',data.length?data.map(b=>`<div class="list-card"><h3>${escapeHtml(b.clientName||'Cliente')}</h3><p>${escapeHtml(b.serviceName)} • ${b.dateLabel||b.date} às ${b.time}</p></div>`).join(''):'<p>Nenhum cancelamento.</p>')}
 function revenuePage(){const valid=bookings().filter(b=>b.status!=='cancelado'),done=bookings().filter(b=>b.status==='concluido'),total=valid.reduce((s,b)=>s+Number(b.price||0),0),doneTotal=done.reduce((s,b)=>s+Number(b.price||0),0);openModal('Faturamento',`<div class="summary-box"><p>Agendado</p><div class="big">${money(total)}</div><p>${valid.length} agendamento(s)</p></div><div class="summary-box"><p>Concluído</p><div class="big">${money(doneTotal)}</div><p>${done.length} atendimento(s)</p></div>`)}
