@@ -429,3 +429,71 @@ body.client-editor-open{overflow:hidden}
 .rev-payments,.rev-hours{background:linear-gradient(145deg,#343b45,#282e37);border-radius:22px;padding:23px}.rev-payment-row{display:flex;justify-content:space-between;align-items:center}.rev-payment-row>div{display:flex;flex-direction:column;gap:8px}.rev-payment-row>div:last-child{align-items:flex-end}.rev-payment-row b,.rev-more-pay{color:#e98e61}.rev-payment-row strong{font-size:29px}.rev-more-pay{background:none;border:0;font-weight:700;font-size:18px}.rev-hours>strong{display:block;font-size:24px;margin-bottom:25px}.rev-hourbar{height:56px;border-radius:15px;overflow:hidden;background:#aeb2ba;display:flex}.rev-hourbar i{font-style:normal;display:flex;align-items:center;justify-content:center;min-width:0}.rev-hourbar .worked{background:#21ca62;color:#fff}.rev-hourbar .idle{background:#aeb2ba;color:#fff}.rev-hourbar span{white-space:nowrap;font-weight:700}.rev-legend{display:flex;gap:22px;flex-wrap:wrap;margin-top:18px;color:#aeb3bc}.rev-legend span:nth-child(1){color:#35ca69}.rev-legend span:nth-child(2){color:#e88d5f}.rev-legend span:nth-child(3){color:#9ba1aa}
 .rev-more-data>div{display:flex;justify-content:space-between;align-items:center;gap:20px;min-height:88px;border-bottom:1px solid #07090c;font-size:20px;color:#aeb4bd}.rev-more-data b{color:#e6e8eb;text-align:right;font-weight:500}.rev-bottom-space{height:55px}
 @media(max-width:520px){.revenue-page{padding-left:18px;padding-right:18px}.revenue-page h1{font-size:46px}.rev-kicker{font-size:20px}.rev-months{margin-left:-18px;margin-right:-18px;padding-left:18px;padding-right:18px}.rev-month{flex-basis:105px;height:62px;font-size:19px}.rev-total{font-size:43px}.rev-count{font-size:22px}.rev-chart{margin-left:-18px;margin-right:-18px;padding-left:18px;padding-right:18px}.rev-bar-col{flex-basis:72px}.rev-bar-zone i{width:50px}.rev-service-card{flex-basis:245px;height:250px}.rev-duo{gap:10px}.rev-metric{height:155px;padding:19px}.rev-metric strong{font-size:31px}.rev-metric span{font-size:14px}.rev-balance-head{font-size:15px}.rev-balance-head select{font-size:15px}.rev-filter-row{font-size:16px}.rev-filter-row button{padding:0 14px}.rev-payment-row strong{font-size:24px}.rev-more-data>div{font-size:16px}.rev-hours{padding:18px}.rev-hourbar{height:48px}}
+
+/* V18 — Faturamento compacto, meses completos no topo */
+#modal.revenue-mode,
+#modal.revenue-mode .modal-card,
+#modal.revenue-mode #modalContent,
+.revenue-page{max-width:100vw;overflow-x:hidden}
+.revenue-page{padding:calc(14px + env(safe-area-inset-top)) 16px 34px}
+.rev-back{font-size:34px;margin-bottom:16px}
+.rev-kicker{font-size:18px;margin-bottom:4px}
+.revenue-page h1{font-size:42px;line-height:1;margin-bottom:24px;letter-spacing:-1px}
+
+/* meses: todos os 12 no topo, pequenos como na referência */
+.rev-months{margin:0 -16px 26px;padding:0 16px;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity}
+.rev-month{flex:0 0 68px;height:50px;border-radius:15px;font-size:15px;letter-spacing:.2px;scroll-snap-align:start}
+
+.rev-balance-head{font-size:14px;margin-bottom:8px;gap:8px}
+.rev-balance-head select{font-size:14px;max-width:150px}
+.rev-total{font-size:40px}
+.rev-count{font-size:19px;margin:2px 0 28px}
+
+.rev-chart{height:285px;margin:0 -16px;padding-left:16px;padding-right:16px;gap:7px}
+.rev-bar-col{flex-basis:56px;gap:11px}
+.rev-bar-zone{height:225px}
+.rev-bar-zone i{width:38px;border-radius:17px}
+.rev-bar-col b{font-size:16px}
+.rev-drag{font-size:30px;margin:10px 0 16px}
+.rev-drag span{font-size:10px}
+
+.rev-filter-row{font-size:14px;gap:8px;margin-bottom:10px}
+.rev-filter-row button{height:42px;border-radius:11px;padding:0 12px;font-size:13px}
+.rev-date-box{gap:7px;padding:10px;margin-bottom:16px}
+.rev-date-box button{padding:8px;font-size:12px}
+
+.rev-section-title{font-size:14px;margin:30px 0 14px}
+.rev-services{margin:0 -16px;padding:0 16px;gap:10px}
+.rev-service-card{flex-basis:190px;height:190px;border-radius:20px;padding:18px}
+.rev-service-card strong{font-size:42px}
+.rev-service-card span{font-size:14px}
+.rev-service-card b{font-size:17px}
+
+.rev-duo{gap:10px;margin-top:34px}
+.rev-metric{height:128px;border-radius:20px;padding:17px}
+.rev-metric strong{font-size:27px}
+.rev-metric span{font-size:12px}
+
+.rev-payments,.rev-hours{border-radius:18px;padding:17px}
+.rev-payment-row strong{font-size:21px}
+.rev-more-pay{font-size:13px}
+.rev-hours>strong{font-size:18px;margin-bottom:16px}
+.rev-hourbar{height:42px;border-radius:12px}
+.rev-hourbar span{font-size:12px}
+.rev-legend{gap:13px;margin-top:12px;font-size:12px}
+.rev-more-data>div{min-height:64px;font-size:14px;gap:12px}
+.rev-bottom-space{height:35px}
+
+@media(max-width:390px){
+ .revenue-page{padding-left:14px;padding-right:14px}
+ .revenue-page h1{font-size:38px}
+ .rev-months{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px;gap:7px}
+ .rev-month{flex-basis:62px;height:46px;font-size:14px;border-radius:13px}
+ .rev-total{font-size:36px}
+ .rev-chart{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}
+ .rev-bar-col{flex-basis:52px}
+ .rev-bar-zone i{width:34px}
+ .rev-service-card{flex-basis:176px;height:178px}
+ .rev-metric strong{font-size:24px}
+ .rev-filter-row #revPdf{padding:0 10px}
+}

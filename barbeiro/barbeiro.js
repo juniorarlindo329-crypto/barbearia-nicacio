@@ -281,7 +281,7 @@ function revenuePage(){
  const now=new Date();
  const monthKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
  const monthLabel=d=>['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][d.getMonth()];
- const months=[]; for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({key:monthKey(d),label:monthLabel(d),date:d})}
+ const months=Array.from({length:12},(_,i)=>{const d=new Date(now.getFullYear(),i,1);return {key:monthKey(d),label:monthLabel(d),date:d}})
  let selected=monthKey(now), balanceMode='meu', customStart='', customEnd='';
  const statusOk=(b,mode)=>{if(b.status==='cancelado')return false;if(mode==='realizados')return b.status==='concluido'||(b.date&&b.date<key(new Date()));if(mode==='agendados')return b.status!=='concluido';return b.status==='concluido'||(b.date&&b.date<=key(new Date()))};
  const getMonthRows=()=>bookings().filter(b=>String(b.date||'').slice(0,7)===selected && statusOk(b,balanceMode));
