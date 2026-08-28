@@ -6,7 +6,7 @@ window.scrollTo(0,0);
 const DEFAULT_SERVICES=[
 {name:'Corte',price:30,duration:30,active:true},{name:'Barba',price:20,duration:30,active:true},{name:'Corte+Barba',price:45,duration:60,active:true},{name:'Corte+Sobrancelha',price:40,duration:30,active:true},{name:'Corte+Barba+Sobra',price:50,duration:60,active:true},{name:'Barba+Sobrancelha',price:30,duration:30,active:true},{name:'Corte +Alisante ou pintura',price:60,duration:60,active:true},{name:'Alisante ou pintura',price:30,duration:30,active:true},{name:'Closed',price:0,duration:60,active:false},{name:'CMT',price:38,duration:10,active:true},{name:'CS',price:12,duration:10,active:true}
 ];
-const KEYS={bookings:'nicacio_bookings',blocked:'nicacio_blocked_days',settings:'nicacio_barber_settings',services:'nicacio_services',closedSlots:'nicacio_closed_slots',recurrence:'nicacio_barber_recurring',barber:'nicacio_barber_profile',linkConfig:'nicacio_link_config'};
+const KEYS={bookings:'nicacio_bookings',blocked:'nicacio_blocked_days',settings:'nicacio_barber_settings',services:'nicacio_services',closedSlots:'nicacio_closed_slots',recurrence:'nicacio_barber_recurring',barber:'nicacio_barber_profile',linkConfig:'nicacio_link_config',clients:'nicacio_barber_clients'};
 const $=s=>document.querySelector(s);
 let currentWeekStart=startOfWeek(new Date()),selectedDate=new Date(),valuesHidden=false;
 
@@ -99,7 +99,89 @@ function editDayPage(){const date=key(selectedDate),checks=slotsForDay().map(t=>
 function servicesPage(){const list=services();openModal('Serviços e preços',`<p style="color:#aeb5bf">Edite os serviços que aparecem no agendamento.</p><div id="serviceList">${list.map((s,i)=>`<div class="list-card"><div class="service-admin"><div><h3>${escapeHtml(s.name)}</h3><p>${s.duration} min • <span class="badge ${s.active===false?'off':''}">${s.active===false?'OCULTO':'ATIVO'}</span></p></div><div class="service-price">${money(s.price)}</div></div><div class="service-actions"><button class="small-btn edit-service" data-i="${i}">Editar</button><button class="small-btn toggle-service" data-i="${i}">${s.active===false?'Ativar':'Ocultar'}</button><button class="small-btn danger delete-service" data-i="${i}">Excluir</button></div></div>`).join('')}</div><button id="addService" class="primary-btn">+ NOVO SERVIÇO</button>`);document.querySelectorAll('.edit-service').forEach(b=>b.onclick=()=>serviceEditor(Number(b.dataset.i)));document.querySelectorAll('.toggle-service').forEach(b=>b.onclick=()=>{const a=services();a[Number(b.dataset.i)].active=a[Number(b.dataset.i)].active===false?true:false;saveServices(a);servicesPage()});document.querySelectorAll('.delete-service').forEach(b=>b.onclick=()=>{if(confirm('Excluir este serviço?')){const a=services();a.splice(Number(b.dataset.i),1);saveServices(a);servicesPage()}});$('#addService').onclick=()=>serviceEditor(-1)}
 function serviceEditor(i){const s=i>=0?services()[i]:{name:'',price:'',duration:30,active:true};openModal(i>=0?'Editar serviço':'Novo serviço',`<form id="serviceForm"><div class="field"><label>Nome</label><input id="sName" required value="${escapeHtml(s.name)}"></div><div class="field"><label>Preço (R$)</label><input id="sPrice" type="number" min="0" step="0.01" required value="${s.price}"></div><div class="field"><label>Duração em minutos</label><input id="sDuration" type="number" min="5" step="5" required value="${s.duration}"></div><button class="primary-btn" type="submit">SALVAR SERVIÇO</button></form>`);$('#serviceForm').onsubmit=e=>{e.preventDefault();const a=services(),item={name:$('#sName').value.trim(),price:Number($('#sPrice').value),duration:Number($('#sDuration').value),active:s.active!==false};if(i>=0)a[i]=item;else a.push(item);saveServices(a);servicesPage();toast('Serviço salvo')}}
 
-function clientsPage(){const map={};bookings().forEach(b=>{const k=(b.clientPhone||b.clientName||'cliente').toLowerCase();if(!map[k])map[k]={name:b.clientName,phone:b.clientPhone,count:0};map[k].count++});const arr=Object.values(map);openModal('Clientes',arr.length?arr.map(c=>`<div class="list-card"><h3>${escapeHtml(c.name||'Cliente')}</h3><p>${escapeHtml(c.phone||'Sem telefone')} • ${c.count} agendamento(s)</p></div>`).join(''):'<p>Nenhum cliente ainda.</p>')}
+function normalizePhone(v){return String(v||'').replace(/\D/g,'')}
+function clientIdFrom(name,phone){const p=normalizePhone(phone);return p?'p_'+p:'n_'+String(name||'cliente').trim().toLowerCase().replace(/\s+/g,'_')}
+function storedClients(){return load(KEYS.clients,[])}
+function saveClients(v){save(KEYS.clients,v)}
+function syncClientsFromBookings(){
+ const current=storedClients(), byId=new Map(current.map(c=>[c.id,c]));
+ bookings().forEach(b=>{
+  const name=(b.clientName||'Cliente').trim(), phone=(b.clientPhone||'').trim(), id=clientIdFrom(name,phone);
+  const existing=byId.get(id)||{id,name,phone,favorite:false,notes:'',createdAt:b.createdAt||new Date().toISOString()};
+  if(name&&name!=='Cliente')existing.name=name;
+  if(phone)existing.phone=phone;
+  byId.set(id,existing);
+ });
+ const arr=[...byId.values()];saveClients(arr);return arr;
+}
+function clientBookingCount(c){return bookings().filter(b=>clientMatchesBooking(c,b)).length}
+function clientMatchesBooking(c,b){const cp=normalizePhone(c.phone),bp=normalizePhone(b.clientPhone);if(cp&&bp)return cp===bp;return String(c.name||'').trim().toLowerCase()===String(b.clientName||'').trim().toLowerCase()}
+function clientLastBooking(c){return bookings().filter(b=>clientMatchesBooking(c,b)).sort((a,b)=>(b.date+' '+b.time).localeCompare(a.date+' '+a.time))[0]||null}
+function phoneForWhatsApp(v){let p=normalizePhone(v);if(!p)return'';if(p.length===10||p.length===11)p='55'+p;return p}
+function clientsPage(){
+ syncClientsFromBookings();
+ openModal('',`<div class="clients-screen">
+   <button id="clientsBack" class="clients-back" type="button" aria-label="Voltar">←</button>
+   <div class="clients-eyebrow">Lista de</div><h2>Clientes</h2>
+   <div class="clients-tools">
+    <input id="clientSearch" type="search" placeholder="Pesquisar" autocomplete="off">
+    <button id="clientFilterBtn" class="tool-square" type="button" aria-label="Filtros">⌕</button>
+    <button id="clientDateBtn" class="tool-square" type="button" aria-label="Filtrar por data">▣</button>
+    <button id="clientFavBtn" class="tool-square" type="button" aria-label="Favoritos">★</button>
+   </div>
+   <div id="clientFilterPanel" class="client-filter-panel hidden">
+    <button data-filter="all" type="button" class="active">Todos</button><button data-filter="phone" type="button">Com telefone</button><button data-filter="no-phone" type="button">Sem telefone</button>
+   </div>
+   <div id="clientDatePanel" class="client-date-panel hidden"><label>Mostrar clientes com agendamento em</label><input id="clientDateFilter" type="date"><button id="clearClientDate" type="button">Limpar data</button></div>
+   <div id="clientList" class="client-list"></div>
+   <button id="addClientBtn" class="client-add-btn" type="button" aria-label="Adicionar cliente">+</button>
+  </div>`);
+ $('#modal').classList.add('clients-modal');
+ let filter='all',favoritesOnly=false,dateFilter='';
+ const closeClients=()=>{$('#modal').classList.remove('clients-modal');closeModal()};
+ $('#clientsBack').onclick=closeClients;
+ const render=()=>{
+  const q=$('#clientSearch').value.trim().toLowerCase();
+  let arr=syncClientsFromBookings();
+  arr=arr.filter(c=>!q||String(c.name||'').toLowerCase().includes(q)||String(c.phone||'').toLowerCase().includes(q));
+  if(filter==='phone')arr=arr.filter(c=>normalizePhone(c.phone));
+  if(filter==='no-phone')arr=arr.filter(c=>!normalizePhone(c.phone));
+  if(favoritesOnly)arr=arr.filter(c=>c.favorite);
+  if(dateFilter)arr=arr.filter(c=>bookings().some(b=>clientMatchesBooking(c,b)&&b.date===dateFilter));
+  arr.sort((a,b)=>Number(!!b.favorite)-Number(!!a.favorite)||String(a.name||'').localeCompare(String(b.name||''),'pt-BR'));
+  const list=$('#clientList');
+  if(!arr.length){list.innerHTML='<div class="clients-empty">Nenhum cliente encontrado.</div>';return}
+  list.innerHTML=arr.map(c=>{const cnt=clientBookingCount(c),phone=escapeHtml(c.phone||'Sem telefone');return `<article class="client-card" data-id="${escapeHtml(c.id)}"><div class="client-main"><strong>${escapeHtml(c.name||'Cliente')}</strong><span>${phone}</span>${c.favorite?'<small>★ Favorito</small>':''}</div><div class="client-actions">${normalizePhone(c.phone)?'<button class="client-wa" type="button" title="WhatsApp">◉</button>':''}<button class="client-history" type="button" title="Histórico"><span>▥</span><small>${cnt}</small></button><button class="client-edit" type="button" title="Editar">✎</button></div></article>`}).join('');
+  list.querySelectorAll('.client-card').forEach(card=>{
+   const c=syncClientsFromBookings().find(x=>x.id===card.dataset.id);if(!c)return;
+   const wa=card.querySelector('.client-wa');if(wa)wa.onclick=()=>{const p=phoneForWhatsApp(c.phone);if(p)window.open('https://wa.me/'+p,'_blank','noopener')};
+   card.querySelector('.client-history').onclick=()=>clientHistoryPage(c.id);
+   card.querySelector('.client-edit').onclick=()=>clientEditor(c.id);
+  });
+ };
+ $('#clientSearch').addEventListener('input',render);
+ $('#clientFilterBtn').onclick=()=>{$('#clientFilterPanel').classList.toggle('hidden');$('#clientDatePanel').classList.add('hidden')};
+ $('#clientDateBtn').onclick=()=>{$('#clientDatePanel').classList.toggle('hidden');$('#clientFilterPanel').classList.add('hidden')};
+ $('#clientFavBtn').onclick=()=>{favoritesOnly=!favoritesOnly;$('#clientFavBtn').classList.toggle('active',favoritesOnly);render()};
+ $('#clientFilterPanel').querySelectorAll('button').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;$('#clientFilterPanel').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));render()});
+ $('#clientDateFilter').onchange=e=>{dateFilter=e.target.value;render()};
+ $('#clearClientDate').onclick=()=>{dateFilter='';$('#clientDateFilter').value='';render()};
+ $('#addClientBtn').onclick=()=>clientEditor();
+ render();
+}
+function clientEditor(id=''){
+ const all=syncClientsFromBookings(),c=all.find(x=>x.id===id)||{name:'',phone:'',favorite:false,notes:''};
+ openModal(id?'Editar cliente':'Novo cliente',`<form id="clientEditForm" class="client-edit-form"><div class="field"><label>Nome do cliente</label><input id="ceName" required maxlength="80" value="${escapeHtml(c.name||'')}" placeholder="Nome e sobrenome"></div><div class="field"><label>Telefone</label><input id="cePhone" inputmode="tel" maxlength="20" value="${escapeHtml(c.phone||'')}" placeholder="(00) 00000-0000"></div><label class="client-fav-switch"><input id="ceFavorite" type="checkbox" ${c.favorite?'checked':''}><span>★ Marcar como favorito</span></label><div class="field"><label>Observações</label><textarea id="ceNotes" rows="4" maxlength="500" placeholder="Observações sobre o cliente">${escapeHtml(c.notes||'')}</textarea></div><button class="primary-btn" type="submit">SALVAR CLIENTE</button>${id?'<button id="deleteClient" class="danger-btn" type="button">EXCLUIR CLIENTE</button>':''}</form>`);
+ $('#clientEditForm').onsubmit=e=>{e.preventDefault();const name=$('#ceName').value.trim(),phone=$('#cePhone').value.trim();if(!name){toast('Digite o nome do cliente');return}let arr=storedClients();const obj={...c,id:id||clientIdFrom(name,phone),name,phone,favorite:$('#ceFavorite').checked,notes:$('#ceNotes').value.trim(),updatedAt:new Date().toISOString()};if(id){arr=arr.filter(x=>x.id!==id)};const duplicate=arr.findIndex(x=>x.id===obj.id);if(duplicate>=0)arr[duplicate]={...arr[duplicate],...obj};else arr.push(obj);saveClients(arr);clientsPage();toast(id?'Cliente atualizado':'Cliente cadastrado')};
+ if(id)$('#deleteClient').onclick=()=>{if(confirm('Excluir este cliente da lista? Os agendamentos não serão apagados.')){saveClients(storedClients().filter(x=>x.id!==id));clientsPage();toast('Cliente excluído')}};
+}
+function clientHistoryPage(id){
+ const c=syncClientsFromBookings().find(x=>x.id===id);if(!c){clientsPage();return}
+ const bs=bookings().filter(b=>clientMatchesBooking(c,b)).sort((a,b)=>(b.date+' '+b.time).localeCompare(a.date+' '+a.time));
+ openModal('Histórico',`<div class="client-history-head"><strong>${escapeHtml(c.name||'Cliente')}</strong><span>${escapeHtml(c.phone||'Sem telefone')}</span><button id="toggleFavoriteClient" class="small-btn" type="button">${c.favorite?'★ Remover favorito':'☆ Favoritar'}</button></div><div class="client-history-list">${bs.length?bs.map(b=>`<div class="history-card"><b>${escapeHtml(b.serviceName||'Serviço')}</b><span>${escapeHtml(b.dateLabel||b.date)} às ${escapeHtml(b.time||'')}</span><small>${money(b.price)} • ${escapeHtml(b.status||'confirmado')}</small></div>`).join(''):'<p>Nenhum agendamento deste cliente.</p>'}</div><button id="backToClients" class="primary-btn" type="button">VOLTAR AOS CLIENTES</button>`);
+ $('#toggleFavoriteClient').onclick=()=>{const arr=storedClients(),x=arr.find(v=>v.id===id);if(x){x.favorite=!x.favorite;saveClients(arr)}clientHistoryPage(id)};
+ $('#backToClients').onclick=clientsPage;
+}
 function cancelledPage(){const data=bookings().filter(b=>b.status==='cancelado').sort((a,b)=>(b.cancelledAt||'').localeCompare(a.cancelledAt||''));openModal('Cancelados',data.length?data.map(b=>`<div class="list-card"><h3>${escapeHtml(b.clientName||'Cliente')}</h3><p>${escapeHtml(b.serviceName)} • ${b.dateLabel||b.date} às ${b.time}</p></div>`).join(''):'<p>Nenhum cancelamento.</p>')}
 function revenuePage(){const valid=bookings().filter(b=>b.status!=='cancelado'),done=bookings().filter(b=>b.status==='concluido'),total=valid.reduce((s,b)=>s+Number(b.price||0),0),doneTotal=done.reduce((s,b)=>s+Number(b.price||0),0);openModal('Faturamento',`<div class="summary-box"><p>Agendado</p><div class="big">${money(total)}</div><p>${valid.length} agendamento(s)</p></div><div class="summary-box"><p>Concluído</p><div class="big">${money(doneTotal)}</div><p>${done.length} atendimento(s)</p></div>`)}
 function recurrencePage(){const rs=recurrings();openModal('Minhas recorrências',`${rs.length?rs.map((r,i)=>`<div class="list-card"><h3>${escapeHtml(r.clientName)}</h3><p>${escapeHtml(r.serviceName)} • toda ${r.frequency} semana(s) • ${r.time}</p><button class="small-btn danger del-rec" data-i="${i}">Excluir</button></div>`).join(''):'<p>Nenhuma recorrência.</p>'}<button id="addRec" class="primary-btn">+ NOVA RECORRÊNCIA</button>`);document.querySelectorAll('.del-rec').forEach(b=>b.onclick=()=>{const a=recurrings();a.splice(Number(b.dataset.i),1);saveRecurrings(a);recurrencePage()});$('#addRec').onclick=recurrenceEditor}
