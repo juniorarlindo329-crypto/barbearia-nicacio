@@ -3,6 +3,8 @@ const SERVICES=[
 ];
 const OPEN_TIMES=['08:00','08:30','09:00','09:30','10:00','10:30','11:00','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
 let selectedService=null,selectedDate=null,selectedTime=null,clientName='';
+function getProfile(){try{return JSON.parse(localStorage.getItem('nicacio_profile')||'{}')||{}}catch(e){return {}}}
+function hasSavedClient(){const p=getProfile();return !!(p.name?.trim() && p.phone?.trim())}
 const $=s=>document.querySelector(s),servicesEl=$('#services'),datesEl=$('#dates'),timesEl=$('#times');
 function bookings(){return JSON.parse(localStorage.getItem('nicacio_bookings')||'[]')}
 function saveBookings(v){localStorage.setItem('nicacio_bookings',JSON.stringify(v))}
@@ -22,12 +24,20 @@ function animateConversation(container){
 function showConversation(id){show(id);animateConversation(id)}
 
 function playIntro(){
- const w=$('#welcomeBubble'),q=$('#nameQuestion'),s=$('#stepName');
+ const w=$('#welcomeBubble'),q=$('#nameQuestion'),s=$('#stepName'),profile=getProfile();
  setTimeout(()=>w?.classList.add('show'),180);
+ if(hasSavedClient()){
+   clientName=profile.name.trim();
+   q?.classList.add('hidden');
+   s?.classList.add('hidden');
+   $('#nameReply').textContent=clientName;
+   $('#howAreYou').textContent=`Como vai, ${clientName}, tudo bem?`;
+   setTimeout(()=>showConversation('#stepNotify'),900);
+   return;
+ }
  setTimeout(()=>q?.classList.add('show'),850);
  setTimeout(()=>{s?.classList.remove('intro-step-hidden');s?.classList.add('intro-step-show')},1450);
- const old=JSON.parse(localStorage.getItem('nicacio_profile')||'null');
- if(old?.name) $('#clientName').value=old.name;
+ if(profile?.name) $('#clientName').value=profile.name;
  $('#sendName').disabled=!$('#clientName').value.trim();
 }
 $('#clientName')?.addEventListener('input',e=>{$('#sendName').disabled=!e.target.value.trim()});
@@ -58,16 +68,26 @@ function renderDates(){datesEl.innerHTML='';dateChoices().forEach(x=>{const el=d
 function renderTimes(){if(!selectedDate)return;timesEl.innerHTML='';const taken=bookings().filter(b=>b.date===selectedDate.key&&b.status!=='cancelado').map(b=>b.time),free=OPEN_TIMES.filter(t=>!taken.includes(t));if(!free.length){$('#timesMessage').textContent='NESTE DIA, TODOS OS HORÁRIOS JÁ FORAM RESERVADOS.';$('#confirmDate').disabled=true;return}$('#timesMessage').textContent='Escolha um horário disponível:';free.forEach(t=>{const b=document.createElement('button');b.type='button';b.className='time-btn';b.textContent=t;b.onclick=()=>{selectedTime=t;[...timesEl.children].forEach(c=>c.classList.remove('selected'));b.classList.add('selected');$('#confirmDate').disabled=false};timesEl.appendChild(b)})}
 $('#serviceNext')?.addEventListener('click',()=>{if(!selectedService)return;hide('#stepService');show('#stepDate');$('#chosenServiceBubble').textContent=selectedService.name;renderDates();animateConversation('#stepDate')});
 $('#backToService')?.addEventListener('click',()=>{hide('#stepDate');showConversation('#stepService');selectedDate=null;selectedTime=null;$('#confirmDate').disabled=true});
-$('#confirmDate')?.addEventListener('click',()=>{if(!selectedService||!selectedDate||!selectedTime)return;hide('#stepDate');show('#stepPhone');const old=JSON.parse(localStorage.getItem('nicacio_profile')||'null');if(old?.phone)$('#clientPhone').value=old.phone;$('#finishBooking').disabled=$('#clientPhone').value.replace(/\D/g,'').length<8;animateConversation('#stepPhone')});
-$('#clientPhone')?.addEventListener('input',e=>{$('#finishBooking').disabled=e.target.value.replace(/\D/g,'').length<8});
-$('#finishBooking')?.addEventListener('click',()=>{
- const phone=$('#clientPhone').value.trim();if(!phone||!selectedService||!selectedDate||!selectedTime)return;
+function completeBooking(phone){
+ phone=(phone||'').trim();if(!phone||!selectedService||!selectedDate||!selectedTime)return;
  const data=bookings();if(data.some(b=>b.date===selectedDate.key&&b.time===selectedTime&&b.status!=='cancelado')){alert('Esse horário acabou de ser reservado. Escolha outro.');hide('#stepPhone');show('#stepDate');renderTimes();return}
- const old=JSON.parse(localStorage.getItem('nicacio_profile')||'{}');localStorage.setItem('nicacio_profile',JSON.stringify({...old,name:clientName,phone}));
+ const old=getProfile();localStorage.setItem('nicacio_profile',JSON.stringify({...old,name:clientName,phone}));
  const item={id:(crypto.randomUUID?crypto.randomUUID():String(Date.now())),clientName,clientEmail:old.email||'',clientPhone:phone,serviceId:selectedService.id,serviceName:selectedService.name,price:selectedService.price,duration:selectedService.duration,date:selectedDate.key,dateLabel:selectedDate.d.toLocaleDateString('pt-BR'),time:selectedTime,status:'confirmado',createdAt:new Date().toISOString()};data.push(item);saveBookings(data);
  const fullDate=selectedDate.d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}).replace(/\./g,'');
- hide('#stepPhone');show('#stepDone');$('#bookingSummary').innerHTML=`<div class="bubble bot final-bubble"><b>Perfeito...</b><br><br>Agendamento realizado: Um(a) <b>${item.serviceName}</b> - (${money(item.price)}), com o(a) <b>${clientName}</b> no(a) ${fullDate} às <b>${item.time}</b>.<br><br>O local é o de sempre: <b>Rua São José, 197 - Ao lado do Bradesco.</b><br><br><strong>EVITE ATRASOS. SE VOCÊ NÃO CONSEGUIR CHEGAR NO HORÁRIO, POR FAVOR, CANCELE OU AVISE ANTES.</strong><br><br>Muito obrigado, até mais!</div>`;animateConversation('#stepDone');
+ hide('#stepPhone');hide('#stepDate');show('#stepDone');$('#bookingSummary').innerHTML=`<div class="bubble bot final-bubble"><b>Perfeito...</b><br><br>Agendamento realizado: Um(a) <b>${item.serviceName}</b> - (${money(item.price)}), com o(a) <b>${clientName}</b> no(a) ${fullDate} às <b>${item.time}</b>.<br><br>O local é o de sempre: <b>Rua São José, 197 - Ao lado do Bradesco.</b><br><br><strong>EVITE ATRASOS. SE VOCÊ NÃO CONSEGUIR CHEGAR NO HORÁRIO, POR FAVOR, CANCELE OU AVISE ANTES.</strong><br><br>Muito obrigado, até mais!</div>`;animateConversation('#stepDone');
+}
+$('#confirmDate')?.addEventListener('click',()=>{
+ if(!selectedService||!selectedDate||!selectedTime)return;
+ const profile=getProfile();
+ if(profile.name?.trim() && profile.phone?.trim()){
+   clientName=profile.name.trim();
+   completeBooking(profile.phone);
+   return;
+ }
+ hide('#stepDate');show('#stepPhone');if(profile?.phone)$('#clientPhone').value=profile.phone;$('#finishBooking').disabled=$('#clientPhone').value.replace(/\D/g,'').length<8;animateConversation('#stepPhone');
 });
+$('#clientPhone')?.addEventListener('input',e=>{$('#finishBooking').disabled=e.target.value.replace(/\D/g,'').length<8});
+$('#finishBooking')?.addEventListener('click',()=>completeBooking($('#clientPhone').value));
 $('#newBooking')?.addEventListener('click',()=>location.reload());
 renderServices();playIntro();
-let deferredInstallPrompt=null;const installBtn=$('#installAppBtn');window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;installBtn?.classList.remove('hidden')});installBtn?.addEventListener('click',async()=>{if(!deferredInstallPrompt){alert('No Chrome, toque no menu ⋮ e escolha "Adicionar à tela inicial" ou "Instalar app".');return}deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installBtn.classList.add('hidden')});window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;installBtn?.classList.add('hidden')});if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=20').catch(()=>{}));
+let deferredInstallPrompt=null;const installBtn=$('#installAppBtn');window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;installBtn?.classList.remove('hidden')});installBtn?.addEventListener('click',async()=>{if(!deferredInstallPrompt){alert('No Chrome, toque no menu ⋮ e escolha "Adicionar à tela inicial" ou "Instalar app".');return}deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installBtn.classList.add('hidden')});window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;installBtn?.classList.add('hidden')});if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=21').catch(()=>{}));
