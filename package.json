@@ -1,0 +1,12 @@
+{
+  "name": "pizza-do-kim",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "web-push": "^3.6.7",
+    "qrcode": "^1.5.4"
+  }
+}

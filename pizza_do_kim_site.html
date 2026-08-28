@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pizza do Kim - Delivery</title>
+<link rel="manifest" href="/manifest-cliente.json">
+<meta name="theme-color" content="#0b0b0b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pizza do Kim">
+<link rel="apple-touch-icon" href="/icon-192.png">
+  <style>
+    :root{
+      --red:#b71c1c;--red2:#8e1111;--cream:#fff8ef;--gold:#f2b84b;--dark:#211a18;
+      --card:#ffffff;--muted:#6f6763;--border:#eaded6;--green:#168a45;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--dark)}
+    header{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;padding:28px 18px}
+    .head{max-width:1100px;margin:auto;display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap}
+    .brand h1{margin:0;font-size:34px}.brand p{margin:7px 0 0;opacity:.93}
+    .badge{background:#fff2;padding:10px 14px;border:1px solid #ffffff44;border-radius:999px;font-weight:700}
+    .container{max-width:1100px;margin:0 auto;padding:22px 16px 45px}
+    .layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:20px;align-items:start}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:0 7px 24px #4b22120d;margin-bottom:18px}
+    h2{margin:0 0 15px;color:var(--red);font-size:21px}
+    h3{font-size:16px;margin:16px 0 8px}
+    label{display:block;font-weight:700;margin:12px 0 6px}
+    input,select,textarea{width:100%;min-height:46px;padding:11px 12px;border:1px solid #d7cbc4;border-radius:11px;background:#fff;font-size:16px;color:var(--dark)}
+    textarea{min-height:80px;resize:vertical}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .sizes,.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+    .modes{grid-template-columns:1fr 1fr}
+    .choice{min-height:48px;border:2px solid var(--border);background:#fff;border-radius:12px;font-weight:800;cursor:pointer}
+    .choice.active{border-color:var(--red);background:#fff0f0;color:var(--red)}
+    .hidden{display:none}
+    .pizza-item{border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:12px;background:#fffdfb}
+    .pizza-item strong{color:var(--red)}
+    .pizza-top{display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .mini-btn{border:0;border-radius:9px;padding:8px 10px;font-weight:700;cursor:pointer;background:#f2ece8;color:#6d2828}
+    .add{width:100%;border:0;background:var(--red);color:#fff;border-radius:12px;padding:14px;font-size:16px;font-weight:800;cursor:pointer;margin-top:12px}
+    .add:hover{background:var(--red2)}
+    .summary{position:sticky;top:12px}
+    .summary-line{display:flex;justify-content:space-between;gap:15px;margin:9px 0}
+    .summary small{color:var(--muted)}
+    .total{font-size:24px;font-weight:900;color:var(--red);border-top:1px dashed #bcaea5;padding-top:14px;margin-top:14px}
+    .btn{width:100%;min-height:48px;border:0;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;margin-top:10px}
+    .print{background:#26211f;color:#fff}
+    .whatsapp{background:var(--green);color:white}.whatsapp:disabled{opacity:.65;cursor:not-allowed}
+    .clear{background:#f1e9e4;color:#7b2525}
+    .empty{color:var(--muted);font-size:14px;padding:8px 0}
+    .info{font-size:14px;color:var(--muted);line-height:1.5}
+    .price-note{font-size:13px;color:var(--muted);margin-top:8px}
+    footer{text-align:center;color:var(--muted);font-size:13px;padding:12px 0}
+
+    .tutorial-overlay{position:fixed;inset:0;background:#0009;z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px}
+    .tutorial-overlay.hidden{display:none}
+    .tutorial-card{width:min(100%,480px);background:#fff;border-radius:20px;padding:22px;box-shadow:0 20px 60px #0006}
+    .tutorial-step{display:none}
+    .tutorial-step.active{display:block}
+    .tutorial-icon{font-size:46px;margin-bottom:8px}
+    .tutorial-card h2{font-size:25px;margin:0 0 10px}
+    .tutorial-card p{font-size:16px;line-height:1.5;color:#5f5753;margin:0}
+    .tutorial-progress{display:flex;gap:7px;justify-content:center;margin:20px 0 14px}
+    .tutorial-dot{width:9px;height:9px;border-radius:50%;background:#ddd}
+    .tutorial-dot.active{background:var(--red)}
+    .tutorial-actions{display:flex;gap:10px}
+    .tutorial-actions button{flex:1;min-height:48px;border:0;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer}
+    .tutorial-skip{background:#eee7e3;color:#5d2525}
+    .tutorial-next{background:var(--red);color:#fff}
+
+    
+    .animated-hero{
+      position:relative;
+      min-height:0;
+      aspect-ratio:16/9;
+      overflow:hidden;
+      background:#090504;
+      color:#fff;
+      isolation:isolate;
+      border-bottom:1px solid #2b1710;
+    }
+    .animated-hero .hero-image{
+      position:absolute;inset:0;
+      width:100%;height:100%;
+      object-fit:contain;
+      object-position:center center;
+      transform:scale(1);
+      animation:heroBreath 7s ease-in-out infinite alternate;
+      filter:saturate(1.05) contrast(1.03);
+      z-index:-4;
+    }
+    .animated-hero::after{
+      content:"";position:absolute;inset:0;
+      background:linear-gradient(180deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.08) 45%,rgba(0,0,0,.62) 100%);
+      z-index:-1;
+    }
+    @keyframes heroBreath{
+      from{transform:scale(1)}
+      to{transform:scale(1.012)}
+    }
+    .smoke-layer{
+      position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:-2;
+    }
+    .smoke{
+      position:absolute;
+      bottom:-110px;
+      width:180px;height:260px;
+      border-radius:50%;
+      background:radial-gradient(ellipse at center,rgba(255,255,255,.20) 0%,rgba(230,230,230,.10) 36%,rgba(255,255,255,0) 72%);
+      filter:blur(18px);
+      opacity:.5;
+      animation:smokeRise linear infinite;
+    }
+    .smoke.s1{left:45%;animation-duration:8s;animation-delay:-2s}
+    .smoke.s2{left:58%;width:220px;height:300px;animation-duration:10s;animation-delay:-6s}
+    .smoke.s3{left:32%;width:150px;height:230px;animation-duration:9s;animation-delay:-4s}
+    @keyframes smokeRise{
+      0%{transform:translate3d(0,90px,0) scale(.65);opacity:0}
+      15%{opacity:.42}
+      55%{transform:translate3d(25px,-220px,0) scale(1.05);opacity:.38}
+      100%{transform:translate3d(-20px,-520px,0) scale(1.45);opacity:0}
+    }
+    .embers{position:absolute;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
+    .ember{
+      position:absolute;bottom:-12px;width:5px;height:5px;border-radius:50%;
+      background:#ff641f;box-shadow:0 0 12px #ff3c00,0 0 20px #ff9a2f;
+      animation:emberFloat linear infinite;
+    }
+    .ember:nth-child(1){left:8%;animation-duration:5.2s;animation-delay:-1s}
+    .ember:nth-child(2){left:19%;animation-duration:6.4s;animation-delay:-4s;width:3px;height:3px}
+    .ember:nth-child(3){left:33%;animation-duration:4.8s;animation-delay:-2.2s}
+    .ember:nth-child(4){left:52%;animation-duration:6.9s;animation-delay:-5.5s;width:4px;height:4px}
+    .ember:nth-child(5){left:66%;animation-duration:5.6s;animation-delay:-3.4s}
+    .ember:nth-child(6){left:78%;animation-duration:7.2s;animation-delay:-6.1s;width:3px;height:3px}
+    .ember:nth-child(7){left:91%;animation-duration:5.1s;animation-delay:-2.8s}
+    @keyframes emberFloat{
+      0%{transform:translate(0,0) scale(.7);opacity:0}
+      12%{opacity:1}
+      60%{transform:translate(22px,-330px) scale(1);opacity:.75}
+      100%{transform:translate(-14px,-610px) scale(.4);opacity:0}
+    }
+    .hero-content{
+      max-width:1100px;margin:auto;
+      height:100%;padding:18px;
+      display:flex;align-items:flex-end;
+    }
+    .hero-copy{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:9px;
+      max-width:760px;
+      text-shadow:0 2px 12px rgba(0,0,0,.85);
+    }
+    .hero-copy h1{font-size:38px;margin:0 0 8px;color:#fff}
+    .hero-copy p{font-size:19px;margin:0 0 14px}
+    .hero-chip{
+      display:inline-flex;align-items:center;gap:9px;
+      padding:10px 15px;border-radius:999px;
+      background:rgba(120,20,14,.68);
+      border:1px solid rgba(255,130,75,.65);
+      backdrop-filter:blur(8px);
+      font-weight:800;
+    }
+    @media(max-width:700px){
+      .animated-hero{aspect-ratio:16/9}
+      .hero-content{height:100%}
+      .animated-hero .hero-image{object-position:center center}
+      .hero-copy h1{font-size:30px}
+      .hero-copy p{font-size:16px}
+    }
+
+@media(max-width:800px){.layout{grid-template-columns:1fr}.summary{position:static}.sizes{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:520px){.grid2{grid-template-columns:1fr}.brand h1{font-size:28px}}
+    @media print{
+      body{background:#fff}
+      header,.order-form,.actions,footer{display:none!important}
+      .container{padding:0}.layout{display:block}.summary{position:static;border:0;box-shadow:none}
+      .summary h2{color:#000}.card{box-shadow:none;border:0}.print-only{display:block!important}
+    }
+    .print-only{display:none}
+  
+    /* Somente brasas suaves sobre a imagem original */
+    .embers-only{position:absolute;inset:0;pointer-events:none;z-index:3;overflow:hidden}
+    .embers-only i{
+      position:absolute;bottom:-8px;width:4px;height:4px;border-radius:50%;
+      background:#ff7a18;
+      box-shadow:0 0 7px #ff3b00,0 0 13px #ffad32;
+      opacity:0;
+      animation:emberOnly 6s ease-out infinite;
+    }
+    .embers-only i:nth-child(1){left:8%;animation-delay:-1s}
+    .embers-only i:nth-child(2){left:17%;animation-delay:-4.2s;width:3px;height:3px}
+    .embers-only i:nth-child(3){left:29%;animation-delay:-2.4s}
+    .embers-only i:nth-child(4){left:42%;animation-delay:-5.1s;width:3px;height:3px}
+    .embers-only i:nth-child(5){left:54%;animation-delay:-3.3s}
+    .embers-only i:nth-child(6){left:66%;animation-delay:-.7s;width:3px;height:3px}
+    .embers-only i:nth-child(7){left:76%;animation-delay:-4.8s}
+    .embers-only i:nth-child(8){left:87%;animation-delay:-2.1s;width:3px;height:3px}
+    .embers-only i:nth-child(9){left:94%;animation-delay:-5.7s}
+    @keyframes emberOnly{
+      0%{transform:translate3d(0,0,0) scale(.4);opacity:0}
+      12%{opacity:.75}
+      45%{transform:translate3d(8px,-80px,0) scale(.9);opacity:.6}
+      75%{transform:translate3d(-5px,-155px,0) scale(.65);opacity:.3}
+      100%{transform:translate3d(9px,-245px,0) scale(.15);opacity:0}
+    }
+
+
+    /* VISUAL PROFISSIONAL DOS CONTROLES */
+    .card{
+      background:linear-gradient(180deg,#171312,#100d0c);
+      border:1px solid #3a2a24;
+      color:#f7f1ed;
+      box-shadow:0 10px 28px rgba(0,0,0,.22);
+    }
+    .card h2{color:#ff7a2a}
+    label{color:#f6eee9}
+    .info,.price-note,.summary small{color:#bfb4ae}
+    input,select,textarea{
+      background:#161210;
+      color:#fff7f2;
+      border:1px solid #3a2d27;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.015);
+      transition:border-color .25s ease,box-shadow .25s ease,transform .18s ease;
+    }
+    input:focus,select:focus,textarea:focus{
+      outline:none;
+      border-color:#ff6a24;
+      box-shadow:0 0 0 3px rgba(255,106,36,.12),0 0 18px rgba(255,79,20,.12);
+    }
+
+    .choice,.add,.btn,.mini-btn{
+      position:relative;
+      overflow:hidden;
+      isolation:isolate;
+      transition:transform .18s ease,box-shadow .22s ease,filter .22s ease;
+    }
+
+    .choice{
+      background:#171311;
+      color:#e9ded7;
+      border:1px solid #3b2c27;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.015);
+    }
+    .choice::before,
+    .add::before,
+    .whatsapp::before{
+      content:"";
+      position:absolute;
+      inset:-2px;
+      border-radius:inherit;
+      padding:1px;
+      background:conic-gradient(
+        from var(--glow-angle,0deg),
+        transparent 0deg 70deg,
+        rgba(255,83,19,.25) 95deg,
+        rgba(255,168,55,.75) 120deg,
+        rgba(255,65,12,.42) 155deg,
+        transparent 190deg 360deg
+      );
+      -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+      -webkit-mask-composite:xor;
+      mask-composite:exclude;
+      pointer-events:none;
+      z-index:2;
+      animation:borderFlow 7s linear infinite;
+      opacity:.45;
+    }
+    .choice.active::before,
+    .add::before,
+    .whatsapp::before{opacity:.9}
+
+    @property --glow-angle{
+      syntax:"<angle>";
+      initial-value:0deg;
+      inherits:false;
+    }
+    @keyframes borderFlow{
+      to{--glow-angle:360deg}
+    }
+
+    .choice.active{
+      background:linear-gradient(180deg,#28140e,#1b0e0a);
+      color:#ff8a3d;
+      border-color:#ff6523;
+      box-shadow:
+        0 0 0 1px rgba(255,102,35,.2),
+        0 0 16px rgba(255,76,20,.15),
+        inset 0 0 16px rgba(255,78,20,.06);
+    }
+
+    .add{
+      background:linear-gradient(180deg,#e84a18,#b62c0c);
+      color:white;
+      border:1px solid #ff7c34;
+      box-shadow:0 8px 18px rgba(164,42,8,.24);
+    }
+    .whatsapp{
+      background:linear-gradient(180deg,#1ea652,#13783b);
+      color:white;
+      border:1px solid rgba(121,255,168,.35);
+      box-shadow:0 8px 18px rgba(16,119,58,.24);
+    }
+    .print{
+      background:linear-gradient(180deg,#2d2825,#171412);
+      color:#fff;
+      border:1px solid #50423b;
+    }
+    .clear,.mini-btn{
+      background:#211a17;
+      color:#d8c9c2;
+      border:1px solid #3e302a;
+    }
+
+    .choice:active,.add:active,.btn:active,.mini-btn:active{
+      transform:scale(.975);
+      filter:brightness(1.06);
+    }
+
+    @media(hover:hover) and (pointer:fine){
+      .choice:hover,.add:hover,.btn:hover,.mini-btn:hover{
+        transform:translateY(-1px);
+      }
+      .choice:hover{
+        border-color:#7d4a35;
+        box-shadow:0 6px 18px rgba(0,0,0,.18);
+      }
+      .add:hover{filter:brightness(1.06)}
+      .whatsapp:hover{filter:brightness(1.05)}
+    }
+
+    .pizza-item{
+      background:#151110;
+      border:1px solid #382a25;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.012);
+    }
+    .pizza-item strong{color:#ff7d32}
+    .summary-line{color:#f5eee9}
+    .total{color:#ff7a2a;border-top-color:#5a4035}
+
+    @media(prefers-reduced-motion:reduce){
+      .choice::before,.add::before,.whatsapp::before{animation:none}
+    }
+
+
+.theme-toggle{position:fixed;top:14px;right:14px;z-index:10000;border:1px solid #ff7a35;border-radius:999px;padding:10px 14px;background:#171311e8;color:#fff;font-weight:800;cursor:pointer;box-shadow:0 5px 18px #0004}
+body.light-theme{background:#f7f4f1;color:#2b211d}
+body.light-theme .card{background:#fff;color:#2c211d;border-color:#eadbd3;box-shadow:0 10px 26px #47281914}
+body.light-theme .card h2{color:#bd3614}
+body.light-theme label{color:#33251f}
+body.light-theme .info,body.light-theme .price-note,body.light-theme .summary small{color:#76665e}
+body.light-theme input,body.light-theme select,body.light-theme textarea{background:#fff;color:#2c211d;border-color:#dfd0c8}
+body.light-theme .choice{background:#fff;color:#493a33;border-color:#dfd0c8}
+body.light-theme .choice.active{background:#fff1e9;color:#b93613;border-color:#e45a25}
+body.light-theme .pizza-item{background:#fffaf7;border-color:#eadbd3}
+body.light-theme .summary-line{color:#342720}
+body.light-theme .clear,body.light-theme .mini-btn,body.light-theme .print{background:#f1e9e4;color:#3b2c25;border-color:#dfd0c8}
+body.light-theme .total{color:#bd3614;border-top-color:#eadbd3}
+body.light-theme .theme-toggle{background:#fffffff0;color:#382820;border-color:#e6c6b5}
+
+
+    .hero-info-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(12,10,9,.72);
+      border:1px solid rgba(255,135,65,.42);
+      color:#fff;
+      font-size:14px;
+      font-weight:800;
+      backdrop-filter:blur(7px);
+      box-shadow:0 4px 15px rgba(0,0,0,.24);
+    }
+    .hero-rating{border-color:rgba(255,194,55,.55)}
+    @media(max-width:600px){
+      .hero-copy{gap:6px}
+      .hero-info-pill{padding:6px 9px;font-size:11px}
+    }
+
+
+    /* NOVO VISUAL APP — inspirado no modelo enviado */
+    body{
+      background:#050505;
+      color:#f7f4f2;
+      padding-bottom:88px;
+    }
+    .container{max-width:920px;padding:18px 14px 36px}
+    .layout{display:block}
+    .order-form{width:100%}
+    .summary{position:static;margin-top:18px}
+
+    .animated-hero{
+      max-width:1050px;
+      margin:0 auto;
+      border-bottom:0;
+      border-radius:0 0 28px 28px;
+      box-shadow:0 18px 45px rgba(0,0,0,.35);
+    }
+    .animated-hero::after{
+      background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.02) 58%,rgba(0,0,0,.44));
+    }
+    .hero-floating-controls{
+      position:absolute;z-index:9;left:18px;right:18px;top:18px;
+      display:flex;justify-content:space-between;align-items:center;
+      pointer-events:none;
+    }
+    .hero-right-controls{display:flex;gap:10px;align-items:center}
+    .round-control,.delivery-chip{
+      pointer-events:auto;
+      min-height:46px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(12,12,12,.72);
+      color:#fff;
+      backdrop-filter:blur(10px);
+      box-shadow:0 8px 24px rgba(0,0,0,.28);
+    }
+    .round-control{
+      width:48px;height:48px;border-radius:50%;font-size:21px;cursor:pointer;
+      transition:transform .18s ease,box-shadow .22s ease,border-color .22s ease;
+    }
+    .round-control:active{transform:scale(.94)}
+    .delivery-chip{border-radius:999px;padding:0 15px;display:flex;align-items:center;gap:7px;font-size:12px}
+    .cart-control{position:relative}
+    #cartBadge{
+      position:absolute;right:-4px;top:-5px;min-width:20px;height:20px;padding:0 5px;
+      display:flex;align-items:center;justify-content:center;border-radius:999px;
+      background:#ef2f1c;color:#fff;font-size:11px;font-weight:900;
+      border:2px solid #080808;
+    }
+
+    .hero-content{align-items:flex-end;padding:18px 20px}
+    .hero-copy{display:flex!important;width:100%;gap:8px;justify-content:flex-start}
+    .hero-info-pill{
+      background:rgba(8,8,8,.74);
+      border:1px solid rgba(255,255,255,.12);
+      color:#fff;
+      padding:9px 13px;
+      box-shadow:0 8px 20px rgba(0,0,0,.22);
+    }
+    .hero-rating{border-color:rgba(255,142,28,.40)}
+    .hero-copy .hero-info-pill:nth-child(2){display:none}
+
+    .card{
+      background:linear-gradient(180deg,#111,#0a0a0a);
+      border:1px solid #292929;
+      border-radius:26px;
+      padding:22px;
+      margin-bottom:16px;
+      box-shadow:0 16px 35px rgba(0,0,0,.25);
+    }
+    .hero-order-card{padding-top:24px}
+    .section-kicker{
+      color:#ff6b1a;font-size:11px;font-weight:900;letter-spacing:1.6px;margin-bottom:5px;
+    }
+    .hero-order-card h2{
+      text-align:center;font-size:34px;color:#fff;margin:0 0 2px;font-weight:900;
+    }
+    .hero-order-card h2 span{color:#ff6417}
+    .section-subtitle{text-align:center;color:#9d9692;margin:0 0 20px;font-size:16px}
+    .hero-order-card>label:first-of-type{display:none}
+
+    .sizes{
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-bottom:18px;
+    }
+    .sizes .choice{
+      min-height:150px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+      border-radius:20px;background:#111;border:1px solid #303030;color:#fff;
+      box-shadow:inset 0 0 18px rgba(255,255,255,.012);
+    }
+    .sizes .choice .pizza-icon{
+      width:52px;height:52px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:38px;line-height:1;
+      filter:drop-shadow(0 0 8px rgba(255,93,24,.28));
+    }
+    .sizes .choice b{font-size:22px}
+    .sizes .choice small{font-size:12px;color:#aaa;font-weight:600}
+    .sizes .choice.active{
+      background:linear-gradient(180deg,#18120f,#0e0c0b);
+      border-color:#ff611d;
+      color:#fff;
+      box-shadow:0 0 0 1px #ff611d,0 0 24px rgba(255,84,18,.28),inset 0 0 20px rgba(255,91,20,.06);
+    }
+
+    .hero-order-card>label:nth-of-type(2){display:none}
+    #modes{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin:10px 0 18px;
+    }
+    #modes .choice{
+      min-height:84px;border-radius:19px;padding:12px 16px;
+      display:grid;grid-template-columns:52px 1fr 22px;align-items:center;text-align:left;
+      background:#121212;border:1px solid #2c2c2c;color:#fff;
+    }
+    #modes .choice .mode-icon{
+      width:44px;height:44px;border-radius:14px;background:#090909;
+      display:flex;align-items:center;justify-content:center;color:#ff671c;font-size:22px;
+      border:1px solid #2b2b2b;
+    }
+    #modes .choice span:nth-child(2){display:flex;flex-direction:column;gap:4px}
+    #modes .choice b{font-size:18px}
+    #modes .choice small{font-size:13px;color:#aaa;font-weight:500}
+    #modes .choice em{font-size:34px;font-style:normal;font-weight:300;color:#fff;text-align:right}
+    #modes .choice.active{
+      background:linear-gradient(100deg,#ef4c0d,#d5260d);
+      border-color:#ff6d27;
+      box-shadow:0 10px 24px rgba(196,47,12,.24);
+    }
+    #modes .choice.active small{color:#ffe5da}
+
+    input,select,textarea{
+      background:#121212;color:#fff;border:1px solid #333;border-radius:14px;
+      min-height:50px;
+    }
+    input:focus,select:focus,textarea:focus{
+      border-color:#ff6420;box-shadow:0 0 0 3px rgba(255,100,32,.10);outline:none;
+    }
+    label{color:#e9e4e1}
+    .info,.price-note{color:#9f9793}
+
+    .add{
+      min-height:56px;border-radius:16px;
+      background:linear-gradient(100deg,#ff5d0b,#e3270b);
+      border:1px solid #ff7a35;
+      box-shadow:0 10px 24px rgba(210,55,9,.18);
+      letter-spacing:.1px;
+    }
+    .btn{border-radius:16px}
+    .whatsapp{background:linear-gradient(100deg,#1ea452,#11753b)}
+    .print{background:#181818;border:1px solid #373737}
+    .clear,.mini-btn{background:#191919;color:#e3d9d4;border:1px solid #303030}
+    .pizza-item{background:#101010;border-color:#2b2b2b}
+    .pizza-item strong{color:#ff6d28}
+    .summary-line{color:#f1ece9}
+    .total{color:#ff681e;border-top-color:#343434}
+
+    .bottom-app-nav{
+      position:fixed;z-index:9000;left:50%;bottom:10px;transform:translateX(-50%);
+      width:min(calc(100% - 22px),850px);
+      min-height:70px;padding:7px 10px;
+      display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+      background:rgba(8,8,8,.92);
+      border:1px solid #252525;border-radius:24px;
+      backdrop-filter:blur(14px);
+      box-shadow:0 12px 35px rgba(0,0,0,.45);
+    }
+    .nav-item{
+      border:0;background:transparent;color:#8e8e8e;border-radius:16px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+      font-size:11px;cursor:pointer;
+    }
+    .nav-item span{font-size:25px;line-height:1}
+    .nav-item b{font-size:11px}
+    .nav-item.active{color:#ff741e;text-shadow:0 0 12px rgba(255,95,18,.30)}
+    .nav-item:active{transform:scale(.96)}
+
+    .theme-toggle{
+      top:76px;right:16px;padding:8px 11px;font-size:11px;
+      background:rgba(10,10,10,.80);border-color:#343434;
+    }
+
+    footer{color:#777;padding-bottom:90px}
+    body.light-theme{
+      background:#f4f1ee;color:#271f1b;
+    }
+    body.light-theme .card{background:#fff;border-color:#eaded7;color:#2c221d}
+    body.light-theme .hero-order-card h2{color:#241b17}
+    body.light-theme .sizes .choice{background:#fff;color:#2a201b;border-color:#e2d5cf}
+    body.light-theme #modes .choice{background:#fff;color:#2a201b;border-color:#e2d5cf}
+    body.light-theme input,body.light-theme select,body.light-theme textarea{background:#fff;color:#2a201b;border-color:#ded1ca}
+    body.light-theme label{color:#2d231e}
+    body.light-theme .pizza-item{background:#fffaf7;border-color:#e5d9d2}
+    body.light-theme .summary-line{color:#30251f}
+
+    @media(max-width:620px){
+      .animated-hero{border-radius:0 0 20px 20px}
+      .hero-floating-controls{left:10px;right:10px;top:10px}
+      .round-control{width:40px;height:40px;min-height:40px;font-size:17px}
+      .delivery-chip{min-height:40px;padding:0 10px;font-size:9px}
+      .hero-content{padding:10px}
+      .hero-copy{gap:5px}
+      .hero-info-pill{font-size:9px!important;padding:6px 8px!important}
+      .container{padding:12px 10px 26px}
+      .card{border-radius:20px;padding:17px}
+      .hero-order-card h2{font-size:28px}
+      .sizes{gap:7px}
+      .sizes .choice{min-height:116px;border-radius:16px;padding:8px 3px}
+      .sizes .choice .pizza-icon{width:42px;height:42px;font-size:31px}
+      .sizes .choice b{font-size:18px}
+      .sizes .choice small{font-size:9px}
+      .bottom-app-nav{bottom:7px;width:calc(100% - 14px);border-radius:20px;min-height:64px}
+    }
+
+
+    /* Pizza inteira proporcional ao tamanho P / M / G / GG */
+    .sizes .choice .whole-pizza{
+      position:relative;
+      width:var(--pizza-size);
+      height:var(--pizza-size);
+      flex:0 0 var(--pizza-size);
+      border-radius:50%;
+      display:block;
+      background:
+        radial-gradient(circle at 34% 31%,#d9341e 0 8%,transparent 9%),
+        radial-gradient(circle at 67% 34%,#d9341e 0 8%,transparent 9%),
+        radial-gradient(circle at 39% 68%,#d9341e 0 8%,transparent 9%),
+        radial-gradient(circle at 69% 66%,#d9341e 0 8%,transparent 9%),
+        radial-gradient(circle at 51% 49%,#f5c95e 0 55%,#dc8b24 57% 72%,#9b5017 74% 100%);
+      border:2px solid #ff8a2b;
+      box-shadow:0 3px 8px rgba(0,0,0,.38),0 0 10px rgba(255,92,18,.12);
+      transition:transform .2s ease,filter .2s ease,box-shadow .2s ease;
+    }
+    .sizes .choice[data-size="P"]{--pizza-size:34px}
+    .sizes .choice[data-size="M"]{--pizza-size:42px}
+    .sizes .choice[data-size="G"]{--pizza-size:51px}
+    .sizes .choice[data-size="GG"]{--pizza-size:61px}
+
+    .sizes .choice .whole-pizza::before,
+    .sizes .choice .whole-pizza::after,
+    .sizes .choice .whole-pizza i{
+      content:"";
+      position:absolute;
+      left:50%;top:50%;
+      width:2px;height:92%;
+      background:rgba(117,58,15,.42);
+      transform:translate(-50%,-50%);
+      border-radius:999px;
+    }
+    .sizes .choice .whole-pizza::after{transform:translate(-50%,-50%) rotate(90deg)}
+    .sizes .choice .whole-pizza i:nth-child(1){transform:translate(-50%,-50%) rotate(45deg)}
+    .sizes .choice .whole-pizza i:nth-child(2){transform:translate(-50%,-50%) rotate(-45deg)}
+    .sizes .choice .whole-pizza i:nth-child(3),
+    .sizes .choice .whole-pizza i:nth-child(4){display:none}
+
+    .sizes .choice.active .whole-pizza{
+      transform:scale(1.04);
+      filter:brightness(1.08);
+      box-shadow:0 4px 10px rgba(0,0,0,.38),0 0 16px rgba(255,91,20,.48);
+    }
+
+    @media(max-width:620px){
+      .sizes .choice[data-size="P"]{--pizza-size:28px}
+      .sizes .choice[data-size="M"]{--pizza-size:34px}
+      .sizes .choice[data-size="G"]{--pizza-size:41px}
+      .sizes .choice[data-size="GG"]{--pizza-size:49px}
+    }
+
+
+    .install-client-btn{
+      pointer-events:auto;
+      min-height:42px;
+      border:1px solid rgba(255,111,37,.65);
+      border-radius:999px;
+      padding:0 13px;
+      background:linear-gradient(100deg,rgba(255,91,17,.95),rgba(213,42,8,.95));
+      color:#fff;
+      font-size:11px;
+      font-weight:900;
+      box-shadow:0 8px 22px rgba(181,48,9,.28);
+      backdrop-filter:blur(8px);
+      cursor:pointer;
+      transition:transform .18s ease,filter .18s ease;
+      white-space:nowrap;
+    }
+    .install-client-btn:active{transform:scale(.96)}
+    .install-client-btn.installed{
+      background:rgba(15,15,15,.78);
+      border-color:#333;
+      color:#aaa;
+      box-shadow:none;
+    }
+    .standalone-install{position:absolute;z-index:10;right:12px;top:12px}
+    @media(max-width:620px){
+      .install-client-btn{min-height:38px;padding:0 9px;font-size:9px}
+    }
+
+
+    .tracking-card{
+      margin:0 0 16px;
+      padding:16px;
+      border-radius:18px;
+      background:linear-gradient(145deg,#171310,#0d0d0d);
+      border:1px solid #3b2b23;
+      box-shadow:0 10px 26px rgba(0,0,0,.22);
+    }
+    .tracking-card.hidden{display:none}
+    .tracking-top{display:flex;align-items:center;gap:12px}
+    .tracking-icon{
+      width:48px;height:48px;border-radius:15px;
+      display:flex;align-items:center;justify-content:center;
+      background:#24140d;border:1px solid #5c2d18;font-size:25px;
+    }
+    .tracking-top small{display:block;color:#ff7a31;font-size:9px;font-weight:900;letter-spacing:1.3px;margin-bottom:3px}
+    .tracking-top strong{display:block;color:#fff;font-size:17px}
+    .tracking-card p{color:#aaa19c;font-size:13px;line-height:1.45;margin:10px 0 13px}
+    .tracking-progress{display:flex;align-items:center;padding:0 6px}
+    .track-step{width:14px;height:14px;border-radius:50%;background:#36312e;border:2px solid #554943;flex:none}
+    .track-step.active{background:#ff651d;border-color:#ff9a5c;box-shadow:0 0 12px rgba(255,101,29,.5)}
+    .track-line{height:3px;flex:1;background:#36312e}
+    .tracking-card.delivering .track-line{background:linear-gradient(90deg,#ff651d,#ff8f42)}
+    .tracking-card.delivering #trackDelivery{background:#22a75a;border-color:#7ae8a4;box-shadow:0 0 12px rgba(34,167,90,.45)}
+    .tracking-labels{display:flex;justify-content:space-between;gap:12px;color:#8f8884;font-size:9px;margin-top:6px}
+    .tracking-labels span:last-child{text-align:right}
+    .tracking-number{margin-top:10px;color:#6f6864;font-size:11px}
+    body.light-theme .tracking-card{background:#fff8f3;border-color:#ead8cf}
+    body.light-theme .tracking-top strong{color:#2c211c}
+    body.light-theme .tracking-card p{color:#75665f}
+
+
+    .notify-btn{
+      width:100%;min-height:46px;margin-top:12px;border:1px solid #ff7a35;border-radius:14px;
+      background:linear-gradient(100deg,#ff621a,#dc360d);color:#fff;font-weight:900;cursor:pointer;
+      box-shadow:0 8px 20px rgba(197,52,10,.20)
+    }
+    .notify-btn.enabled{background:#15371f;border-color:#2e7042;color:#9be3b5}
+    .notify-note{font-size:10px;color:#8f8782;line-height:1.4;margin-top:7px;text-align:center}
+    body.light-theme .notify-note{color:#786c66}
+
+
+  .notify-reminder{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px}
+  .notify-reminder.hidden{display:none}
+  .notify-reminder-box{width:min(430px,100%);background:#171717;border:1px solid rgba(255,145,0,.35);border-radius:22px;padding:24px;text-align:center;box-shadow:0 22px 70px rgba(0,0,0,.55)}
+  .notify-reminder-icon{font-size:46px;margin-bottom:8px}
+  .notify-reminder-box h3{margin:0 0 9px;font-size:22px}
+  .notify-reminder-box p{margin:0 0 18px;color:#ccc;line-height:1.45}
+  .notify-reminder-actions{display:grid;gap:10px}
+  .notify-reminder-actions button{border:0;border-radius:14px;padding:14px 16px;font-weight:800;font-size:15px;cursor:pointer}
+  .notify-reminder-on{background:linear-gradient(135deg,#ff9d00,#ff5a00);color:#15100a}
+  .notify-reminder-later{background:#2a2a2a;color:#eee}
+
+
+/* ===== VISUAL PREMIUM DOS 3 CARDÁPIOS ===== */
+.menu-glow{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  border:1px solid rgba(255,119,38,.88)!important;
+  background:
+    radial-gradient(circle at 12% 8%,rgba(255,122,35,.075),transparent 26%),
+    radial-gradient(circle at 88% 78%,rgba(255,92,18,.06),transparent 30%),
+    linear-gradient(180deg,#16100d 0%,#0d0b0a 100%)!important;
+  box-shadow:
+    0 0 7px rgba(255,127,42,.62),
+    0 0 18px rgba(255,85,12,.28),
+    0 0 34px rgba(255,72,5,.10),
+    inset 0 0 18px rgba(255,113,27,.045)!important;
+}
+.menu-glow::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  opacity:.17;
+  background-size:210px 210px;
+  background-repeat:repeat;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='210' height='210' viewBox='0 0 210 210'%3E%3Cg fill='none' stroke='%23e66a20' stroke-width='1.35' opacity='.95'%3E%3Cpath d='M18 39l55-21-12 58zM20 39l41 37M37 34c6 4 11 2 15-3M51 53c6 4 11 2 15-3'/%3E%3Ccircle cx='155' cy='46' r='20'/%3E%3Cpath d='M155 26c5-9 13-10 19-5M143 46c8-5 18-5 25 0M111 126c14-13 35-13 49 0M116 130h39l-6 34h-27zM125 122c-5-10 5-19 14-16M144 121c4-9-3-18-11-16'/%3E%3Cpath d='M27 139c13-20 30-23 48-10-13 21-30 24-48 10zM42 138c8-2 16-7 24-13'/%3E%3C/g%3E%3C/svg%3E");
+}
+.menu-glow::after{
+  content:"";
+  position:absolute;
+  inset:3px;
+  border-radius:inherit;
+  z-index:5;
+  pointer-events:none;
+  border:1px solid rgba(255,178,99,.20);
+  box-shadow:
+    inset 0 0 8px rgba(255,135,47,.10),
+    0 0 10px rgba(255,114,29,.10);
+}
+.menu-glow h2{
+  position:relative;
+  z-index:1;
+  text-shadow:0 0 10px rgba(255,101,20,.42),0 0 22px rgba(255,78,8,.18);
+}
+.menu-glow input,.menu-glow select,.menu-glow textarea,.menu-glow .choice{
+  position:relative;
+  z-index:2;
+  border-color:rgba(255,113,35,.48)!important;
+  box-shadow:0 0 7px rgba(255,82,10,.10),inset 0 0 0 1px rgba(255,255,255,.01)!important;
+}
+.menu-glow .add{
+  position:relative;
+  z-index:2;
+  box-shadow:0 0 12px rgba(255,87,16,.25),0 8px 18px rgba(164,42,8,.24)!important;
+}
+/* pontinhos de brilho bem discretos nos cantos */
+.menu-pizza{--menu-icon:"🍕"}
+.menu-sweet{--menu-icon:"🍫"}
+.menu-drinks{--menu-icon:"🥤"}
+.menu-glow > h2::after{
+  content:var(--menu-icon);
+  float:right;
+  opacity:.16;
+  filter:grayscale(.2);
+  font-size:1.2em;
+}
+body.light-theme .menu-glow{
+  background:linear-gradient(180deg,#fffaf6,#fff)!important;
+  border-color:#e66e31!important;
+  box-shadow:0 0 8px rgba(225,91,25,.22),0 10px 26px #47281914!important;
+}
+/* ===== FIM VISUAL PREMIUM ===== */
+
+/* === CARDAPIO CUSTOMIZADO: listas com fundo desenhado + neon === */
+select.kim-native-hidden{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;min-height:1px!important;padding:0!important;border:0!important}
+.kim-select{position:relative;z-index:20;width:100%}
+.kim-select-btn{width:100%;min-height:50px;padding:12px 44px 12px 14px;border:1px solid rgba(255,113,35,.58);border-radius:12px;background:#0d0c0b;color:#f7ece7;text-align:left;font-size:16px;position:relative;box-shadow:0 0 8px rgba(255,91,12,.13)}
+.kim-select-btn:after{content:'⌄';position:absolute;right:15px;top:50%;transform:translateY(-55%);color:#ff7626;font-size:22px}
+.kim-select-panel{display:none;position:fixed;left:20px;right:20px;top:9vh;max-height:82vh;overflow:auto;z-index:99999;border-radius:26px;border:1.5px solid #ff792c;background:linear-gradient(rgba(18,11,7,.95),rgba(10,8,7,.98));box-shadow:0 0 9px #ff8b42,0 0 25px rgba(255,94,15,.48),inset 0 0 20px rgba(255,103,23,.08);overscroll-behavior:contain}
+.kim-select-panel:before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.16;background-size:220px 220px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cg fill='none' stroke='%23ef7025' stroke-width='1.3'%3E%3Cpath d='M18 40l60-22-14 62zM22 40l42 40M36 34c7 5 12 2 16-3M51 55c7 4 12 2 16-3'/%3E%3Ccircle cx='165' cy='48' r='22'/%3E%3Cpath d='M165 26c5-10 14-11 20-5M150 48c10-6 20-6 29 0M118 145c16-15 38-15 54 0M124 150h42l-7 38h-28zM30 150c14-22 32-25 52-11-14 23-33 26-52 11z'/%3E%3C/g%3E%3C/svg%3E")}
+.kim-select-panel.open{display:block}
+.kim-option{position:relative;z-index:1;display:flex;align-items:center;gap:12px;width:100%;min-height:68px;padding:15px 18px;border:0;border-bottom:1px solid rgba(255,184,145,.18);background:transparent;color:#f8ebe5;text-align:left;font-size:18px}
+.kim-option:last-child{border-bottom:0}.kim-option span:first-child{flex:1}.kim-radio{width:25px;height:25px;border:3px solid #ead8cf;border-radius:50%;flex:0 0 25px;box-sizing:border-box}.kim-option.selected .kim-radio{border-color:#ff9a69;box-shadow:0 0 8px rgba(255,105,35,.5);position:relative}.kim-option.selected .kim-radio:after{content:'';position:absolute;inset:4px;border-radius:50%;background:#ff7b32}.kim-option.selected{color:#fff}.kim-select-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:99998}.kim-select-backdrop.open{display:block}
+body.light-theme .kim-select-btn{background:#fff;color:#2c211d}.kim-select-panel{color-scheme:dark}
+
+
+
+/* ===== PIX + EFEITO DE TAMANHO ===== */
+.pix-payment-box{display:none;margin-top:14px;padding:16px;border-radius:16px;border:1px solid rgba(255,117,40,.72);background:linear-gradient(145deg,rgba(31,18,11,.98),rgba(12,10,9,.99));box-shadow:0 0 10px rgba(255,102,24,.22),inset 0 0 14px rgba(255,116,34,.05)}
+.pix-payment-box.show{display:block;animation:pixOpen .24s ease-out}
+@keyframes pixOpen{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.pix-payment-box h3{margin:0 0 7px;color:#ff7626;font-size:19px}
+.pix-payment-box p{margin:5px 0 10px;color:#bbb;line-height:1.45}
+.pix-key-row{display:flex;align-items:center;gap:8px;padding:10px 11px;background:#0a0908;border:1px solid #4c2a1b;border-radius:12px}
+.pix-key-row code{flex:1;overflow-wrap:anywhere;color:#fff;font-size:15px}
+.pix-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pix-action{border:1px solid #ff6f24;background:#1a0e08;color:#fff;border-radius:11px;min-height:44px;font-weight:800;cursor:pointer}
+.pix-action.primary{background:linear-gradient(135deg,#ef5b10,#c82d10);border:0}
+.pix-qr-wrap{text-align:center;margin-top:13px}
+.pix-qr-wrap img{width:210px;max-width:78%;aspect-ratio:1/1;background:#fff;padding:9px;border-radius:14px;box-shadow:0 0 16px rgba(255,117,40,.30)}
+.pix-total-note{font-size:13px!important;color:#e7c5b4!important}
+.pix-copy-status{min-height:18px;font-size:12px;color:#8fdf98;margin-top:7px}
+.sizes .choice{overflow:visible}
+.sizes .choice.active{transform:translateY(-3px) scale(1.035);border-color:#ff782b!important;box-shadow:0 0 0 2px rgba(255,120,43,.18),0 0 18px rgba(255,90,14,.48)!important}
+.sizes .choice.active::after{content:"✓ Selecionado";position:absolute;top:6px;right:7px;background:#ff6f23;color:#fff;border-radius:999px;padding:3px 6px;font-size:8px;font-weight:900;box-shadow:0 0 8px rgba(255,111,35,.55)}
+.sizes .choice.size-click-effect{animation:sizeChoicePop .34s ease}
+@keyframes sizeChoicePop{0%{transform:scale(1)}45%{transform:scale(1.09)}100%{transform:translateY(-3px) scale(1.035)}}
+body.light-theme .pix-payment-box{background:#fff8f3}
+body.light-theme .pix-key-row{background:#fff;color:#2b211c}
+body.light-theme .pix-key-row code{color:#2b211c}
+@media(max-width:520px){.pix-actions{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<button id="themeToggle" class="theme-toggle" type="button">☀️ Claro</button>
+<div id="firstTutorial" class="tutorial-overlay hidden" aria-modal="true" role="dialog">
+  <div class="tutorial-card">
+    <div class="tutorial-step active">
+      <div class="tutorial-icon">🍕</div>
+      <h2>Bem-vindo à Pizza do Kim!</h2>
+      <p>Esse tutorial rápido vai mostrar como fazer seu pedido. Ele aparece apenas na primeira vez que você entra.</p>
+    </div>
+    <div class="tutorial-step">
+      <div class="tutorial-icon">📏</div>
+      <h2>1. Monte sua pizza</h2>
+      <p>Escolha o tamanho P, M, G ou GG, depois escolha 1 sabor ou meio a meio. Você também pode escolher borda de Catupiry ou Cheddar.</p>
+    </div>
+    <div class="tutorial-step">
+      <div class="tutorial-icon">🥤</div>
+      <h2>2. Adicione outros itens</h2>
+      <p>Se quiser, adicione pizza doce e bebidas. Depois confira todos os itens no resumo do pedido.</p>
+    </div>
+    <div class="tutorial-step">
+      <div class="tutorial-icon">📍</div>
+      <h2>3. Informe a entrega</h2>
+      <p>Escolha obrigatoriamente o local da entrega. Os locais cadastrados têm a taxa mostrada no pedido. Se escolher “Outro”, digite o nome do lugar.</p>
+    </div>
+    <div class="tutorial-step">
+      <div class="tutorial-icon">💳</div>
+      <h2>4. Pagamento e envio</h2>
+      <p>Preencha seus dados, escolha a forma de pagamento, confira o total e envie o pedido. O pedido chega direto para a pizzaria.</p>
+    </div>
+
+    <div class="tutorial-progress">
+      <span class="tutorial-dot active"></span><span class="tutorial-dot"></span><span class="tutorial-dot"></span><span class="tutorial-dot"></span><span class="tutorial-dot"></span>
+    </div>
+    <div class="tutorial-actions">
+      <button type="button" id="tutorialSkip" class="tutorial-skip">Pular</button>
+      <button type="button" id="tutorialNext" class="tutorial-next">Próximo</button>
+    </div>
+  </div>
+</div>
+<section class="animated-hero">
+  <div class="hero-floating-controls">
+    <button class="round-control" id="menuScrollBtn" type="button" aria-label="Ir para cardápio">☰</button>
+    <div class="hero-right-controls">
+      <button class="install-client-btn" id="installClientApp" type="button">📲 Instalar app</button>
+      <span class="delivery-chip">🛵 <b>SOMENTE DELIVERY</b></span>
+      <button class="round-control cart-control" id="cartScrollBtn" type="button" aria-label="Ver pedido">🛒<span id="cartBadge">0</span></button>
+    </div>
+  </div>
+  <img class="hero-image" src="hero-pizza-do-kim.png" alt="Pizza do Kim">
+  <div class="embers-only" aria-hidden="true">
+    <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+  </div>
+
+<div class="hero-content">
+    <div class="hero-copy">
+      <span class="hero-info-pill">📍 São José do Jacuri - MG</span>
+      <span class="hero-info-pill">🛵 Somente Delivery</span>
+      <span class="hero-info-pill hero-rating">⭐ 5,0 no Google</span>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <div class="layout">
+    <main class="order-form" id="inicio">
+      <section class="card hero-order-card menu-glow menu-pizza">
+        <div class="section-kicker">MONTE DO SEU JEITO</div>
+        <h2>Monte sua <span>pizza</span></h2>
+        <p class="section-subtitle">Escolha o tamanho</p>
+
+        <label>Tamanho</label>
+        <div class="sizes" id="sizes">
+          <button type="button" class="choice active" data-size="P"><span class="pizza-icon whole-pizza"><i></i><i></i><i></i><i></i></span><b>P</b><small>Pequena</small></button>
+          <button type="button" class="choice" data-size="M"><span class="pizza-icon whole-pizza"><i></i><i></i><i></i><i></i></span><b>M</b><small>Média</small></button>
+          <button type="button" class="choice" data-size="G"><span class="pizza-icon whole-pizza"><i></i><i></i><i></i><i></i></span><b>G</b><small>Grande</small></button>
+          <button type="button" class="choice" data-size="GG"><span class="pizza-icon whole-pizza"><i></i><i></i><i></i><i></i></span><b>GG</b><small>Gigante</small></button>
+        </div>
+
+        <label>Como deseja?</label>
+        <div class="modes" id="modes">
+          <button type="button" class="choice active" data-mode="inteira"><span class="mode-icon">🍕</span><span><b>1 sabor</b><small>Escolha um sabor</small></span><em>›</em></button>
+          <button type="button" class="choice" data-mode="meio"><span class="mode-icon">◐</span><span><b>Meio a meio</b><small>Escolha dois sabores</small></span><em>›</em></button>
+        </div>
+
+        <div class="grid2">
+          <div>
+            <label for="flavor1">Sabor 1</label>
+            <select id="flavor1"></select>
+            <div class="price-note" id="desc1"></div>
+          </div>
+          <div id="secondFlavorWrap" class="hidden">
+            <label for="flavor2">Sabor 2</label>
+            <select id="flavor2"></select>
+            <div class="price-note" id="desc2"></div>
+          </div>
+        </div>
+
+        <label>Borda da pizza</label>
+        <div class="modes" id="crustModes">
+          <button type="button" class="choice active" data-crust="Sem borda">Sem borda</button>
+          <button type="button" class="choice" data-crust="Com borda">Com borda</button>
+        </div>
+
+        <div id="crustFlavorWrap" class="hidden">
+          <label for="crustFlavor">Sabor da borda</label>
+          <select id="crustFlavor">
+            <option>Catupiry</option>
+            <option>Cheddar</option>
+          </select>
+          <div class="price-note">Acréscimo de R$ 7,00 para borda de Catupiry ou Cheddar.</div>
+        </div>
+
+        <label for="obsPizza">Observação da pizza</label>
+        <textarea id="obsPizza" placeholder="Ex.: sem cebola, massa bem assada..."></textarea>
+
+        <div class="grid2">
+          <div>
+            <label for="qty">Quantidade</label>
+            <input id="qty" type="number" value="1" min="1" max="20">
+          </div>
+          <div>
+            <label for="pizzaPrice">Preço calculado</label>
+            <input id="pizzaPrice" readonly>
+          </div>
+        </div>
+
+        <div class="price-note">Na pizza meio a meio, o sistema usa o maior preço entre os dois sabores no tamanho escolhido.</div>
+        <button class="add" id="addPizza" type="button">+ Adicionar pizza ao pedido</button>
+      </section>
+
+      <section class="card menu-glow menu-sweet">
+        <h2>2. Pizzas doces</h2>
+        <p class="info">Escolha o sabor e o tamanho.</p>
+        <div class="grid2">
+          <div>
+            <label for="sweetFlavor">Sabor</label>
+            <select id="sweetFlavor">
+              <option value="Banana com canela">Banana com canela — mussarela, banana, canela e doce de leite</option>
+              <option value="Dois amores">Dois amores — chocolate branco e chocolate preto</option>
+            </select>
+          </div>
+          <div>
+            <label for="sweetSize">Tamanho</label>
+            <select id="sweetSize">
+              <option value="P">P — R$ 35,00</option>
+              <option value="M">M — R$ 42,00</option>
+            </select>
+          </div>
+        </div>
+        <label for="sweetQty">Quantidade</label>
+        <input id="sweetQty" type="number" value="1" min="1" max="20">
+        <button class="add" id="addSweet" type="button">+ Adicionar pizza doce</button>
+      </section>
+
+      <section class="card menu-glow menu-drinks">
+        <h2>3. Bebidas</h2>
+        <div class="grid2">
+          <div>
+            <label for="drink">Bebida</label>
+            <select id="drink">
+              <option value="Coca-Cola 2L">Coca-Cola 2L — R$ 14,00</option>
+              <option value="Guaraná 2L">Guaraná 2L — R$ 10,00</option>
+              <option value="Sukita laranja 2L">Sukita laranja 2L — R$ 10,00</option>
+              <option value="Coca lata">Coca lata — R$ 5,00</option>
+              <option value="Guaraná 1L">Guaraná 1L — R$ 6,50</option>
+              <option value="Kuat">Kuat — R$ 8,00</option>
+            </select>
+          </div>
+          <div>
+            <label for="drinkQty">Quantidade</label>
+            <input id="drinkQty" type="number" value="1" min="1" max="20">
+          </div>
+        </div>
+        <button class="add" id="addDrink" type="button">+ Adicionar bebida</button>
+      </section>
+
+      <section class="card">
+        <h2>4. Dados para entrega</h2>
+        <div class="grid2">
+          <div><label for="name">Nome</label><input id="name" placeholder="Nome do cliente"></div>
+          <div><label for="phone">Telefone</label><input id="phone" placeholder="(33) 99999-9999"></div>
+        </div>
+        <label for="deliveryPlace">Local da entrega *</label>
+<select id="deliveryPlace" required>
+  <option value="" selected disabled>Selecione o local</option>
+
+  <option value="Piteira Jacuri">Piteira Jacuri</option>
+  <option value="Bairro Santo Expedito Jacuri">Bairro Santo Expedito Jacuri</option>
+  <option value="Bairro Novo Progresso Jacuri">Bairro Novo Progresso Jacuri</option>
+  <option value="Bairro Santa Edvingen Jacuri">Bairro Santa Edvingen Jacuri</option>
+  <option value="Bairro do Cleber Jacuri">Bairro do Cleber Jacuri</option>
+  <option value="Rua Nova Jacuri">Rua Nova Jacuri</option>
+  <option value="Rua Assunção Jacuri">Rua Assunção Jacuri</option>
+  <option value="Rua São Pedro Jacuri">Rua São Pedro Jacuri</option>
+  <option value="Avenida São João Jacuri">Avenida São João Jacuri</option>
+  <option value="Rua Vai e Volta Jacuri">Rua Vai e Volta Jacuri</option>
+  <option value="Centro Jacuri">Centro Jacuri</option>
+
+  <option value="Fonseca">Fonseca</option>
+  <option value="Jatobá">Jatobá</option>
+  <option value="Boa Vista">Boa Vista</option>
+  <option value="Santa Cruz Cristaulat">Santa Cruz Cristaulat</option>
+  <option value="Guaches">Guaches</option>
+  <option value="Bom Jardim">Bom Jardim</option>
+  <option value="Córrego das Flores">Córrego das Flores</option>
+
+  <option value="Outro">Outro</option>
+</select>
+<div id="otherPlaceWrap" class="hidden">
+<label for="otherPlace">Digite o nome do lugar *</label>
+<input id="otherPlace" placeholder="Nome do bairro, comunidade ou local">
+</div>
+<label for="address">Endereço de entrega</label>
+        <input id="address" placeholder="Rua, número, bairro">
+        <div class="grid2">
+          <div><label for="reference">Referência</label><input id="reference" placeholder="Ex.: perto da praça"></div>
+          <div>
+            <label for="payment">Pagamento</label>
+            <select id="payment">
+              <option>Dinheiro</option>
+              <option>Pix</option>
+              <option>Cartão na entrega</option>
+            </select>
+          </div>
+        </div>
+        <div id="pixPaymentBox" class="pix-payment-box" aria-live="polite">
+          <h3>💠 Pagamento via Pix</h3>
+          <p>Use a chave abaixo ou escaneie o QR Code. O QR acompanha o total atual do pedido.</p>
+          <div class="pix-key-row"><span>Chave:</span><code id="pixKeyText">(33) 99847-1303</code></div>
+          <div class="pix-actions">
+            <button type="button" class="pix-action primary" id="copyPixKey">📋 Copiar chave Pix</button>
+            <button type="button" class="pix-action" id="copyPixCode">📲 Copiar Pix copia e cola</button>
+          </div>
+          <div class="pix-qr-wrap"><img id="pixQrImage" alt="QR Code Pix Pizza do Kim"></div>
+          <p class="pix-total-note" id="pixTotalNote"></p>
+          <div class="pix-copy-status" id="pixCopyStatus"></div>
+        </div>
+        <label for="change">Troco para</label>
+        <input id="change" placeholder="Ex.: R$ 100,00">
+      </section>
+    </main>
+
+    <aside class="card summary" id="receipt">
+      <div class="print-only">
+        <h2 style="margin-bottom:3px">Pizza do Kim</h2>
+        <div class="info">Somente Delivery<br>R. São Pedro, São José do Jacuri - MG<br>(33) 99847-1303</div>
+        <hr>
+      </div>
+      <h2>Seu pedido</h2>
+      <div id="orderTracking" class="tracking-card hidden" aria-live="polite">
+        <div class="tracking-top">
+          <span class="tracking-icon" id="trackingIcon">🍕</span>
+          <div>
+            <small>ACOMPANHAMENTO</small>
+            <strong id="trackingTitle">Pedido recebido</strong>
+          </div>
+        </div>
+        <p id="trackingText">A pizzaria recebeu seu pedido.</p>
+        <div class="tracking-progress">
+          <span class="track-step active" id="trackReceived"></span>
+          <span class="track-line"></span>
+          <span class="track-step" id="trackDelivery"></span>
+        </div>
+        <div class="tracking-labels">
+          <span>Recebido</span>
+          <span>Saindo para entrega</span>
+        </div>
+        <div class="tracking-number" id="trackingNumber"></div>
+        <button type="button" class="notify-btn" id="enableNotifications">🔔 Ativar notificações</button>
+        <div class="notify-note" id="notifyNote">Ative uma vez para receber “Sua pizza saiu para entrega” mesmo com o app fechado.</div>
+      </div>
+
+      <div id="items"><div class="empty">Nenhuma pizza adicionada ainda.</div></div>
+
+      <div class="summary-line"><span>Subtotal</span><strong id="subtotal">R$ 0,00</strong></div>
+      <div class="summary-line" id="deliveryRow"><span>Taxa de entrega</span><strong id="delivery">R$ 0,00</strong></div>
+      <div class="summary-line total"><span>Total</span><span id="total">R$ 0,00</span></div>
+
+      <div id="customerSummary" class="info" style="margin-top:18px"></div>
+
+      <div class="actions">
+        <button class="btn print" id="printBtn" type="button">🖨️ Imprimir notinha</button>
+        <button class="btn whatsapp" id="whatsappBtn" type="button">✅ Enviar pedido para a pizzaria</button>
+        <button class="btn clear" id="clearBtn" type="button">Limpar pedido</button>
+      </div>
+
+      <p class="info" style="margin-top:15px">
+        Pizza do Kim • Somente Delivery<br>
+        R. São Pedro, São José do Jacuri - MG<br>
+        (33) 99847-1303
+      </p>
+    </aside>
+  </div>
+
+  <div id="notifyReminder" class="notify-reminder hidden" role="dialog" aria-modal="true" aria-labelledby="notifyReminderTitle">
+    <div class="notify-reminder-box">
+      <div class="notify-reminder-icon">🔔</div>
+      <h3 id="notifyReminderTitle">Ative as notificações</h3>
+      <p>Receba um aviso no seu telefone quando sua pizza sair para entrega.</p>
+      <div class="notify-reminder-actions">
+        <button type="button" class="notify-reminder-on" id="notifyReminderOn">🔔 Ativar notificações</button>
+        <button type="button" class="notify-reminder-later" id="notifyReminderLater">Agora não</button>
+      </div>
+    </div>
+  </div>
+  <canvas id="receiptCanvas" width="900" height="1200" style="display:none"></canvas>
+  <footer id="contato">Pizza do Kim — sistema de pedidos</footer>
+</div>
+
+<script>
+(() => {
+  const TUTORIAL_KEY="pizza_do_kim_tutorial_v2";
+  const tutorialById=id=>document.getElementById(id);
+  const tutorialBox=tutorialById("firstTutorial");
+  const tutorialSteps=[...document.querySelectorAll(".tutorial-step")];
+  const tutorialDots=[...document.querySelectorAll(".tutorial-dot")];
+  let tutorialIndex=0;
+
+  function showTutorialStep(){
+    tutorialSteps.forEach((el,i)=>el.classList.toggle("active",i===tutorialIndex));
+    tutorialDots.forEach((el,i)=>el.classList.toggle("active",i===tutorialIndex));
+    tutorialById("tutorialNext").textContent=tutorialIndex===tutorialSteps.length-1 ? "Começar pedido" : "Próximo";
+  }
+  function finishTutorial(){
+    localStorage.setItem(TUTORIAL_KEY,"seen");
+    tutorialBox.classList.add("hidden");
+  }
+
+  tutorialById("tutorialSkip").addEventListener("click",finishTutorial);
+  tutorialById("tutorialNext").addEventListener("click",()=>{
+    if(tutorialIndex<tutorialSteps.length-1){
+      tutorialIndex++;
+      showTutorialStep();
+    }else{
+      finishTutorial();
+    }
+  });
+
+  if(localStorage.getItem(TUTORIAL_KEY)!=="seen"){
+    tutorialBox.classList.remove("hidden");
+    showTutorialStep();
+  }
+
+  // EDITE AQUI OS SABORES E PREÇOS
+  const menu = [
+    {name:"Calabresa", desc:"molho, mussarela, calabresa, azeitona e cebola", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"À moda", desc:"molho, mussarela, presunto, milho, tomate, pimentão e cebola", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Vegetariana", desc:"molho, mussarela, tomate, milho, pimentão e cebola", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Marguerita", desc:"molho, mussarela, tomate e manjericão", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Portuguesa", desc:"molho, mussarela, presunto, ovo, pimentão, milho, tomate, cebola e azeitona", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Frango com catupiry", desc:"molho, mussarela, frango, milho e catupiry", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Napolitana", desc:"molho, mussarela, presunto e tomate", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Bacon", desc:"molho, mussarela, bacon, tomate e milho", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Lombinho", desc:"molho, mussarela, lombinho e cebola", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Calabresa com bacon", desc:"molho, mussarela, calabresa, bacon, milho, catupiry, azeitona e cebola", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Frango com cheddar", desc:"molho, mussarela, frango, milho e cheddar", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Carne seca", desc:"molho, mussarela, carne seca, catupiry e pimenta biquinho", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Especial do Kim", desc:"molho, mussarela, presunto, bacon, calabresa, milho, catupiry, pimentão, tomate, cebola e azeitona", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Provolombo", desc:"molho, mussarela, lombinho, provolone e catupiry", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Três queijos", desc:"molho, mussarela, catupiry e provolone", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Crocante", desc:"molho, mussarela, catupiry, bacon e batata palha", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Pepperoni", desc:"molho, mussarela, pepperoni e catupiry", prices:{P:35, M:45, G:52, GG:60}},
+    {name:"Frango com bacon", desc:"molho, frango, mussarela, milho, catupiry ou cheddar", prices:{P:35, M:45, G:52, GG:60}}
+  ];
+
+  const sweetPrices = {P:35, M:42};
+  const sweetMenu = [
+    {name:"Banana com canela", desc:"mussarela, banana, canela e doce de leite", prices:sweetPrices, sweet:true},
+    {name:"Dois amores", desc:"chocolate branco e chocolate preto", prices:sweetPrices, sweet:true}
+  ];
+  const drinks = {
+    "Coca-Cola 2L":14,
+    "Guaraná 2L":10,
+    "Sukita laranja 2L":10,
+    "Coca lata":5,
+    "Guaraná 1L":6.5,
+    "Kuat":8
+  };
+  const state = {size:"P", mode:"inteira", crust:"Sem borda", items:[]};
+  const q = id => document.getElementById(id);
+  const brl = v => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(v);
+
+  function flavorFromValue(value){
+    const [type,index]=String(value).split(":");
+    return type==="sweet" ? sweetMenu[+index] : menu[+index];
+  }
+
+  function fillFlavors(){
+    const old2=q("flavor2").value;
+    q("flavor1").innerHTML = menu.map((x,i)=>`<option value="savory:${i}">${x.name}</option>`).join("");
+    let second = menu.map((x,i)=>`<option value="savory:${i}">${x.name}</option>`).join("");
+    if(state.mode==="meio" && (state.size==="P" || state.size==="M")){
+      second += `<optgroup label="🍫 Sabores doces — metade doce + metade salgada">` +
+        sweetMenu.map((x,i)=>`<option value="sweet:${i}">🍫 ${x.name} (doce)</option>`).join("") + `</optgroup>`;
+    }
+    q("flavor2").innerHTML=second;
+    if([...q("flavor2").options].some(o=>o.value===old2)) q("flavor2").value=old2;
+  }
+
+  function currentUnit(){
+    const aFlavor=flavorFromValue(q("flavor1").value);
+    const a = aFlavor.prices[state.size];
+    let base = a;
+    if(state.mode === "meio"){
+      const bFlavor=flavorFromValue(q("flavor2").value);
+      const b=bFlavor.prices[state.size];
+      base = Math.max(a,b);
+    }
+    const crustExtra = state.crust === "Com borda" ? 7 : 0;
+    return base + crustExtra;
+  }
+
+  function updatePrice(){
+    q("desc1").textContent = flavorFromValue(q("flavor1").value).desc;
+    q("desc2").textContent = flavorFromValue(q("flavor2").value).desc;
+    const qty = Math.max(1, Math.min(20, parseInt(q("qty").value)||1));
+    q("qty").value = qty;
+    q("pizzaPrice").value = brl(currentUnit()*qty);
+  }
+
+  document.querySelectorAll("#sizes .choice").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll("#sizes .choice").forEach(b=>b.classList.remove("active","size-click-effect"));
+      void btn.offsetWidth;
+      btn.classList.add("active","size-click-effect");
+      state.size=btn.dataset.size;
+      fillFlavors();
+      updatePrice();
+      setTimeout(()=>btn.classList.remove("size-click-effect"),420);
+    });
+  });
+
+  document.querySelectorAll("#modes .choice").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll("#modes .choice").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active"); state.mode=btn.dataset.mode;
+      q("secondFlavorWrap").classList.toggle("hidden",state.mode!=="meio");
+      fillFlavors();
+      updatePrice();
+    });
+  });
+
+  document.querySelectorAll("#crustModes .choice").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll("#crustModes .choice").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      state.crust=btn.dataset.crust;
+      q("crustFlavorWrap").classList.toggle("hidden",state.crust!=="Com borda");
+      updatePrice();
+    });
+  });
+
+  q("flavor1").addEventListener("change",updatePrice);
+  q("flavor2").addEventListener("change",updatePrice);
+  q("qty").addEventListener("input",updatePrice);
+
+  q("addPizza").addEventListener("click",()=>{
+    const qty = Math.max(1,parseInt(q("qty").value)||1);
+    const f1 = flavorFromValue(q("flavor1").value).name;
+    const secondFlavor = flavorFromValue(q("flavor2").value);
+    const f2 = secondFlavor.name;
+    const mixedSweetSavory = state.mode==="meio" && !!secondFlavor.sweet;
+    const unit = currentUnit();
+    state.items.push({
+      id:Date.now()+Math.random(),
+      type:"pizza",
+      size:state.size, mode:state.mode, f1, f2, qty, unit, mixedSweetSavory,
+      crust:state.crust,
+      crustFlavor:state.crust==="Com borda" ? q("crustFlavor").value : "",
+      obs:q("obsPizza").value.trim()
+    });
+    q("obsPizza").value="";
+    q("qty").value=1;
+    render();
+    updatePrice();
+  });
+
+  q("addSweet").addEventListener("click",()=>{
+    const qty = Math.max(1, Math.min(20, parseInt(q("sweetQty").value)||1));
+    const size = q("sweetSize").value;
+    const name = q("sweetFlavor").value;
+    state.items.push({
+      id:Date.now()+Math.random(),
+      type:"sweet",
+      name, size, qty, unit:sweetPrices[size]
+    });
+    q("sweetQty").value=1;
+    render();
+  });
+
+  q("addDrink").addEventListener("click",()=>{
+    const qty = Math.max(1, Math.min(20, parseInt(q("drinkQty").value)||1));
+    const name = q("drink").value;
+    state.items.push({
+      id:Date.now()+Math.random(),
+      type:"drink",
+      name, qty, unit:drinks[name]
+    });
+    q("drinkQty").value=1;
+    render();
+  });
+
+  function removeItem(id){
+    state.items = state.items.filter(i=>i.id!==id);
+    render();
+  }
+
+  const PIX_KEY="(33) 99847-1303";
+
+  async function copyText(value,message){
+    try{
+      await navigator.clipboard.writeText(value);
+    }catch(e){
+      const ta=document.createElement("textarea");
+      ta.value=value; document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); ta.remove();
+    }
+    if(q("pixCopyStatus")){
+      q("pixCopyStatus").textContent=message;
+      setTimeout(()=>q("pixCopyStatus").textContent="",2200);
+    }
+  }
+
+  async function refreshPixBox(){
+    const box=q("pixPaymentBox");
+    if(!box) return;
+    const payment=q("payment").value;
+    const isPix=payment==="Pix";
+    box.classList.toggle("show",isPix);
+    q("change").disabled=payment!=="Dinheiro";
+    if(!isPix) return;
+
+    const subtotal=state.items.reduce((s,i)=>s+i.qty*i.unit,0);
+    const total=subtotal+getDeliveryFee();
+    q("pixTotalNote").textContent=total>0
+      ? `QR Code preparado para o total atual: ${brl(total)}`
+      : "Adicione os itens ao pedido para o QR Code usar o valor final.";
+
+    try{
+      const res=await fetch(`/api/pix?amount=${encodeURIComponent(total.toFixed(2))}`,{cache:"no-store"});
+      const data=await res.json();
+      if(!res.ok) throw new Error(data.error||"Pix indisponível");
+      q("pixQrImage").src=data.qrDataUrl;
+      q("pixQrImage").dataset.payload=data.payload;
+    }catch(e){
+      console.error("Erro Pix:",e);
+      q("pixQrImage").removeAttribute("src");
+      q("pixQrImage").dataset.payload="";
+      q("pixTotalNote").textContent="A chave Pix continua disponível para copiar.";
+    }
+  }
+
+  q("copyPixKey")?.addEventListener("click",()=>copyText(PIX_KEY,"✓ Chave Pix copiada"));
+  q("copyPixCode")?.addEventListener("click",()=>{
+    const payload=q("pixQrImage")?.dataset.payload||PIX_KEY;
+    copyText(payload,"✓ Pix copia e cola copiado");
+  });
+
+  function customerText(){
+    const parts=[];
+    if(q("name").value.trim()) parts.push(`<strong>Cliente:</strong> ${escapeHtml(q("name").value.trim())}`);
+    if(q("phone").value.trim()) parts.push(`<strong>Telefone:</strong> ${escapeHtml(q("phone").value.trim())}`);
+    if(q("address").value.trim()) parts.push(`<strong>Entrega:</strong> ${escapeHtml(q("address").value.trim())}`);
+    if(q("reference").value.trim()) parts.push(`<strong>Referência:</strong> ${escapeHtml(q("reference").value.trim())}`);
+    parts.push(`<strong>Pagamento:</strong> ${escapeHtml(q("payment").value)}`);
+    if(q("payment").value==="Dinheiro" && q("change").value.trim()) parts.push(`<strong>Troco para:</strong> ${escapeHtml(q("change").value.trim())}`);
+    return parts.join("<br>");
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+  }
+
+  function deliveryPlaceName(){
+    return q("deliveryPlace").value==="Outro" ? q("otherPlace").value.trim() : q("deliveryPlace").value;
+  }
+  function getDeliveryFee(){
+    return ["Fonseca","Jatobá","Boa Vista","Santa Cruz Cristaulat","Guaches","Bom Jardim","Córrego das Flores"].includes(q("deliveryPlace").value) ? 7 : 0;
+  }
+  function validateDelivery(){
+    if(!q("deliveryPlace").value){ alert("Escolha o local da entrega."); q("deliveryPlace").focus(); return false; }
+    if(q("deliveryPlace").value==="Outro" && !q("otherPlace").value.trim()){ alert("Digite o nome do local da entrega."); q("otherPlace").focus(); return false; }
+    return true;
+  }
+
+  function render(){
+    const box=q("items");
+    if(!state.items.length){
+      box.innerHTML='<div class="empty">Nenhuma pizza adicionada ainda.</div>';
+    } else {
+      box.innerHTML=state.items.map((i,idx)=>{
+        if(i.type==="drink"){
+          return `<div class="pizza-item">
+            <div class="pizza-top"><div><strong>${idx+1}. Bebida</strong><br><small>${escapeHtml(i.name)}</small></div>
+            <button type="button" class="mini-btn remove" data-id="${i.id}">Remover</button></div>
+            <div class="summary-line"><span>${i.qty} × ${brl(i.unit)}</span><strong>${brl(i.qty*i.unit)}</strong></div>
+          </div>`;
+        }
+        if(i.type==="sweet"){
+          return `<div class="pizza-item">
+            <div class="pizza-top"><div><strong>${idx+1}. Pizza doce ${i.size}</strong><br><small>${escapeHtml(i.name)}</small></div>
+            <button type="button" class="mini-btn remove" data-id="${i.id}">Remover</button></div>
+            <div class="summary-line"><span>${i.qty} × ${brl(i.unit)}</span><strong>${brl(i.qty*i.unit)}</strong></div>
+          </div>`;
+        }
+        const sabor=i.mode==="meio" ? `½ ${i.f1} + ½ ${i.f2}` : i.f1;
+        return `<div class="pizza-item">
+          <div class="pizza-top">
+            <div><strong>${idx+1}. Pizza ${i.size}</strong><br><small>${sabor}</small></div>
+            <button type="button" class="mini-btn remove" data-id="${i.id}">Remover</button>
+          </div>
+          <div class="summary-line"><span>${i.qty} × ${brl(i.unit)}</span><strong>${brl(i.qty*i.unit)}</strong></div>
+          <small>Borda: ${escapeHtml(i.crust)}${i.crust==="Com borda" ? " ("+escapeHtml(i.crustFlavor)+")" : ""}</small><br>
+          ${i.obs?`<small>Obs.: ${escapeHtml(i.obs)}</small>`:""}
+        </div>`;
+      }).join("");
+      box.querySelectorAll(".remove").forEach(b=>b.addEventListener("click",()=>removeItem(+b.dataset.id)));
+    }
+    const subtotal=state.items.reduce((s,i)=>s+i.qty*i.unit,0);
+    const delivery=getDeliveryFee(); // Troque aqui se quiser taxa fixa, por exemplo: 5
+    q("subtotal").textContent=brl(subtotal);
+    q("delivery").textContent=brl(delivery);
+    q("deliveryRow").classList.toggle("hidden", delivery===0);
+    q("total").textContent=brl(subtotal+delivery);
+    q("customerSummary").innerHTML=customerText();
+    refreshPixBox();
+  }
+
+  ["name","phone","address","reference","change"].forEach(id=>q(id).addEventListener("input",render));
+  q("payment").addEventListener("change",()=>{render();refreshPixBox();});
+
+  q("printBtn").addEventListener("click",()=>{
+    if(!validateDelivery()) return;
+    if(!state.items.length){alert("Adicione pelo menos uma pizza ao pedido.");return;}
+    render(); window.print();
+  });
+
+  function buildSellerOrder(){
+    const items=state.items.map(i=>{
+      if(i.type==="drink"){
+        return {
+          title:i.name,
+          detail:"Bebida",
+          obs:"",
+          qty:i.qty,
+          unit:i.unit
+        };
+      }
+      if(i.type==="sweet"){
+        return {
+          title:`Pizza doce ${i.size}`,
+          detail:i.name,
+          obs:"",
+          qty:i.qty,
+          unit:i.unit
+        };
+      }
+      const sabor=i.mode==="meio" ? `½ ${i.f1} + ½ ${i.f2}` : i.f1;
+      const borda=`Borda: ${i.crust}${i.crust==="Com borda" ? " ("+i.crustFlavor+")" : ""}`;
+      return {
+        title:`Pizza ${i.size}`,
+        detail:`${sabor} • ${borda}`,
+        obs:i.obs || "",
+        qty:i.qty,
+        unit:i.unit
+      };
+    });
+
+    return {
+      customer:{
+        name:q("name").value.trim(),
+        phone:q("phone").value.trim(),
+        address:`${deliveryPlaceName()} — ${q("address").value.trim()}`,
+        reference:q("reference").value.trim(),
+        payment:q("payment").value,
+        change:q("payment").value==="Dinheiro" ? q("change").value.trim() : ""
+      },
+      items,
+      deliveryFee:getDeliveryFee()
+    };
+  }
+
+  function validateCustomer(){
+    if(!q("name").value.trim()){
+      alert("Digite o nome do cliente.");
+      q("name").focus();
+      return false;
+    }
+    if(!q("phone").value.trim()){
+      alert("Digite o telefone.");
+      q("phone").focus();
+      return false;
+    }
+    if(!q("address").value.trim()){
+      alert("Digite o endereço de entrega.");
+      q("address").focus();
+      return false;
+    }
+    return true;
+  }
+
+  async function makeReceiptImage(){
+    if(!state.items.length) throw new Error("empty");
+
+    const canvas=q("receiptCanvas");
+    const ctx=canvas.getContext("2d");
+    const W=900, pad=54, line=42;
+    const extraLines=state.items.reduce((n,i)=>{
+      if(i.type==="pizza") return n + (i.obs?4:3);
+      return n+2;
+    },0);
+    canvas.height=Math.max(1100, 520 + extraLines*line + 320);
+    canvas.width=W;
+
+    ctx.fillStyle="#fffaf4";
+    ctx.fillRect(0,0,W,canvas.height);
+    ctx.fillStyle="#9f1818";
+    ctx.fillRect(0,0,W,145);
+
+    ctx.fillStyle="#ffffff";
+    ctx.font="bold 48px Arial";
+    ctx.fillText("PIZZA DO KIM",pad,66);
+    ctx.font="24px Arial";
+    ctx.fillText("COMPROVANTE DO PEDIDO",pad,108);
+
+    let y=190;
+    ctx.fillStyle="#241d1b";
+    ctx.font="bold 25px Arial";
+    ctx.fillText("Itens do pedido",pad,y);
+    y+=34;
+
+    ctx.font="22px Arial";
+    state.items.forEach((i,idx)=>{
+      ctx.fillStyle="#241d1b";
+      if(i.type==="drink"){
+        ctx.font="bold 22px Arial";
+        ctx.fillText(`${idx+1}. ${i.qty}x ${i.name}`,pad,y);
+        y+=line;
+        ctx.font="22px Arial";
+        ctx.fillText(`Valor: ${brl(i.qty*i.unit)}`,pad+28,y);
+        y+=line;
+      } else if(i.type==="sweet"){
+        ctx.font="bold 22px Arial";
+        ctx.fillText(`${idx+1}. ${i.qty}x Pizza doce ${i.size}`,pad,y);
+        y+=line;
+        ctx.font="22px Arial";
+        ctx.fillText(`${i.name} — ${brl(i.qty*i.unit)}`,pad+28,y);
+        y+=line;
+      } else {
+        const sabor=i.mode==="meio" ? `1/2 ${i.f1} + 1/2 ${i.f2}` : i.f1;
+        ctx.font="bold 22px Arial";
+        ctx.fillText(`${idx+1}. ${i.qty}x Pizza ${i.size}`,pad,y);
+        y+=line;
+        ctx.font="22px Arial";
+        wrapCanvasText(ctx,sabor,pad+28,y,W-pad*2-28,30);
+        y+=line;
+        const borda=`Borda: ${i.crust}${i.crust==="Com borda" ? " ("+i.crustFlavor+")" : ""}`;
+        ctx.fillText(`${borda} — ${brl(i.qty*i.unit)}`,pad+28,y);
+        y+=line;
+        if(i.obs){
+          wrapCanvasText(ctx,`Obs.: ${i.obs}`,pad+28,y,W-pad*2-28,30);
+          y+=line;
+        }
+      }
+      ctx.strokeStyle="#dfd2ca";
+      ctx.beginPath(); ctx.moveTo(pad,y-12); ctx.lineTo(W-pad,y-12); ctx.stroke();
+      y+=10;
+    });
+
+    const subtotal=state.items.reduce((s,i)=>s+i.qty*i.unit,0);
+    const delivery=getDeliveryFee();
+    y+=12;
+    ctx.font="22px Arial";
+    ctx.fillText(`Subtotal: ${brl(subtotal)}`,pad,y); y+=line;
+    if(delivery>0){
+      ctx.fillText(`Taxa de entrega: ${brl(delivery)}`,pad,y); y+=line;
+    }
+    ctx.fillStyle="#9f1818";
+    ctx.font="bold 34px Arial";
+    ctx.fillText(`TOTAL: ${brl(subtotal+delivery)}`,pad,y); y+=58;
+
+    ctx.fillStyle="#241d1b";
+    ctx.font="bold 24px Arial";
+    ctx.fillText("Dados da entrega",pad,y); y+=38;
+    ctx.font="21px Arial";
+    const details=[
+      q("name").value.trim() ? `Cliente: ${q("name").value.trim()}` : "",
+      q("phone").value.trim() ? `Telefone: ${q("phone").value.trim()}` : "",
+      deliveryPlaceName() ? `Local: ${deliveryPlaceName()}` : "",
+      q("address").value.trim() ? `Endereço: ${q("address").value.trim()}` : "",
+      q("reference").value.trim() ? `Referência: ${q("reference").value.trim()}` : "",
+      `Pagamento: ${q("payment").value}`,
+      q("payment").value==="Dinheiro" && q("change").value.trim() ? `Troco para: ${q("change").value.trim()}` : ""
+    ].filter(Boolean);
+
+    details.forEach(t=>{
+      wrapCanvasText(ctx,t,pad,y,W-pad*2,29);
+      y+=line;
+    });
+
+    y+=20;
+    ctx.strokeStyle="#9f1818";
+    ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(W-pad,y); ctx.stroke();
+    y+=38;
+    ctx.fillStyle="#5d5551";
+    ctx.font="19px Arial";
+    ctx.fillText("Pizza do Kim • Somente Delivery",pad,y); y+=30;
+    ctx.fillText("R. São Pedro, São José do Jacuri - MG",pad,y); y+=30;
+    ctx.fillText("(33) 99847-1303",pad,y);
+
+    return new Promise(resolve=>canvas.toBlob(resolve,"image/png",1));
+  }
+
+  function wrapCanvasText(ctx,text,x,y,maxWidth,lineHeight){
+    const words=String(text).split(" ");
+    let current="";
+    for(let n=0;n<words.length;n++){
+      const test=current+words[n]+" ";
+      if(ctx.measureText(test).width>maxWidth && n>0){
+        ctx.fillText(current,x,y);
+        current=words[n]+" ";
+        y+=lineHeight;
+      } else current=test;
+    }
+    ctx.fillText(current,x,y);
+  }
+
+  q("whatsappBtn").addEventListener("click",async()=>{
+    if(!state.items.length){
+      alert("Adicione pelo menos um item ao pedido.");
+      return;
+    }
+    if(!validateDelivery()) return;
+    if(!validateCustomer()) return;
+
+    const btn=q("whatsappBtn");
+    const original=btn.textContent;
+    btn.disabled=true;
+    btn.textContent="⏳ Enviando pedido...";
+
+    try{
+      const response=await fetch("/api/orders",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(buildSellerOrder())
+      });
+
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok){
+        throw new Error(data.error || "Não foi possível enviar o pedido.");
+      }
+
+      localStorage.setItem("pizza_do_kim_last_order",JSON.stringify({
+        id:data.id,
+        number:data.number,
+        createdAt:data.createdAt
+      }));
+      showOrderTracking(data);
+      startOrderTracking();
+
+      if(localStorage.getItem("pizza_do_kim_push_enabled")==="yes" && Notification.permission==="granted"){
+        enablePushForCurrentOrder().catch(()=>{});
+      } else {
+        showNotificationReminder();
+      }
+
+      alert(`✅ Pedido #${data.number || ""} enviado para a Pizza do Kim!
+Você pode acompanhar o andamento aqui no aplicativo.`);
+      state.items=[];
+      render();
+      window.scrollTo({top:0,behavior:"smooth"});
+    }catch(err){
+      alert("Não foi possível enviar o pedido para a pizzaria. Verifique sua internet e tente novamente.");
+    }finally{
+      btn.disabled=false;
+      btn.textContent=original;
+    }
+  });
+
+
+  function showNotificationReminder(){
+    if(localStorage.getItem("pizza_do_kim_push_enabled")==="yes" && Notification.permission==="granted") return;
+    q("notifyReminder")?.classList.remove("hidden");
+  }
+  function hideNotificationReminder(){ q("notifyReminder")?.classList.add("hidden"); }
+  q("notifyReminderLater")?.addEventListener("click",hideNotificationReminder);
+  q("notifyReminderOn")?.addEventListener("click",async()=>{
+    const reminderBtn=q("notifyReminderOn");
+    const originalText=reminderBtn?.textContent || "🔔 Ativar notificações";
+    if(reminderBtn){ reminderBtn.disabled=true; reminderBtn.textContent="Ativando..."; }
+    const ok=await enablePushForCurrentOrder(reminderBtn);
+    if(ok) hideNotificationReminder();
+    else if(reminderBtn){ reminderBtn.disabled=false; reminderBtn.textContent=originalText; }
+  });
+
+  function urlBase64ToUint8Array(base64String){
+    const clean=String(base64String||"").trim().replace(/\s+/g,"");
+    const padding="=".repeat((4-clean.length%4)%4);
+    const base64=(clean+padding).replace(/-/g,"+").replace(/_/g,"/");
+    const raw=atob(base64);
+    return Uint8Array.from([...raw].map(ch=>ch.charCodeAt(0)));
+  }
+
+  function sameApplicationServerKey(subscription,keyBytes){
+    try{
+      const current=subscription?.options?.applicationServerKey;
+      if(!current) return true;
+      const a=new Uint8Array(current);
+      if(a.length!==keyBytes.length) return false;
+      for(let i=0;i<a.length;i++) if(a[i]!==keyBytes[i]) return false;
+      return true;
+    }catch(e){ return true; }
+  }
+
+  function pushErrorMessage(err,stage){
+    const name=String(err?.name||"");
+    const msg=String(err?.message||"");
+    if(name==="NotAllowedError") return "As notificações não foram permitidas neste aparelho.";
+    if(name==="InvalidStateError") return "O sistema de notificações do navegador ainda não ficou pronto. Tente novamente.";
+    if(name==="AbortError") return "O serviço de notificações do celular não respondeu. Tente novamente.";
+    if(name==="NetworkError") return "Falha de conexão ao ativar as notificações.";
+    if(stage==="key") return "A chave de notificações do servidor não foi carregada.";
+    if(stage==="save") return "A notificação foi criada no celular, mas não foi registrada no pedido.";
+    return "Não foi possível concluir a ativação das notificações.";
+  }
+
+  async function enablePushForCurrentOrder(sourceBtn){
+    const btn=q("enableNotifications");
+    const note=q("notifyNote");
+    let saved;
+    try{saved=JSON.parse(localStorage.getItem("pizza_do_kim_last_order")||"null");}catch(e){}
+    if(!saved?.id){
+      alert("Faça um pedido primeiro para ativar o acompanhamento.");
+      return false;
+    }
+    if(!window.isSecureContext){
+      alert("As notificações precisam de uma conexão segura.");
+      return false;
+    }
+    if(!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)){
+      alert("Este navegador não oferece suporte às notificações do aplicativo.");
+      return false;
+    }
+
+    let stage="permission";
+    try{
+      // A permissão é pedida diretamente pelo toque do cliente.
+      let permission=Notification.permission;
+      if(permission==="default"){
+        permission=await Notification.requestPermission();
+      }
+      if(permission!=="granted"){
+        if(note) note.textContent="As notificações não foram permitidas.";
+        alert("Para receber o aviso da entrega, toque em Permitir quando o celular perguntar sobre notificações.");
+        return false;
+      }
+
+      stage="serviceworker";
+      let reg=await navigator.serviceWorker.getRegistration();
+      if(!reg){
+        reg=await navigator.serviceWorker.register("/service-worker.js",{scope:"/"});
+      }
+      await navigator.serviceWorker.ready;
+
+      stage="key";
+      const keyRes=await fetch("/api/push/public-key",{cache:"no-store"});
+      const keyData=await keyRes.json().catch(()=>({}));
+      if(!keyRes.ok || !keyData.publicKey) throw new Error(keyData.error||"Chave Push ausente");
+
+      const keyBytes=urlBase64ToUint8Array(keyData.publicKey);
+      if(keyBytes.length!==65) throw new Error("Chave pública Push inválida");
+
+      stage="subscribe";
+      let subscription=await reg.pushManager.getSubscription();
+
+      // Se já existir uma inscrição antiga criada com outra chave, recria.
+      if(subscription && !sameApplicationServerKey(subscription,keyBytes)){
+        try{ await subscription.unsubscribe(); }catch(e){}
+        subscription=null;
+      }
+
+      if(!subscription){
+        try{
+          subscription=await reg.pushManager.subscribe({
+            userVisibleOnly:true,
+            applicationServerKey:keyBytes
+          });
+        }catch(firstErr){
+          // Alguns Androids/Chromes precisam de uma segunda tentativa após
+          // o Service Worker ficar definitivamente ativo.
+          if(firstErr?.name==="AbortError" || firstErr?.name==="InvalidStateError"){
+            await new Promise(r=>setTimeout(r,1200));
+            const readyReg=await navigator.serviceWorker.ready;
+            subscription=await readyReg.pushManager.subscribe({
+              userVisibleOnly:true,
+              applicationServerKey:keyBytes
+            });
+            reg=readyReg;
+          }else{
+            throw firstErr;
+          }
+        }
+      }
+
+      stage="save";
+      const saveRes=await fetch("/api/push/subscribe",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({orderId:saved.id,subscription:subscription.toJSON ? subscription.toJSON() : subscription})
+      });
+      const saveData=await saveRes.json().catch(()=>({}));
+      if(!saveRes.ok) throw new Error(saveData.error||"Falha ao registrar");
+
+      localStorage.setItem("pizza_do_kim_push_enabled","yes");
+      if(btn){
+        btn.textContent="✓ Notificações ativadas";
+        btn.classList.add("enabled");
+      }
+      if(sourceBtn && sourceBtn.nodeType===1) sourceBtn.textContent="✓ Ativadas";
+      if(note) note.textContent="Pronto! Você receberá o aviso quando sua pizza sair para entrega.";
+
+      // Faz um teste real, silenciosamente no fluxo, para confirmar que
+      // servidor + celular estão conversando corretamente.
+      try{
+        await fetch("/api/push/test",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({orderId:saved.id})
+        });
+      }catch(e){}
+
+      return true;
+    }catch(err){
+      console.error("Erro push etapa",stage,err);
+      const friendly=pushErrorMessage(err,stage);
+      if(note) note.textContent=friendly;
+      alert(friendly+" Tente novamente em alguns segundos.");
+      return false;
+    }
+  }
+
+  q("enableNotifications")?.addEventListener("click",()=>enablePushForCurrentOrder(q("enableNotifications")));
+
+  let trackingTimer=null;
+
+  function trackingElements(){
+    return {
+      box:q("orderTracking"),
+      icon:q("trackingIcon"),
+      title:q("trackingTitle"),
+      text:q("trackingText"),
+      number:q("trackingNumber"),
+      received:q("trackReceived"),
+      delivery:q("trackDelivery")
+    };
+  }
+
+  function showOrderTracking(order){
+    if(!order || !order.id) return;
+    const el=trackingElements();
+    el.box.classList.remove("hidden");
+    el.number.textContent=`Pedido #${order.number || ""}`;
+    el.received.classList.add("active");
+
+    if(order.status==="done"){
+      el.box.classList.add("delivering");
+      el.icon.textContent="🛵";
+      el.title.textContent="Sua pizza está saindo para entrega!";
+      el.text.textContent="O pedido foi finalizado na pizzaria e já está saindo para o endereço informado.";
+      el.delivery.classList.add("active");
+    }else{
+      el.box.classList.remove("delivering");
+      el.icon.textContent="🍕";
+      el.title.textContent="Pedido recebido";
+      el.text.textContent="A Pizza do Kim recebeu seu pedido e está preparando tudo.";
+      el.delivery.classList.remove("active");
+    }
+  }
+
+  async function refreshOrderTracking(){
+    let saved;
+    try{ saved=JSON.parse(localStorage.getItem("pizza_do_kim_last_order")||"null"); }catch(e){}
+    if(!saved?.id) return;
+
+    try{
+      const response=await fetch(`/api/orders/${encodeURIComponent(saved.id)}`,{cache:"no-store"});
+      if(response.status===404){
+        localStorage.removeItem("pizza_do_kim_last_order");
+        q("orderTracking")?.classList.add("hidden");
+        return;
+      }
+      if(!response.ok) return;
+      const data=await response.json();
+      showOrderTracking(data);
+    }catch(e){}
+  }
+
+  function startOrderTracking(){
+    if(trackingTimer) clearInterval(trackingTimer);
+    refreshOrderTracking();
+    trackingTimer=setInterval(refreshOrderTracking,5000);
+  }
+
+  // Continua acompanhando mesmo se o cliente fechar e abrir o app novamente.
+  if(localStorage.getItem("pizza_do_kim_last_order")){
+    startOrderTracking();
+  }
+
+  q("clearBtn").addEventListener("click",()=>{
+    if(confirm("Deseja limpar todo o pedido?")){
+      state.items=[]; render();
+    }
+  });
+
+    q("deliveryPlace").addEventListener("change",()=>{
+    const other=q("deliveryPlace").value==="Outro";
+    q("otherPlaceWrap").classList.toggle("hidden",!other);
+    q("otherPlace").required=other;
+    if(!other) q("otherPlace").value="";
+    render();
+  });
+  q("otherPlace").addEventListener("input",render);
+
+  fillFlavors(); updatePrice(); render();
+})();
+</script>
+
+<script>
+(function(){
+  const key="pizza_do_kim_theme";
+  const btn=document.getElementById("themeToggle");
+  function apply(theme){
+    const light=theme==="light";
+    document.body.classList.toggle("light-theme",light);
+    btn.textContent=light ? "🌙 Escuro" : "☀️ Claro";
+    localStorage.setItem(key,light ? "light" : "dark");
+  }
+  apply(localStorage.getItem(key)||"dark");
+  btn.addEventListener("click",function(){
+    apply(document.body.classList.contains("light-theme") ? "dark" : "light");
+  });
+})();
+</script>
+
+
+<nav class="bottom-app-nav" aria-label="Navegação do aplicativo">
+  <button type="button" class="nav-item active" data-target="inicio"><span>⌂</span><b>Início</b></button>
+  <button type="button" class="nav-item" data-target="meuPedido"><span>▣</span><b>Meu pedido</b></button>
+  <button type="button" class="nav-item" data-target="contato"><span>☎</span><b>Contato</b></button>
+  <button type="button" class="nav-item" id="themeNavBtn"><span>◐</span><b>Tema</b></button>
+</nav>
+
+
+<script>
+(function(){
+  function scrollToId(id){
+    const el=document.getElementById(id);
+    if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  document.getElementById("menuScrollBtn")?.addEventListener("click",()=>scrollToId("inicio"));
+  document.getElementById("cartScrollBtn")?.addEventListener("click",()=>scrollToId("meuPedido"));
+  document.querySelectorAll(".bottom-app-nav .nav-item[data-target]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(".bottom-app-nav .nav-item").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      scrollToId(btn.dataset.target);
+    });
+  });
+  document.getElementById("themeNavBtn")?.addEventListener("click",()=>{
+    document.getElementById("themeToggle")?.click();
+  });
+
+  const badge=document.getElementById("cartBadge");
+  const items=document.getElementById("items");
+  function refreshBadge(){
+    if(!badge||!items)return;
+    const count=items.querySelectorAll(".pizza-item").length;
+    badge.textContent=count;
+    badge.style.display=count?"flex":"none";
+  }
+  refreshBadge();
+  if(items){
+    new MutationObserver(refreshBadge).observe(items,{childList:true,subtree:true});
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  let deferredInstallPrompt=null;
+  const btn=document.getElementById("installClientApp");
+
+  function isStandalone(){
+    return window.matchMedia("(display-mode: standalone)").matches ||
+           window.navigator.standalone===true;
+  }
+
+  function updateInstallButton(){
+    if(!btn) return;
+    if(isStandalone()){
+      btn.textContent="✓ Aplicativo instalado";
+      btn.disabled=true;
+      btn.classList.add("installed");
+    }else{
+      btn.textContent="📲 Instalar app";
+      btn.disabled=false;
+      btn.classList.remove("installed");
+    }
+  }
+
+  window.addEventListener("beforeinstallprompt",event=>{
+    event.preventDefault();
+    deferredInstallPrompt=event;
+    updateInstallButton();
+  });
+
+  window.addEventListener("appinstalled",()=>{
+    deferredInstallPrompt=null;
+    updateInstallButton();
+  });
+
+  btn?.addEventListener("click",async()=>{
+    if(isStandalone()) return;
+
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      try{ await deferredInstallPrompt.userChoice; }catch(e){}
+      deferredInstallPrompt=null;
+      updateInstallButton();
+      return;
+    }
+
+    alert("No Chrome, toque no menu ⋮ e escolha “Instalar app” ou “Adicionar à tela inicial”.");
+  });
+
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("/service-worker.js").catch(()=>{});
+  }
+
+  updateInstallButton();
+})();
+
+  // Cardápios personalizados: mantém os SELECTs originais para não alterar pedidos/preços.
+  function kimBuildSelect(select){
+    if(!select || select.dataset.kimReady==='1') return;
+    select.dataset.kimReady='1'; select.classList.add('kim-native-hidden');
+    const wrap=document.createElement('div'); wrap.className='kim-select';
+    const btn=document.createElement('button'); btn.type='button'; btn.className='kim-select-btn';
+    select.parentNode.insertBefore(wrap,select); wrap.appendChild(select); wrap.appendChild(btn);
+    const panel=document.createElement('div'); panel.className='kim-select-panel'; document.body.appendChild(panel);
+    const backdrop=document.createElement('div'); backdrop.className='kim-select-backdrop'; document.body.appendChild(backdrop);
+    function label(){ const o=select.options[select.selectedIndex]; btn.textContent=o?o.textContent:''; }
+    function close(){panel.classList.remove('open');backdrop.classList.remove('open');document.body.style.overflow='';}
+    function render(){
+      panel.innerHTML='';
+      [...select.options].forEach((o,i)=>{
+        if(o.disabled && !o.value) return;
+        const row=document.createElement('button'); row.type='button'; row.className='kim-option'+(i===select.selectedIndex?' selected':'');
+        const txt=document.createElement('span'); txt.textContent=o.textContent;
+        const radio=document.createElement('span'); radio.className='kim-radio';
+        row.append(txt,radio);
+        row.onclick=()=>{select.selectedIndex=i;select.dispatchEvent(new Event('change',{bubbles:true}));label();close();};
+        panel.appendChild(row);
+      });
+    }
+    btn.onclick=()=>{render();panel.classList.add('open');backdrop.classList.add('open');document.body.style.overflow='hidden';};
+    backdrop.onclick=close; label();
+    select.addEventListener('change',label);
+    new MutationObserver(()=>label()).observe(select,{childList:true,subtree:true});
+  }
+  ['flavor1','flavor2','sweetFlavor','sweetSize','drink'].forEach(id=>kimBuildSelect(document.getElementById(id)));
+
+</script>
+
+</body>
+</html>
