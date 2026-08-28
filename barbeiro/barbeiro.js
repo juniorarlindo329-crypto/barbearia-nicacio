@@ -277,7 +277,68 @@ function cancelledPage(){
  $('#cancelledFilter').onchange=e=>renderCancelledCards(e.target.value);
  renderCancelledCards('all');
 }
-function revenuePage(){const valid=bookings().filter(b=>b.status!=='cancelado'),done=bookings().filter(b=>b.status==='concluido'),total=valid.reduce((s,b)=>s+Number(b.price||0),0),doneTotal=done.reduce((s,b)=>s+Number(b.price||0),0);openModal('Faturamento',`<div class="summary-box"><p>Agendado</p><div class="big">${money(total)}</div><p>${valid.length} agendamento(s)</p></div><div class="summary-box"><p>Concluído</p><div class="big">${money(doneTotal)}</div><p>${done.length} atendimento(s)</p></div>`)}
+function revenuePage(){
+ const now=new Date();
+ const monthKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+ const monthLabel=d=>['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][d.getMonth()];
+ const months=[]; for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({key:monthKey(d),label:monthLabel(d),date:d})}
+ let selected=monthKey(now), balanceMode='meu', customStart='', customEnd='';
+ const statusOk=(b,mode)=>{if(b.status==='cancelado')return false;if(mode==='realizados')return b.status==='concluido'||(b.date&&b.date<key(new Date()));if(mode==='agendados')return b.status!=='concluido';return b.status==='concluido'||(b.date&&b.date<=key(new Date()))};
+ const getMonthRows=()=>bookings().filter(b=>String(b.date||'').slice(0,7)===selected && statusOk(b,balanceMode));
+ const getRows=()=>{let a=getMonthRows();if(customStart)a=a.filter(b=>b.date>=customStart);if(customEnd)a=a.filter(b=>b.date<=customEnd);return a};
+ const daysInMonth=(y,m)=>new Date(y,m+1,0).getDate();
+ const calcHours=(rows)=>{const [y,m]=selected.split('-').map(Number),s=settings();const dayMins=Math.max(0,mins(s.end)-mins(s.start));let scheduled=0,closed=0;for(let d=1;d<=daysInMonth(y,m-1);d++){const dt=new Date(y,m-1,d),dk=key(dt);if(dt.getDay()===0)continue;scheduled+=dayMins;if(blockedDays().includes(dk))closed+=dayMins}const worked=rows.reduce((a,b)=>a+Number(b.duration||0),0);const available=Math.max(0,scheduled-closed);const idle=Math.max(0,available-worked);return{scheduled,closed,available,worked,idle}};
+ const fmtHours=m=>`${Math.round(m/60)} hrs`;
+ const percent=(n,d)=>d?Math.round(n/d*100):0;
+ const escapeAttr=v=>escapeHtml(String(v??'')).replace(/\"/g,'&quot;');
+ function render(){
+  const rows=getRows(); const total=rows.reduce((a,b)=>a+Number(b.price||0),0); const count=rows.length;
+  const byDay={};rows.forEach(b=>{const d=Number(String(b.date||'').slice(8,10));if(d)byDay[d]=(byDay[d]||0)+Number(b.price||0)});const maxDay=Math.max(1,...Object.values(byDay));
+  const [yy,mm]=selected.split('-').map(Number),dim=daysInMonth(yy,mm-1);const chartDays=Array.from({length:dim},(_,i)=>i+1);
+  const serviceMap={};rows.forEach(b=>{const n=b.serviceName||'Serviço';if(!serviceMap[n])serviceMap[n]={count:0,total:0};serviceMap[n].count++;serviceMap[n].total+=Number(b.price||0)});const svc=Object.entries(serviceMap).sort((a,b)=>b[1].count-a[1].count);
+  const hrs=calcHours(rows),workedH=hrs.worked/60,ticket=count?total/count:0,occup=percent(hrs.worked,hrs.available);
+  const unique=new Set(rows.map(b=>(b.clientPhone||'').replace(/\D/g,'')||String(b.clientName||'').trim().toLowerCase()).filter(Boolean)).size;
+  const perClient=unique?count/unique:0;
+  const monthAll=bookings().filter(b=>String(b.date||'').slice(0,7)===selected);const cancelled=monthAll.filter(b=>b.status==='cancelado').length;const performance=(count+cancelled)?count/(count+cancelled):0;
+  const pending=monthAll.filter(b=>['pendente','pending'].includes(String(b.status||'').toLowerCase())).length;
+  const top=svc[0];
+  const paymentMap={};rows.forEach(b=>{const p=(b.paymentMethod||b.payment||'Não detalhados');if(!paymentMap[p])paymentMap[p]=0;paymentMap[p]+=Number(b.price||0)});const pays=Object.entries(paymentMap).sort((a,b)=>b[1]-a[1]);
+  const monthTabs=months.map(m=>`<button class="rev-month ${m.key===selected?'active':''}" data-month="${m.key}">${m.label}</button>`).join('');
+  const chart=chartDays.map(d=>`<div class="rev-bar-col"><div class="rev-bar-zone"><i style="height:${Math.max(0,(byDay[d]||0)/maxDay*100)}%"></i></div><b>${String(d).padStart(2,'0')}</b></div>`).join('');
+  const servicesHtml=svc.length?svc.map(([name,v])=>`<article class="rev-service-card"><div><strong>${v.count}</strong><span>${percent(v.count,count)}%</span></div><b>${escapeHtml(name)}</b></article>`).join(''):`<article class="rev-service-card empty"><div><strong>0</strong><span>0%</span></div><b>Sem serviços</b></article>`;
+  const payHtml=pays.map(([name,val])=>`<div class="rev-payment-row"><div><b>${escapeHtml(name)}</b><strong>${money(val)}</strong></div><div><span>${percent(val,total)}%</span>${name==='Não detalhados'?'<button class="rev-more-pay">VER MAIS</button>':''}</div></div>`).join('');
+  $('#modal').classList.add('revenue-mode');
+  $('#modalTitle').textContent='';
+  $('#modalContent').innerHTML=`<section class="revenue-page">
+   <button class="rev-back" id="revBack">←</button><div class="rev-kicker">Analisar</div><h1>Faturamento</h1>
+   <div class="rev-months">${monthTabs}</div>
+   <div class="rev-balance-head"><span>BALANÇO SERVIÇOS</span><select id="revBalance"><option value="meu" ${balanceMode==='meu'?'selected':''}>MEU BALANÇO</option><option value="realizados" ${balanceMode==='realizados'?'selected':''}>REALIZADOS</option><option value="agendados" ${balanceMode==='agendados'?'selected':''}>AGENDADOS</option></select></div>
+   <div class="rev-total">${money(total)}</div><div class="rev-count"><b>${count}</b> atendimentos</div>
+   <div class="rev-chart">${chart}</div><div class="rev-drag">→ <span>ARRASTE PARA O LADO PARA VER MAIS</span></div>
+   <div class="rev-filter-row"><span>FILTRO:</span><button id="revDateBtn">DATA</button><button id="revPdf">GERAR PDF</button></div>
+   <div id="revDateBox" class="rev-date-box ${customStart||customEnd?'show':''}"><label>De <input id="revStart" type="date" value="${escapeAttr(customStart)}"></label><label>Até <input id="revEnd" type="date" value="${escapeAttr(customEnd)}"></label><button id="revApplyDate">APLICAR</button><button id="revClearDate">LIMPAR</button></div>
+   <h3 class="rev-section-title">SERVIÇOS REALIZADOS</h3><div class="rev-services">${servicesHtml}</div><div class="rev-drag">→ <span>ARRASTE PARA O LADO PARA VER MAIS</span></div>
+   <div class="rev-duo"><article class="rev-metric accent"><strong>${money(ticket)}</strong><span>TICKET MÉDIO</span></article><article class="rev-metric"><strong>${occup}%</strong><span>TAXA DE OCUPAÇÃO</span></article></div>
+   <h3 class="rev-section-title">PAGAMENTOS</h3><div class="rev-payments">${payHtml||'<div class="rev-payment-row"><div><b>Não detalhados</b><strong>R$ 0,00</strong></div><div><span>0%</span></div></div>'}</div>
+   <h3 class="rev-section-title">DISTRIBUIÇÃO DE HORAS</h3><article class="rev-hours"><strong>${fmtHours(hrs.available)} disponíveis</strong><div class="rev-hourbar"><i class="worked" style="width:${percent(hrs.worked,Math.max(1,hrs.available))}%"><span>${fmtHours(hrs.worked)}</span></i><i class="idle" style="width:${percent(hrs.idle,Math.max(1,hrs.available))}%"><span>${fmtHours(hrs.idle)}</span></i></div><div class="rev-legend"><span>● Trabalhadas</span><span>● Ocioso</span><span>● Fechada</span></div></article>
+   <h3 class="rev-section-title">MAIS DADOS</h3><div class="rev-more-data">
+    <div><span>CLIENTES ÚNICOS</span><b>${unique} ⓘ</b></div><div><span>ATENDIMENTOS POR<br>CLIENTE</span><b>${perClient.toFixed(2).replace('.',',')} ⓘ</b></div><div><span>PERFORMANCE</span><b>${performance.toFixed(2).replace('.',',')} ⓘ</b></div><div><span>RECEITA POR HORA</span><b>${money(workedH?total/workedH:0)} ⓘ</b></div><div><span>UPSELL PRODUTO</span><b>0% ⓘ</b></div><div><span>PENDÊNCIAS</span><b>${pending?pending:'0%'} ⓘ</b></div><div><span>TOP SERVIÇO</span><b>${top?escapeHtml(top[0].toUpperCase())+' ('+percent(top[1].count,count)+'%)':'—'} ⓘ</b></div><div><span>HORAS DISPONÍVEIS</span><b>${fmtHours(hrs.available)} ⓘ</b></div><div><span>HORAS TRABALHADAS</span><b>${fmtHours(hrs.worked)} ⓘ</b></div><div><span>TEMPO OCIOSO</span><b>${fmtHours(hrs.idle)} ⓘ</b></div>
+   </div><div class="rev-bottom-space"></div></section>`;
+  document.querySelectorAll('.rev-month').forEach(b=>b.onclick=()=>{selected=b.dataset.month;customStart='';customEnd='';render()});
+  $('#revBalance').onchange=e=>{balanceMode=e.target.value;render()};
+  $('#revBack').onclick=()=>{closeModal();$('#modal').classList.remove('revenue-mode')};
+  $('#revDateBtn').onclick=()=>$('#revDateBox').classList.toggle('show');
+  $('#revApplyDate').onclick=()=>{customStart=$('#revStart').value;customEnd=$('#revEnd').value;render()};
+  $('#revClearDate').onclick=()=>{customStart='';customEnd='';render()};
+  $('#revPdf').onclick=()=>generateRevenuePdf(rows,total,count,selected,ticket,occup,svc,hrs,unique,perClient);
+ }
+ function generateRevenuePdf(rows,total,count,month,ticket,occup,svc,hrs,unique,perClient){
+   const [y,m]=month.split('-').map(Number),title=`Faturamento ${['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][m-1]} de ${y}`;
+   const w=window.open('','_blank');if(!w){alert('Permita pop-ups para gerar o PDF.');return}
+   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>body{font-family:Arial;padding:32px;color:#111}h1{font-size:30px}h2{margin-top:28px}.big{font-size:42px;font-weight:700}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{border:1px solid #ddd;border-radius:12px;padding:16px}table{width:100%;border-collapse:collapse}td,th{padding:9px;border-bottom:1px solid #ddd;text-align:left}@media print{button{display:none}}</style></head><body><h1>${title}</h1><div class="big">${money(total)}</div><p>${count} atendimentos</p><div class="grid"><div class="card"><b>Ticket médio</b><br>${money(ticket)}</div><div class="card"><b>Taxa de ocupação</b><br>${occup}%</div><div class="card"><b>Clientes únicos</b><br>${unique}</div><div class="card"><b>Atendimentos por cliente</b><br>${perClient.toFixed(2).replace('.',',')}</div></div><h2>Serviços realizados</h2><table><tr><th>Serviço</th><th>Qtd.</th><th>Total</th></tr>${svc.map(([n,v])=>`<tr><td>${escapeHtml(n)}</td><td>${v.count}</td><td>${money(v.total)}</td></tr>`).join('')}</table><h2>Distribuição de horas</h2><p>Disponíveis: ${fmtHours(hrs.available)} • Trabalhadas: ${fmtHours(hrs.worked)} • Ocioso: ${fmtHours(hrs.idle)}</p><h2>Atendimentos</h2><table><tr><th>Data</th><th>Cliente</th><th>Serviço</th><th>Valor</th></tr>${rows.map(b=>`<tr><td>${escapeHtml(b.date||'')} ${escapeHtml(b.time||'')}</td><td>${escapeHtml(b.clientName||'')}</td><td>${escapeHtml(b.serviceName||'')}</td><td>${money(b.price||0)}</td></tr>`).join('')}</table><script>setTimeout(()=>window.print(),300)<\/script></body></html>`);w.document.close();
+ }
+ openModal('', '<div></div>');render();
+}
 function recurrencePage(){const rs=recurrings();openModal('Minhas recorrências',`${rs.length?rs.map((r,i)=>`<div class="list-card"><h3>${escapeHtml(r.clientName)}</h3><p>${escapeHtml(r.serviceName)} • toda ${r.frequency} semana(s) • ${r.time}</p><button class="small-btn danger del-rec" data-i="${i}">Excluir</button></div>`).join(''):'<p>Nenhuma recorrência.</p>'}<button id="addRec" class="primary-btn">+ NOVA RECORRÊNCIA</button>`);document.querySelectorAll('.del-rec').forEach(b=>b.onclick=()=>{const a=recurrings();a.splice(Number(b.dataset.i),1);saveRecurrings(a);recurrencePage()});$('#addRec').onclick=recurrenceEditor}
 function recurrenceEditor(){const opts=services().filter(s=>s.active!==false).map(s=>`<option>${escapeHtml(s.name)}</option>`).join('');openModal('Nova recorrência',`<form id="recForm"><div class="field"><label>Cliente</label><input id="rName" required></div><div class="field"><label>Telefone</label><input id="rPhone"></div><div class="field"><label>Serviço</label><select id="rService">${opts}</select></div><div class="field"><label>Primeira data</label><input id="rDate" type="date" required></div><div class="field"><label>Horário</label><input id="rTime" type="time" required></div><div class="field"><label>Repetir a cada</label><select id="rFreq"><option value="1">1 semana</option><option value="2">2 semanas</option><option value="4">4 semanas</option></select></div><button class="primary-btn">SALVAR RECORRÊNCIA</button></form>`);$('#recForm').onsubmit=e=>{e.preventDefault();const item={id:uuid(),clientName:$('#rName').value.trim(),phone:$('#rPhone').value.trim(),serviceName:$('#rService').value,startDate:$('#rDate').value,time:$('#rTime').value,frequency:Number($('#rFreq').value)};const a=recurrings();a.push(item);saveRecurrings(a);generateRecurring(item,8);recurrencePage();toast('Recorrência criada')}}
 function generateRecurring(r,count){const srv=services().find(s=>s.name===r.serviceName);if(!srv)return;const all=bookings(),base=new Date(r.startDate+'T12:00:00');for(let i=0;i<count;i++){const d=addDays(base,i*r.frequency*7),date=key(d);if(d.getDay()===0||blockedDays().includes(date)||all.some(b=>b.date===date&&b.time===r.time&&b.status!=='cancelado'))continue;all.push({id:uuid(),clientName:r.clientName,clientPhone:r.phone,serviceName:srv.name,price:srv.price,duration:srv.duration,date,dateLabel:d.toLocaleDateString('pt-BR'),time:r.time,status:'confirmado',source:'recorrencia',recurrenceId:r.id})}saveBookings(all);renderAll()}
