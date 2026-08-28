@@ -159,42 +159,34 @@ function linkPage(){
  $('#showQr').onclick=()=>openQrExport(clientUrl);
 }
 
-function qrApiUrl(clientUrl,format='png',size=900){
- return 'https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&margin=22&format='+encodeURIComponent(format)+'&data='+encodeURIComponent(clientUrl);
-}
-async function downloadQr(clientUrl,format){
+function downloadQrFile(format){
  const ext=format==='svg'?'svg':'png';
- const url=qrApiUrl(clientUrl,ext,1200);
  const filename='qrcode-barbearia-nicacio.'+ext;
- try{
-   const response=await fetch(url,{mode:'cors',cache:'no-store'});
-   if(!response.ok) throw new Error('Falha ao gerar QR');
-   const blob=await response.blob();
-   const objectUrl=URL.createObjectURL(blob);
-   const a=document.createElement('a');
-   a.href=objectUrl;a.download=filename;document.body.appendChild(a);a.click();a.remove();
-   setTimeout(()=>URL.revokeObjectURL(objectUrl),1500);
-   toast('QR Code exportado em '+ext.toUpperCase());
- }catch(err){
-   // Fallback para aparelhos/navegadores que bloqueiam download cross-origin.
-   window.open(url,'_blank','noopener');
-   toast('QR Code aberto. Salve a imagem no aparelho.');
- }
+ const asset=ext==='svg'?'qrcode-cliente.svg':'qrcode-cliente.png';
+ const a=document.createElement('a');
+ a.href=asset;
+ a.download=filename;
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+ toast('QR Code exportado em '+ext.toUpperCase());
 }
 function openQrExport(clientUrl){
  const content=$('#modalContent');
  content.innerHTML=`<div class="qr-export-screen">
    <button id="qrExportBack" class="qr-export-back" type="button" aria-label="Voltar">←</button>
    <h2>Seu QRCode</h2>
-   <div class="qr-export-image-wrap"><img id="qrExportImage" alt="QR Code do aplicativo da Barbearia Nicácio" src="${qrApiUrl(clientUrl,'png',900)}"></div>
+   <div class="qr-export-image-wrap">
+     <img id="qrExportImage" alt="QR Code do aplicativo da Barbearia Nicácio" src="qrcode-cliente.png">
+   </div>
    <div class="qr-export-actions">
      <button id="exportQrSvg" type="button">Exportar como SVG</button>
      <button id="exportQrPng" type="button">Exportar como PNG</button>
    </div>
  </div>`;
  $('#qrExportBack').onclick=linkPage;
- $('#exportQrSvg').onclick=()=>downloadQr(clientUrl,'svg');
- $('#exportQrPng').onclick=()=>downloadQr(clientUrl,'png');
+ $('#exportQrSvg').onclick=()=>downloadQrFile('svg');
+ $('#exportQrPng').onclick=()=>downloadQrFile('png');
 }
 
 function openLinkConfig(){
