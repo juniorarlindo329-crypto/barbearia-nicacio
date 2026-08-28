@@ -401,3 +401,12 @@ h3{margin-bottom:12px;font-size:13px;letter-spacing:.5px;font-weight:800;color:#
 }
 #stepService .service-meta span{color:#c7c9ce !important;}
 #stepService .card.selected .check::after{color:#fff !important;background:#c47b58;border-radius:10px;}
+
+/* V28 — correção definitiva dos nomes dos serviços */
+.service-name,
+#stepService .service-name,
+.cards .card .service-name,
+#services .service-name {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
