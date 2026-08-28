@@ -313,377 +313,78 @@ h3{margin-bottom:12px;font-size:13px;letter-spacing:.5px;font-weight:800;color:#
 }
 
 
-/* V16 — botão de dia menor + instalar aplicativo */
-.top-actions{
-  display:flex;
-  align-items:center;
+/* V26 — cartões de serviços compactos no estilo da referência */
+#stepService .cards.horizontal{
   gap:8px;
-  flex-wrap:wrap;
+  padding:2px 2px 8px;
+}
+#stepService .card{
+  min-width:148px;
+  width:148px;
+  height:176px;
+  padding:14px 14px 15px;
+  border-radius:20px;
   justify-content:flex-end;
-}
-.install-btn{
-  border:0;
-  border-radius:13px;
-  padding:10px 12px;
-  background:linear-gradient(135deg,#d39a70,#b8754e);
-  color:#111;
-  font-weight:900;
-  font-size:11px;
-}
-.date-card{
-  min-width:82px !important;
-  width:82px !important;
-  height:96px !important;
-  padding:6px !important;
-  border-radius:16px !important;
-}
-.date-card .dow{
-  font-size:12px !important;
-}
-.date-card .day{
-  font-size:21px !important;
-  margin-top:3px !important;
-}
-.date-card .month{
-  font-size:10px !important;
-}
-.blocked-tag{
-  margin-top:4px !important;
-  font-size:7px !important;
-}
-@media(max-width:560px){
-  .topbar{
-    gap:8px;
-  }
-  .top-actions{
-    gap:6px;
-  }
-  .install-btn,.light-btn{
-    font-size:9px !important;
-    padding:9px 9px !important;
-  }
-  .date-card{
-    min-width:76px !important;
-    width:76px !important;
-    height:90px !important;
-  }
-}
-
-
-/* V17 — cartões de selecionar serviço menores */
-.card:not(.date-card){
-  min-width:118px !important;
-  width:118px !important;
-  height:132px !important;
-  padding:11px !important;
-  border-radius:17px !important;
-}
-.card:not(.date-card) .service-name{
-  font-size:14px !important;
-  line-height:1.15 !important;
-}
-.card:not(.date-card) .service-meta{
-  font-size:10px !important;
-  gap:5px !important;
-  margin-top:7px !important;
-}
-.card:not(.date-card) .check{
-  width:25px !important;
-  height:25px !important;
-  right:8px !important;
-  top:8px !important;
-  border-radius:7px !important;
-}
-.card:not(.date-card).selected .check::after{
-  font-size:15px !important;
-}
-@media(max-width:560px){
-  .card:not(.date-card){
-    min-width:110px !important;
-    width:110px !important;
-    height:124px !important;
-    padding:9px !important;
-  }
-  .card:not(.date-card) .service-name{
-    font-size:13px !important;
-  }
-}
-
-/* V19 — fluxo conversacional da assistente virtual */
-.chat-form-card{background:#151b24;border:1px solid #ffffff14;border-radius:20px;padding:16px;margin-top:22px}
-.chat-form-card label{display:block;color:#c5cad2;font-size:12px;font-weight:800;margin-bottom:9px;letter-spacing:.4px}
-.chat-input{width:100%;border:1px solid #ffffff20;outline:0;background:#0d131c;color:#fff;border-radius:15px;padding:15px 14px;font-size:16px}
-.chat-input:focus{border-color:#d59a6f;box-shadow:0 0 0 3px #d59a6f1f}
-.final-message{margin-top:10px}.final-bubble{max-width:100%;line-height:1.55;font-size:17px}.final-bubble strong{font-size:15px;line-height:1.5}
-#stepNotify .primary{margin-top:8px}
-@media(max-width:560px){.chat-form-card{padding:13px}.final-bubble{font-size:16px}}
-
-
-/* V20 — mensagens chegando uma por uma */
-@keyframes conversationArrival{
-  0%{opacity:0;transform:translateY(12px) scale(.985)}
-  100%{opacity:1;transform:translateY(0) scale(1)}
-}
-.conversation-arrive{animation:conversationArrival .38s ease both}
-#stepNotify:not(.hidden) .bubble,
-#stepService:not(.hidden) > *,
-#stepDate:not(.hidden) > *,
-#stepPhone:not(.hidden) > *,
-#stepDone:not(.hidden) > *{will-change:opacity,transform}
-#nameWarning{margin-bottom:12px}
-
-
-/* V23 — Meus Agendamentos com visual profissional */
-.bookings-page{
-  max-width:760px;
-}
-.bookings-page .topbar{
-  padding:10px 0 20px;
-  margin-bottom:18px;
-}
-.bookings-page .brand{
-  font-size:26px;
-  font-weight:900;
-  letter-spacing:-.6px;
-  line-height:1.05;
-}
-.bookings-page .sub{
-  margin-top:7px;
-  color:#8f98a7;
-  font-size:13px;
-  font-weight:600;
-}
-.bookings-page .light-btn{
-  background:linear-gradient(135deg,#d9a17a,#b8754e);
-  color:#10141a;
-  border:1px solid #f4bd921f;
-  border-radius:14px;
-  padding:12px 14px;
-  font-size:11px;
-  letter-spacing:.25px;
-  box-shadow:0 9px 24px #0004;
-}
-.bookings-only{
-  padding-top:4px;
-}
-#bookingsList{
-  display:grid;
-  gap:14px;
-}
-.booking-card{
-  position:relative;
   overflow:hidden;
-  background:linear-gradient(145deg,#171f2b 0%,#111822 100%);
-  border:1px solid #ffffff12;
-  border-radius:22px;
-  padding:18px;
-  box-shadow:0 14px 35px #00000035;
 }
-.booking-card::before{
-  content:"";
+#stepService .check{
+  top:12px;
+  right:12px;
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  background:linear-gradient(145deg,#f5f5f5,#cfd2d6);
+  box-shadow:0 2px 7px #0003;
+}
+#stepService .card.selected .check::after{
+  font-size:19px;
+}
+#stepService .service-icon{
   position:absolute;
-  left:0;
-  top:0;
-  bottom:0;
-  width:4px;
-  background:linear-gradient(180deg,#d8a078,#a96848);
-}
-.booking-top{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:15px;
-}
-.booking-top > div{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:9px;
-}
-.booking-top strong{
-  font-size:20px;
-  line-height:1.2;
-  font-weight:900;
-  letter-spacing:-.35px;
-  color:#f7f8fa;
-}
-.booking-status{
-  display:inline-flex;
-  align-items:center;
-  min-height:24px;
-  padding:5px 9px;
-  border-radius:999px;
-  background:#264c3a;
-  border:1px solid #59ba862d;
-  color:#80dca6;
-  font-size:9px;
-  line-height:1;
-  font-weight:900;
-  letter-spacing:.7px;
-}
-.booking-info{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:9px;
-  margin:0 0 15px;
-}
-.booking-info > div{
-  min-height:54px;
-  display:flex;
-  align-items:center;
-  gap:9px;
-  padding:11px 12px;
-  background:#0d141d;
-  border:1px solid #ffffff0f;
-  border-radius:14px;
-}
-.booking-info > div span{
-  width:28px;
-  height:28px;
-  flex:0 0 28px;
+  top:18px;
+  left:16px;
   display:grid;
   place-items:center;
-  border-radius:9px;
-  background:#232c38;
-  font-size:15px;
-}
-.booking-info > div b{
-  font-size:14px;
-  line-height:1.2;
-  color:#e8ebef;
+  width:30px;
+  height:30px;
+  color:#e2a077;
+  font-size:24px;
   font-weight:800;
+  line-height:1;
+  opacity:.95;
 }
-.cancel-booking{
-  width:100%;
-  border:1px solid #e06c6c2a;
-  border-radius:14px;
-  padding:12px 14px;
-  background:#2a171c;
-  color:#f19696;
-  font-size:13px;
-  font-weight:900;
-  cursor:pointer;
-  transition:transform .16s ease,background .16s ease;
-}
-.cancel-booking:active{
-  transform:scale(.985);
-  background:#381d23;
-}
-.empty-bookings{
-  text-align:center;
-  background:linear-gradient(145deg,#171f2b,#111822);
-  border:1px solid #ffffff12;
-  border-radius:24px;
-  padding:36px 18px;
-  box-shadow:0 14px 35px #0000002b;
-}
-.empty-bookings .empty-icon{
-  width:58px;
-  height:58px;
-  display:grid;
-  place-items:center;
-  margin:0 auto 15px;
-  border-radius:18px;
-  background:#242d38;
-  font-size:27px;
-}
-.empty-bookings h2{
-  margin:0;
-  font-size:20px;
-}
-.empty-bookings p{
-  margin:9px auto 18px;
-  color:#929baa;
-  font-size:13px;
-  line-height:1.5;
-  max-width:340px;
-}
-.link-button{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  text-decoration:none;
-}
-@media(max-width:560px){
-  .bookings-page{padding:14px 13px 34px}
-  .bookings-page .topbar{align-items:center;gap:10px}
-  .bookings-page .brand{font-size:22px}
-  .bookings-page .sub{font-size:12px}
-  .bookings-page .light-btn{font-size:9px!important;padding:10px 11px!important;white-space:nowrap}
-  .booking-card{padding:16px 14px 14px;border-radius:19px}
-  .booking-top strong{font-size:18px}
-  .booking-status{font-size:8px;padding:5px 8px}
-  .booking-info{gap:7px}
-  .booking-info > div{min-height:50px;padding:9px 10px;border-radius:12px}
-  .booking-info > div span{width:25px;height:25px;flex-basis:25px;font-size:13px;border-radius:8px}
-  .booking-info > div b{font-size:13px}
-  .cancel-booking{padding:11px 12px;font-size:12px}
-}
-
-/* V24 — destaque visual dos serviços, sem alterar o layout */
-.card:not(.date-card) .service-name{
-  font-size:16px !important;
-  line-height:1.12 !important;
-  font-weight:900 !important;
-  color:#ffffff !important;
-  letter-spacing:-0.2px !important;
-  text-shadow:0 1px 2px #0008 !important;
-}
-.card:not(.date-card) .check{
-  width:32px !important;
-  height:32px !important;
-  right:8px !important;
-  top:8px !important;
-  border-radius:9px !important;
-  box-shadow:0 2px 8px #0004 !important;
-}
-.card:not(.date-card).selected{
-  border-color:#d59a6f !important;
-  box-shadow:0 0 0 2px #d59a6f44,0 10px 26px #0003 !important;
-}
-.card:not(.date-card).selected .service-name{
-  color:#ffffff !important;
-}
-.card:not(.date-card).selected .check::after{
-  font-size:20px !important;
-}
-@media(max-width:560px){
-  .card:not(.date-card) .service-name{
-    font-size:15px !important;
-  }
-  .card:not(.date-card) .check{
-    width:31px !important;
-    height:31px !important;
-  }
-}
-
-/* V25 — nomes e seleção dos serviços ainda maiores, mantendo o mesmo layout */
-.card:not(.date-card) .service-name{
-  font-size:24px !important;
-  line-height:1.08 !important;
-  font-weight:950 !important;
-  color:#ffffff !important;
-  letter-spacing:-0.35px !important;
-  text-shadow:0 2px 4px #000a !important;
+#stepService .service-name{
+  font-size:17px;
+  line-height:1.12;
+  font-weight:800;
+  letter-spacing:-.15px;
+  max-width:116px;
   overflow-wrap:anywhere;
 }
-.card:not(.date-card) .check{
-  width:44px !important;
-  height:44px !important;
-  right:10px !important;
-  top:10px !important;
-  border-radius:12px !important;
+#stepService .service-meta{
+  margin-top:10px;
+  gap:7px;
+  font-size:14px;
+  line-height:1;
+  color:#aaaeb5;
 }
-.card:not(.date-card).selected .check::after{
-  font-size:28px !important;
+#stepService .service-meta span:first-child{
+  color:#b8bbc1;
 }
-@media(max-width:560px){
-  .card:not(.date-card) .service-name{
-    font-size:22px !important;
-  }
-  .card:not(.date-card) .check{
-    width:42px !important;
-    height:42px !important;
-  }
+#stepService .swipe{
+  margin-top:3px;
+  font-size:11px;
+  letter-spacing:.1px;
+}
+#stepService h3{
+  font-size:14px;
+  font-weight:500;
+  letter-spacing:0;
+}
+@media(max-width:420px){
+  #stepService .card{min-width:140px;width:140px;height:170px;padding:13px}
+  #stepService .service-name{font-size:16px;max-width:108px}
+  #stepService .service-meta{font-size:13px}
+  #stepService .check{width:32px;height:32px;top:11px;right:11px}
+  #stepService .service-icon{font-size:22px;left:14px;top:16px}
 }
