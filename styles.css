@@ -541,3 +541,54 @@ h3{margin-bottom:12px;font-size:13px;letter-spacing:.5px;font-weight:800;color:#
   #stepDate .times{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:10px !important}
   #stepDate .time-btn{height:55px !important;font-size:16px !important;border-radius:14px !important}
 }
+
+/* V30 — serviços menores e quadradinho branco menor */
+#stepService .cards.horizontal{
+  gap:10px !important;
+}
+#stepService .card{
+  min-width:112px !important;
+  width:112px !important;
+  flex-basis:112px !important;
+  height:132px !important;
+  padding:11px 10px 12px !important;
+  border-radius:18px !important;
+}
+#stepService .check{
+  width:24px !important;
+  height:24px !important;
+  top:10px !important;
+  right:10px !important;
+  border-radius:7px !important;
+}
+#stepService .card.selected .check::after{
+  font-size:14px !important;
+  border-radius:7px !important;
+}
+#stepService .service-icon{
+  width:22px !important;
+  height:22px !important;
+  top:12px !important;
+  left:11px !important;
+  font-size:18px !important;
+}
+#stepService .service-name{
+  font-size:14px !important;
+  line-height:1.08 !important;
+  max-width:94px !important;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+#stepService .service-meta{
+  margin-top:7px !important;
+  gap:5px !important;
+  font-size:11.5px !important;
+}
+@media(max-width:420px){
+  #stepService .card{
+    min-width:108px !important;
+    width:108px !important;
+    flex-basis:108px !important;
+    height:128px !important;
+  }
+}
