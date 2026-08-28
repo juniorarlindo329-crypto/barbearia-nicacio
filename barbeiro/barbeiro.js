@@ -143,16 +143,6 @@ function linkPage(){
        <button id="shareMore" type="button"><span class="share-icon more">•••</span><b>Mais</b></button>
      </div>
    </section>
-   <div id="qrPanel" class="qr-panel hidden">
-     <div class="qr-card">
-       <button id="closeQr" class="qr-close" type="button" aria-label="Fechar QR Code">✕</button>
-       <h3>QR Code do agendamento</h3>
-       <p>Aponte a câmera do celular para abrir o aplicativo do cliente.</p>
-       <img id="qrImage" alt="QR Code para o aplicativo da Barbearia Nicácio">
-       <strong>Barbearia Nicácio</strong>
-       <small>${clientUrl}</small>
-     </div>
-   </div>
  </div>`);
  $('#modal').classList.add('link-modal');
  const closeLink=()=>{$('#modal').classList.remove('link-modal');closeModal()};
@@ -166,10 +156,47 @@ function linkPage(){
  $('#shareWhats').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(shareText+' '+clientUrl),'_blank','noopener');
  $('#shareFacebook').onclick=()=>window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(clientUrl),'_blank','noopener');
  $('#shareMore').onclick=async()=>{if(navigator.share){try{await navigator.share({title:'Barbearia Nicácio',text:shareText,url:clientUrl})}catch(e){if(e&&e.name!=='AbortError')toast('Não foi possível compartilhar')}}else copyClientLink()};
- $('#showQr').onclick=()=>{$('#qrImage').src='https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=18&data='+encodeURIComponent(clientUrl);$('#qrPanel').classList.remove('hidden')};
- $('#closeQr').onclick=()=>$('#qrPanel').classList.add('hidden');
- $('#qrPanel').addEventListener('click',e=>{if(e.target.id==='qrPanel')$('#qrPanel').classList.add('hidden')});
+ $('#showQr').onclick=()=>openQrExport(clientUrl);
 }
+
+function qrApiUrl(clientUrl,format='png',size=900){
+ return 'https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&margin=22&format='+encodeURIComponent(format)+'&data='+encodeURIComponent(clientUrl);
+}
+async function downloadQr(clientUrl,format){
+ const ext=format==='svg'?'svg':'png';
+ const url=qrApiUrl(clientUrl,ext,1200);
+ const filename='qrcode-barbearia-nicacio.'+ext;
+ try{
+   const response=await fetch(url,{mode:'cors',cache:'no-store'});
+   if(!response.ok) throw new Error('Falha ao gerar QR');
+   const blob=await response.blob();
+   const objectUrl=URL.createObjectURL(blob);
+   const a=document.createElement('a');
+   a.href=objectUrl;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+   setTimeout(()=>URL.revokeObjectURL(objectUrl),1500);
+   toast('QR Code exportado em '+ext.toUpperCase());
+ }catch(err){
+   // Fallback para aparelhos/navegadores que bloqueiam download cross-origin.
+   window.open(url,'_blank','noopener');
+   toast('QR Code aberto. Salve a imagem no aparelho.');
+ }
+}
+function openQrExport(clientUrl){
+ const content=$('#modalContent');
+ content.innerHTML=`<div class="qr-export-screen">
+   <button id="qrExportBack" class="qr-export-back" type="button" aria-label="Voltar">←</button>
+   <h2>Seu QRCode</h2>
+   <div class="qr-export-image-wrap"><img id="qrExportImage" alt="QR Code do aplicativo da Barbearia Nicácio" src="${qrApiUrl(clientUrl,'png',900)}"></div>
+   <div class="qr-export-actions">
+     <button id="exportQrSvg" type="button">Exportar como SVG</button>
+     <button id="exportQrPng" type="button">Exportar como PNG</button>
+   </div>
+ </div>`;
+ $('#qrExportBack').onclick=linkPage;
+ $('#exportQrSvg').onclick=()=>downloadQr(clientUrl,'svg');
+ $('#exportQrPng').onclick=()=>downloadQr(clientUrl,'png');
+}
+
 function openLinkConfig(){
  const cfg=linkConfig();
  const content=$('#modalContent');
