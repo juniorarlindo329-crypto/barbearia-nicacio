@@ -249,7 +249,34 @@ function formatActivityHours(hours){
  if(Math.abs(hours-Math.round(hours))<0.01)return`${Math.round(hours)} hrs`;
  return`${hours.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})} hrs`;
 }
-function cancelledPage(){const data=bookings().filter(b=>b.status==='cancelado').sort((a,b)=>(b.cancelledAt||'').localeCompare(a.cancelledAt||''));openModal('Cancelados',data.length?data.map(b=>`<div class="list-card"><h3>${escapeHtml(b.clientName||'Cliente')}</h3><p>${escapeHtml(b.serviceName)} • ${b.dateLabel||b.date} às ${b.time}</p></div>`).join(''):'<p>Nenhum cancelamento.</p>')}
+function cancelledSourceLabel(b){return ['barbeiro','manual','cliente'].includes(String(b.source||'').toLowerCase())?'CLIENTE':'APP'}
+function cancelledDateLabel(dateStr){
+ if(!dateStr)return'';const [y,m,d]=String(dateStr).split('-').map(Number);if(!y||!m||!d)return escapeHtml(dateStr);
+ return new Date(y,m-1,d).toLocaleDateString('pt-BR',{day:'numeric',month:'short',year:'numeric'}).replaceAll('.','');
+}
+function whatsappNumber(v){let n=normalizePhone(v);if(n.length===10||n.length===11)n='55'+n;return n}
+function whatsappSvg(){return `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16.04 3C8.85 3 3 8.73 3 15.78c0 2.25.6 4.45 1.74 6.37L3 28.5l6.55-1.7a13.18 13.18 0 0 0 6.48 1.68h.01C23.23 28.48 29 22.75 29 15.7 29 8.67 23.23 3 16.04 3Zm0 23.3c-2.06 0-4.08-.55-5.83-1.58l-.42-.25-3.89 1.01 1.04-3.72-.27-.43a10.4 10.4 0 0 1-1.62-5.55c0-5.85 4.93-10.6 10.99-10.6 6.05 0 10.92 4.72 10.92 10.52 0 5.85-4.87 10.6-10.92 10.6Zm6.02-7.92c-.33-.16-1.95-.94-2.25-1.05-.3-.1-.52-.16-.74.16-.22.32-.85 1.05-1.04 1.27-.19.21-.38.24-.71.08-.33-.16-1.39-.5-2.65-1.6-.98-.85-1.64-1.9-1.83-2.22-.19-.32-.02-.5.14-.66.15-.14.33-.37.49-.56.16-.18.22-.32.33-.53.11-.21.05-.4-.03-.56-.08-.16-.74-1.74-1.01-2.38-.27-.64-.54-.55-.74-.56h-.63c-.22 0-.57.08-.87.4-.3.32-1.15 1.1-1.15 2.68s1.18 3.11 1.34 3.32c.16.21 2.32 3.47 5.62 4.87.79.33 1.4.53 1.88.68.79.24 1.5.21 2.07.13.63-.09 1.95-.78 2.22-1.53.27-.75.27-1.39.19-1.53-.08-.13-.3-.21-.63-.37Z"/></svg>`}
+function renderCancelledCards(filter='all'){
+ const wrap=$('#cancelledList');if(!wrap)return;
+ let data=bookings().filter(b=>b.status==='cancelado').sort((a,b)=>(b.date+' '+(b.time||'')).localeCompare(a.date+' '+(a.time||'')));
+ if(filter==='app')data=data.filter(b=>cancelledSourceLabel(b)==='APP');
+ if(filter==='client')data=data.filter(b=>cancelledSourceLabel(b)==='CLIENTE');
+ wrap.innerHTML=data.length?data.map(b=>{const phone=whatsappNumber(b.clientPhone);return `<article class="cancelled-card">
+   <div class="cancelled-card-top"><b>${escapeHtml(b.time||'--:--')} - ${cancelledDateLabel(b.date)}</b><strong>${cancelledSourceLabel(b)}</strong></div>
+   <div class="cancelled-card-main"><div class="cancelled-person"><h3>${escapeHtml(b.clientName||'Cliente')}</h3><span>${escapeHtml(String(b.serviceName||'Serviço').toUpperCase())}</span></div>
+   <div class="cancelled-side">${phone?`<button class="cancelled-wa" data-phone="${phone}" aria-label="Abrir WhatsApp">${whatsappSvg()}</button>`:'<span class="cancelled-wa-placeholder"></span>'}<span class="cancelled-price">${money(b.price)}</span></div></div>
+  </article>`}).join(''):`<div class="cancelled-empty">Nenhum cancelamento encontrado.</div>`;
+ wrap.querySelectorAll('.cancelled-wa').forEach(btn=>btn.onclick=()=>window.open('https://wa.me/'+btn.dataset.phone,'_blank','noopener'));
+}
+function cancelledPage(){
+ openModal('',`<div class="cancelled-screen"><button id="cancelledBack" class="cancelled-back" aria-label="Voltar">←</button>
+  <div class="cancelled-eyebrow">Agendamentos</div><div class="cancelled-title-row"><h2>Cancelados</h2><select id="cancelledFilter" aria-label="Filtrar cancelados"><option value="all">MEUS CANCELADOS</option><option value="client">CLIENTE</option><option value="app">APP</option></select></div>
+  <div id="cancelledList" class="cancelled-list"></div></div>`);
+ $('#modal').classList.add('cancelled-modal');
+ $('#cancelledBack').onclick=()=>{$('#modal').classList.remove('cancelled-modal');closeModal()};
+ $('#cancelledFilter').onchange=e=>renderCancelledCards(e.target.value);
+ renderCancelledCards('all');
+}
 function revenuePage(){const valid=bookings().filter(b=>b.status!=='cancelado'),done=bookings().filter(b=>b.status==='concluido'),total=valid.reduce((s,b)=>s+Number(b.price||0),0),doneTotal=done.reduce((s,b)=>s+Number(b.price||0),0);openModal('Faturamento',`<div class="summary-box"><p>Agendado</p><div class="big">${money(total)}</div><p>${valid.length} agendamento(s)</p></div><div class="summary-box"><p>Concluído</p><div class="big">${money(doneTotal)}</div><p>${done.length} atendimento(s)</p></div>`)}
 function recurrencePage(){const rs=recurrings();openModal('Minhas recorrências',`${rs.length?rs.map((r,i)=>`<div class="list-card"><h3>${escapeHtml(r.clientName)}</h3><p>${escapeHtml(r.serviceName)} • toda ${r.frequency} semana(s) • ${r.time}</p><button class="small-btn danger del-rec" data-i="${i}">Excluir</button></div>`).join(''):'<p>Nenhuma recorrência.</p>'}<button id="addRec" class="primary-btn">+ NOVA RECORRÊNCIA</button>`);document.querySelectorAll('.del-rec').forEach(b=>b.onclick=()=>{const a=recurrings();a.splice(Number(b.dataset.i),1);saveRecurrings(a);recurrencePage()});$('#addRec').onclick=recurrenceEditor}
 function recurrenceEditor(){const opts=services().filter(s=>s.active!==false).map(s=>`<option>${escapeHtml(s.name)}</option>`).join('');openModal('Nova recorrência',`<form id="recForm"><div class="field"><label>Cliente</label><input id="rName" required></div><div class="field"><label>Telefone</label><input id="rPhone"></div><div class="field"><label>Serviço</label><select id="rService">${opts}</select></div><div class="field"><label>Primeira data</label><input id="rDate" type="date" required></div><div class="field"><label>Horário</label><input id="rTime" type="time" required></div><div class="field"><label>Repetir a cada</label><select id="rFreq"><option value="1">1 semana</option><option value="2">2 semanas</option><option value="4">4 semanas</option></select></div><button class="primary-btn">SALVAR RECORRÊNCIA</button></form>`);$('#recForm').onsubmit=e=>{e.preventDefault();const item={id:uuid(),clientName:$('#rName').value.trim(),phone:$('#rPhone').value.trim(),serviceName:$('#rService').value,startDate:$('#rDate').value,time:$('#rTime').value,frequency:Number($('#rFreq').value)};const a=recurrings();a.push(item);saveRecurrings(a);generateRecurring(item,8);recurrencePage();toast('Recorrência criada')}}
