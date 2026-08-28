@@ -383,3 +383,32 @@ body.client-editor-open{overflow:hidden}
 .cancelled-card-main{display:grid;grid-template-columns:minmax(0,1fr) 72px;gap:14px;align-items:end}.cancelled-person{min-width:0}.cancelled-person h3{font-size:25px;line-height:1.18;margin:0 0 7px;font-weight:700;overflow-wrap:anywhere}.cancelled-person span{display:block;font-size:17px;color:#c0c3c8}
 .cancelled-side{height:76px;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between}.cancelled-wa{width:42px;height:42px;border:0;background:transparent;color:#fff;padding:4px;cursor:pointer}.cancelled-wa svg{display:block;width:100%;height:100%;fill:currentColor}.cancelled-wa-placeholder{height:42px}.cancelled-price{font-size:17px;color:#c4c6ca;white-space:nowrap}.cancelled-empty{text-align:center;color:#959ca6;padding:55px 10px;font-size:17px}
 @media(max-width:560px){.cancelled-screen{padding:22px 14px 80px}.cancelled-back{margin-bottom:18px}.cancelled-eyebrow{font-size:17px}.cancelled-title-row{margin-bottom:24px}.cancelled-title-row h2{font-size:46px}.cancelled-title-row select{font-size:15px;max-width:46%}.cancelled-card{border-radius:20px;padding:17px 17px 16px;min-height:154px}.cancelled-card-top{margin-bottom:26px}.cancelled-card-top b,.cancelled-card-top strong{font-size:15px}.cancelled-person h3{font-size:23px}.cancelled-person span,.cancelled-price{font-size:16px}}
+
+/* V16 — correção Cancelados no celular: sem rolagem lateral e ícones proporcionais */
+.cancelled-modal,.cancelled-modal .modal-card,.cancelled-modal #modalContent,.cancelled-screen{
+  width:100%;max-width:100%;overflow-x:hidden;
+}
+.cancelled-screen{padding-left:14px;padding-right:14px}
+.cancelled-title-row{width:100%;min-width:0;align-items:flex-end}
+.cancelled-title-row h2{min-width:0;max-width:58%;font-size:clamp(34px,11vw,46px);white-space:nowrap}
+.cancelled-title-row select{min-width:0;max-width:42%;font-size:13px;white-space:nowrap;text-overflow:ellipsis}
+.cancelled-list,.cancelled-card,.cancelled-card-top,.cancelled-card-main,.cancelled-person,.cancelled-side{min-width:0;max-width:100%}
+.cancelled-card{width:100%;overflow:hidden}
+.cancelled-card-top b{min-width:0;overflow-wrap:anywhere}
+.cancelled-card-main{grid-template-columns:minmax(0,1fr) 58px;gap:8px}
+.cancelled-person h3,.cancelled-person span{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.cancelled-side{width:58px;height:68px}
+.cancelled-wa{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;max-width:34px!important;max-height:34px!important;padding:3px!important;border-radius:50%;display:grid;place-items:center;flex:0 0 34px}
+.cancelled-wa svg{width:27px!important;height:27px!important;min-width:27px!important;min-height:27px!important;max-width:27px!important;max-height:27px!important;display:block}
+.cancelled-wa-placeholder{width:34px;height:34px}
+.cancelled-price{font-size:15px;max-width:58px;text-align:right;overflow:hidden;text-overflow:clip}
+@media(max-width:380px){
+  .cancelled-screen{padding-left:10px;padding-right:10px}
+  .cancelled-title-row{gap:6px}
+  .cancelled-title-row h2{font-size:36px;max-width:60%}
+  .cancelled-title-row select{font-size:11px;max-width:40%}
+  .cancelled-card{padding:15px 14px}
+  .cancelled-card-main{grid-template-columns:minmax(0,1fr) 54px}
+  .cancelled-person h3{font-size:21px}
+  .cancelled-person span{font-size:14px}
+}
