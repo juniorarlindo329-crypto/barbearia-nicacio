@@ -1,3 +1,8 @@
+// V4: sempre abre no topo, igual à referência
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+window.addEventListener('pageshow',()=>{ requestAnimationFrame(()=>window.scrollTo(0,0)); });
+window.scrollTo(0,0);
+
 const DEFAULT_SERVICES=[
 {name:'Corte',price:30,duration:30,active:true},{name:'Barba',price:20,duration:30,active:true},{name:'Corte+Barba',price:45,duration:60,active:true},{name:'Corte+Sobrancelha',price:40,duration:30,active:true},{name:'Corte+Barba+Sobra',price:50,duration:60,active:true},{name:'Barba+Sobrancelha',price:30,duration:30,active:true},{name:'Corte +Alisante ou pintura',price:60,duration:60,active:true},{name:'Alisante ou pintura',price:30,duration:30,active:true},{name:'Closed',price:0,duration:60,active:false},{name:'CMT',price:38,duration:10,active:true},{name:'CS',price:12,duration:10,active:true}
 ];

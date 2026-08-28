@@ -32,3 +32,49 @@
   .week-title-row{grid-template-columns:36px minmax(0,1fr) 36px!important}
   .nav-arrow{width:36px!important;height:44px!important;font-size:39px!important}
 }
+
+
+/* V4 — visual alinhado à FOTO 2 + topo sempre visível ao abrir */
+html,body{scroll-behavior:auto;overflow-x:hidden}
+body{background:#151922}
+.barber-app{max-width:820px;margin:0 auto;padding:30px 24px 116px;background:#151922}
+.barber-top{min-height:104px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.hello-block{padding-top:2px}
+.barber-top h1{font-size:31px!important;line-height:1.08!important;font-weight:400!important;margin:0 0 8px!important;color:#f7f7f8!important}
+.agenda-selector{font-size:16px!important;color:#d3d6de!important;line-height:1.25!important}
+.top-actions{gap:12px}
+.icon-btn{width:58px;height:58px;border-radius:20px;background:#222731;font-size:25px}
+.week-head{margin-top:12px}
+.week-title-row{grid-template-columns:48px minmax(0,1fr) 48px!important;gap:10px!important}
+.week-title{font-size:21px!important;line-height:1.25!important;font-weight:800!important}
+.nav-arrow{width:48px!important;height:52px!important;font-size:46px!important;color:#c4c8d0!important}
+.week-days{gap:8px!important;margin-top:18px!important}
+.day-btn{height:92px;border-radius:20px;background:#2c323d;padding:10px 3px;color:#aeb4bd}
+.day-btn span{font-size:11px}.day-btn strong{font-size:24px;margin:6px 0 1px}.day-btn small{font-size:10px}
+.day-btn.active{background:linear-gradient(145deg,#e89968,#c97650);color:#fff}
+.stats-grid{gap:14px;margin-top:36px}
+.stat-card{min-height:174px;border-radius:30px;padding:24px 20px}
+.stat-card strong{font-size:20px}.money-line{margin-top:12px}.money-line b{font-size:16px}.stat-number{font-size:54px;margin-top:21px}
+.timeline-wrap{margin-top:40px}.timeline-top h2{font-size:21px}.timeline-top p{font-size:13px;margin-top:6px}.mini-btn{font-size:12px;padding:12px 15px;border-radius:15px}
+.timeline{margin-top:20px}.slot-row{min-height:118px;padding-left:74px}.slot-time{font-size:13px}.empty-slot{font-size:13px;padding-top:26px}
+.bottom-actions{width:min(790px,calc(100% - 32px));bottom:14px;grid-template-columns:116px 1fr;gap:14px}.lock-btn,.new-booking-btn{height:78px;border-radius:27px}.new-booking-btn{font-size:18px;padding:0 30px}.new-booking-btn span{font-size:38px}
+@media(max-width:560px){
+ .barber-app{padding:24px 14px 112px}
+ .barber-top{min-height:102px}
+ .barber-top h1{font-size:30px!important;margin-bottom:7px!important}
+ .agenda-selector{font-size:15px!important}
+ .icon-btn{width:56px;height:56px;border-radius:19px}
+ .week-head{margin-top:10px}
+ .week-title-row{grid-template-columns:42px minmax(0,1fr) 42px!important}
+ .week-title{font-size:20px!important}
+ .nav-arrow{width:42px!important;height:50px!important;font-size:43px!important}
+ .week-days{gap:6px!important;margin-top:17px!important}
+ .day-btn{height:88px;border-radius:18px}
+ .day-btn span{font-size:10px}.day-btn strong{font-size:23px}
+ .stats-grid{gap:10px;margin-top:34px}
+ .stat-card{min-height:168px;border-radius:28px;padding:22px 18px}
+ .stat-card strong{font-size:19px}.stat-number{font-size:52px}
+ .timeline-wrap{margin-top:36px}.timeline-top h2{font-size:19px}.timeline-top p{font-size:12px}.mini-btn{font-size:11px;padding:11px 12px}
+ .slot-row{padding-left:62px;min-height:112px}
+ .bottom-actions{grid-template-columns:98px 1fr;width:calc(100% - 28px);gap:10px}.lock-btn,.new-booking-btn{height:72px}.new-booking-btn{font-size:17px;padding:0 24px}
+}
