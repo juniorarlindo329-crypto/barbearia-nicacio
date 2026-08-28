@@ -23,16 +23,44 @@ function animateConversation(container){
 }
 function showConversation(id){show(id);animateConversation(id)}
 
+function saveProfilePatch(patch){
+ const old=getProfile();
+ localStorage.setItem('nicacio_profile',JSON.stringify({...old,...patch}));
+}
+function showPhoneStep(next='service'){
+ window.nicacioPhoneNext=next;
+ const profile=getProfile();
+ if(profile?.phone) $('#clientPhone').value=profile.phone;
+ $('#finishBooking').disabled=$('#clientPhone').value.replace(/\D/g,'').length<8;
+ showConversation('#stepPhone');
+}
 function playIntro(){
  const w=$('#welcomeBubble'),q=$('#nameQuestion'),s=$('#stepName'),profile=getProfile();
  setTimeout(()=>w?.classList.add('show'),180);
- if(hasSavedClient()){
+ if(profile?.name?.trim() && profile?.phone?.trim()){
+   clientName=profile.name.trim();
+   q?.classList.add('hidden');
+   s?.classList.add('hidden');
+   setTimeout(()=>{
+     $('#savedWelcome').textContent=`Como vai, ${clientName}, tudo bem? Seus dados já estão salvos neste aparelho.`;
+     showConversation('#stepSavedWelcome');
+   },850);
+   return;
+ }
+ if(profile?.name?.trim()){
    clientName=profile.name.trim();
    q?.classList.add('hidden');
    s?.classList.add('hidden');
    $('#nameReply').textContent=clientName;
    $('#howAreYou').textContent=`Como vai, ${clientName}, tudo bem?`;
-   setTimeout(()=>showConversation('#stepNotify'),900);
+   setTimeout(()=>{
+     if('Notification' in window && Notification.permission==='granted'){
+       saveProfilePatch({notifications:'granted'});
+       showPhoneStep('service');
+     }else{
+       showConversation('#stepNotify');
+     }
+   },850);
    return;
  }
  setTimeout(()=>q?.classList.add('show'),850);
@@ -48,19 +76,29 @@ $('#sendName')?.addEventListener('click',()=>{
    if(!warn){warn=document.createElement('div');warn.id='nameWarning';warn.className='bubble bot';warn.textContent='Digite seu nome e seu sobrenome, por favor.';$('#stepName').prepend(warn)}
    warn.classList.remove('conversation-arrive');void warn.offsetWidth;warn.classList.add('conversation-arrive');scrollDown();return;
  }
+ // Salva o nome imediatamente no aparelho do cliente.
+ saveProfilePatch({name:clientName});
  hide('#stepName'); $('#nameReply').textContent=clientName; $('#howAreYou').textContent=`Como vai, ${clientName}, tudo bem?`; showConversation('#stepNotify');
 });
 async function notificationStep(){
+ let permission='unsupported';
  if('Notification' in window){
-   try{const permission=await Notification.requestPermission();
+   try{
+     permission=await Notification.requestPermission();
+     saveProfilePatch({notifications:permission});
      if(permission==='granted'){$('#enableNotifications').textContent='✓ NOTIFICAÇÕES ATIVADAS';}
      else{$('#enableNotifications').textContent='NOTIFICAÇÕES NÃO ATIVADAS';}
-   }catch(e){}
+   }catch(e){saveProfilePatch({notifications:'error'})}
  }
- setTimeout(()=>{hide('#stepNotify');showConversation('#stepService')},500);
+ setTimeout(()=>{hide('#stepNotify');showPhoneStep('service')},500);
 }
 $('#enableNotifications')?.addEventListener('click',notificationStep);
-$('#continueWithoutNotifications')?.addEventListener('click',()=>{hide('#stepNotify');showConversation('#stepService')});
+$('#continueWithoutNotifications')?.addEventListener('click',()=>{
+ saveProfilePatch({notifications:'skipped'});
+ hide('#stepNotify');
+ showPhoneStep('service');
+});
+$('#continueSaved')?.addEventListener('click',()=>{hide('#stepSavedWelcome');showConversation('#stepService')});
 
 function renderServices(){servicesEl.innerHTML='';SERVICES.forEach(s=>{const el=document.createElement('button');el.type='button';el.className='card';el.innerHTML=`<span class="check"></span><div class="service-name">${s.name}</div><div class="service-meta"><span>${money(s.price)}</span><span>${s.duration===60?'1hr':s.duration+'min'}</span></div>`;el.onclick=()=>{selectedService=s;[...servicesEl.children].forEach(c=>c.classList.remove('selected'));el.classList.add('selected');$('#serviceNext').disabled=false};servicesEl.appendChild(el)})}
 function dateChoices(){const out=[],names=['DOM','SEG','TER','QUA','QUI','SEX','SAB'],months=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];const now=new Date();now.setHours(0,0,0,0);const end=new Date(now.getFullYear(),now.getMonth()+4,0);const cursor=new Date(now);let i=0;while(cursor<=end){const d=new Date(cursor),key=localDateKey(d),sunday=d.getDay()===0,manualBlock=isBlockedDay(key);out.push({d,key,dow:names[d.getDay()],month:months[d.getMonth()],label:i===0?'HOJE':String(d.getDate()).padStart(2,'0'),disabled:sunday||manualBlock,sunday,manualBlock});cursor.setDate(cursor.getDate()+1);i++}return out}
@@ -84,10 +122,19 @@ $('#confirmDate')?.addEventListener('click',()=>{
    completeBooking(profile.phone);
    return;
  }
- hide('#stepDate');show('#stepPhone');if(profile?.phone)$('#clientPhone').value=profile.phone;$('#finishBooking').disabled=$('#clientPhone').value.replace(/\D/g,'').length<8;animateConversation('#stepPhone');
+ hide('#stepDate');
+ showPhoneStep('complete');
 });
 $('#clientPhone')?.addEventListener('input',e=>{$('#finishBooking').disabled=e.target.value.replace(/\D/g,'').length<8});
-$('#finishBooking')?.addEventListener('click',()=>completeBooking($('#clientPhone').value));
+$('#finishBooking')?.addEventListener('click',()=>{
+ const phone=$('#clientPhone').value.trim();
+ if(phone.replace(/\D/g,'').length<8)return;
+ // Salva o telefone imediatamente no aparelho do cliente.
+ saveProfilePatch({name:clientName||getProfile().name||'',phone});
+ hide('#stepPhone');
+ if(window.nicacioPhoneNext==='complete') completeBooking(phone);
+ else showConversation('#stepService');
+});
 $('#newBooking')?.addEventListener('click',()=>location.reload());
 renderServices();playIntro();
-let deferredInstallPrompt=null;const installBtn=$('#installAppBtn');window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;installBtn?.classList.remove('hidden')});installBtn?.addEventListener('click',async()=>{if(!deferredInstallPrompt){alert('No Chrome, toque no menu ⋮ e escolha "Adicionar à tela inicial" ou "Instalar app".');return}deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installBtn.classList.add('hidden')});window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;installBtn?.classList.add('hidden')});if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=21').catch(()=>{}));
+let deferredInstallPrompt=null;const installBtn=$('#installAppBtn');window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;installBtn?.classList.remove('hidden')});installBtn?.addEventListener('click',async()=>{if(!deferredInstallPrompt){alert('No Chrome, toque no menu ⋮ e escolha "Adicionar à tela inicial" ou "Instalar app".');return}deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installBtn.classList.add('hidden')});window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;installBtn?.classList.add('hidden')});if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js?v=22').catch(()=>{}));

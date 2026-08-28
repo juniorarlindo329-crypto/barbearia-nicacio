@@ -1,16 +1,6 @@
-BARBEARIA NICÁCIO PRO
+Barbearia Nicácio V22
 
-Projeto separado do aplicativo do cliente.
-
-Arquivos principais:
-- index.html
-- barbeiro.css
-- barbeiro.js
-- manifest.json
-
-Sugestão de hospedagem:
-- GitHub: novo repositório 'barbearia-nicacio-pro'
-- Render: novo Static Site separado
-
-Exemplo de URL:
-https://barbearia-nicacio-pro.onrender.com
+Atualização: nome, estado das notificações e telefone ficam salvos no aparelho.
+Na primeira vez: nome + notificações + telefone, depois serviço/dia/horário.
+Nas próximas visitas, os dados salvos são reutilizados automaticamente.
+Não é necessário substituir a pasta barbeiro para esta atualização.

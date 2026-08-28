@@ -1,5 +1,5 @@
-const CACHE='nicacio-v16';
-const CORE=['./','./index.html','./styles.css?v=16','./app.js?v=16','./manifest.json','./icon-192.png','./icon-512.png'];
+const CACHE='nicacio-v22';
+const CORE=['./','./index.html','./styles.css?v=22','./app.js?v=22','./manifest.json','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install', event => {
   self.skipWaiting();

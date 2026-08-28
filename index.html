@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#111722" />
   <title>Barbearia Nicácio</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="styles.css?v=21" />
+  <link rel="stylesheet" href="styles.css?v=22" />
 </head>
 <body>
   <main class="app">
@@ -36,6 +36,11 @@
         <button id="continueWithoutNotifications" class="secondary">Continuar</button>
       </div>
 
+      <div id="stepSavedWelcome" class="step hidden">
+        <div id="savedWelcome" class="bubble bot"></div>
+        <button id="continueSaved" class="primary">CONTINUAR</button>
+      </div>
+
       <div id="stepService" class="step hidden">
         <div class="bubble bot">Por qual serviço você está procurando?</div>
         <div class="step-progress"><span class="active"></span><span></span><span></span></div>
@@ -61,7 +66,7 @@
       </div>
 
       <div id="stepPhone" class="step hidden chat-form-card">
-        <div class="bubble bot">Que bom, qual seu telefone?</div>
+        <div class="bubble bot">Que bom, qual seu telefone? Vou deixar seu nome e telefone salvos neste aparelho para você não precisar digitar novamente.</div>
         <label for="clientPhone">SEU TELEFONE:</label>
         <input id="clientPhone" class="chat-input" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ex.: (33) 99999-9999" />
         <button id="finishBooking" class="primary" disabled>Enviar</button>
@@ -74,6 +79,6 @@
     </section>
   </main>
 
-  <script src="app.js?v=21"></script>
+  <script src="app.js?v=22"></script>
 </body>
 </html>
