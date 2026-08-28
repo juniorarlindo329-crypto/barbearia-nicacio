@@ -6,7 +6,7 @@ window.scrollTo(0,0);
 const DEFAULT_SERVICES=[
 {name:'Corte',price:30,duration:30,active:true},{name:'Barba',price:20,duration:30,active:true},{name:'Corte+Barba',price:45,duration:60,active:true},{name:'Corte+Sobrancelha',price:40,duration:30,active:true},{name:'Corte+Barba+Sobra',price:50,duration:60,active:true},{name:'Barba+Sobrancelha',price:30,duration:30,active:true},{name:'Corte +Alisante ou pintura',price:60,duration:60,active:true},{name:'Alisante ou pintura',price:30,duration:30,active:true},{name:'Closed',price:0,duration:60,active:false},{name:'CMT',price:38,duration:10,active:true},{name:'CS',price:12,duration:10,active:true}
 ];
-const KEYS={bookings:'nicacio_bookings',blocked:'nicacio_blocked_days',settings:'nicacio_barber_settings',services:'nicacio_services',closedSlots:'nicacio_closed_slots',recurrence:'nicacio_barber_recurring',barber:'nicacio_barber_profile'};
+const KEYS={bookings:'nicacio_bookings',blocked:'nicacio_blocked_days',settings:'nicacio_barber_settings',services:'nicacio_services',closedSlots:'nicacio_closed_slots',recurrence:'nicacio_barber_recurring',barber:'nicacio_barber_profile',linkConfig:'nicacio_link_config'};
 const $=s=>document.querySelector(s);
 let currentWeekStart=startOfWeek(new Date()),selectedDate=new Date(),valuesHidden=false;
 
@@ -106,8 +106,20 @@ function recurrencePage(){const rs=recurrings();openModal('Minhas recorrências'
 function recurrenceEditor(){const opts=services().filter(s=>s.active!==false).map(s=>`<option>${escapeHtml(s.name)}</option>`).join('');openModal('Nova recorrência',`<form id="recForm"><div class="field"><label>Cliente</label><input id="rName" required></div><div class="field"><label>Telefone</label><input id="rPhone"></div><div class="field"><label>Serviço</label><select id="rService">${opts}</select></div><div class="field"><label>Primeira data</label><input id="rDate" type="date" required></div><div class="field"><label>Horário</label><input id="rTime" type="time" required></div><div class="field"><label>Repetir a cada</label><select id="rFreq"><option value="1">1 semana</option><option value="2">2 semanas</option><option value="4">4 semanas</option></select></div><button class="primary-btn">SALVAR RECORRÊNCIA</button></form>`);$('#recForm').onsubmit=e=>{e.preventDefault();const item={id:uuid(),clientName:$('#rName').value.trim(),phone:$('#rPhone').value.trim(),serviceName:$('#rService').value,startDate:$('#rDate').value,time:$('#rTime').value,frequency:Number($('#rFreq').value)};const a=recurrings();a.push(item);saveRecurrings(a);generateRecurring(item,8);recurrencePage();toast('Recorrência criada')}}
 function generateRecurring(r,count){const srv=services().find(s=>s.name===r.serviceName);if(!srv)return;const all=bookings(),base=new Date(r.startDate+'T12:00:00');for(let i=0;i<count;i++){const d=addDays(base,i*r.frequency*7),date=key(d);if(d.getDay()===0||blockedDays().includes(date)||all.some(b=>b.date===date&&b.time===r.time&&b.status!=='cancelado'))continue;all.push({id:uuid(),clientName:r.clientName,clientPhone:r.phone,serviceName:srv.name,price:srv.price,duration:srv.duration,date,dateLabel:d.toLocaleDateString('pt-BR'),time:r.time,status:'confirmado',source:'recorrencia',recurrenceId:r.id})}saveBookings(all);renderAll()}
 function settingsPage(){const s=settings(),p=load(KEYS.barber,{name:'Nicácio'});openModal('Configurações',`<form id="settingsForm"><div class="field"><label>Nome exibido</label><input id="setName" value="${escapeHtml(p.name||'Nicácio')}"></div><div class="field"><label>Início do expediente</label><input id="setStart" type="time" value="${s.start}"></div><div class="field"><label>Fim do expediente</label><input id="setEnd" type="time" value="${s.end}"></div><div class="field"><label>Intervalo da agenda</label><select id="setInterval"><option value="10" ${s.interval==10?'selected':''}>10 minutos</option><option value="20" ${s.interval==20?'selected':''}>20 minutos</option><option value="30" ${s.interval==30?'selected':''}>30 minutos</option><option value="60" ${s.interval==60?'selected':''}>60 minutos</option></select></div><button class="primary-btn">SALVAR CONFIGURAÇÕES</button></form>`);$('#settingsForm').onsubmit=e=>{e.preventDefault();saveSettings({start:$('#setStart').value,end:$('#setEnd').value,interval:Number($('#setInterval').value)});save(KEYS.barber,{name:$('#setName').value.trim()||'Nicácio'});closeModal();renderAll();toast('Configurações salvas')}}
+function linkConfig(){
+ const base={
+  enabled:true,slug:'',maxDays:90,minLead:10,accent:'#c67d59',anonymous:true,waitlist:false,
+  allowCancel:true,cancelLead:15,gif:true,extraText:'AVISO DE ATRASOS.\n\nTOLERÂNCIA MÁXIMA DE ATRASO SERÁ DE 5 MINUTOS APENAS.\nCANCELE OU AVISE ANTES DO HORÁRIO MARCADO.'
+ };
+ return {...base,...load(KEYS.linkConfig,{})};
+}
+function saveLinkConfig(v){save(KEYS.linkConfig,v)}
+function publicClientUrl(){
+ const c=linkConfig(),base='https://barbearia-nicacio.onrender.com/';
+ return c.slug?base+'?agenda='+encodeURIComponent(c.slug):base;
+}
 function linkPage(){
- const clientUrl='https://barbearia-nicacio.onrender.com/';
+ const cfg=linkConfig(),clientUrl=publicClientUrl();
  const shareText='Agende seu horário na Barbearia Nicácio:';
  openModal('',`<div class="link-screen">
    <button id="linkBack" class="link-back" type="button" aria-label="Voltar">←</button>
@@ -121,7 +133,7 @@ function linkPage(){
        <button id="copyLink" class="copy-link-btn" type="button">Copiar link</button>
      </div>
      <div class="link-status-row">
-       <span><i class="online-dot"></i> Seu link está online</span>
+       <span><i class="online-dot ${cfg.enabled?'':'offline-dot'}"></i> ${cfg.enabled?'Seu link está online':'Seu link está desativado'}</span>
        <button id="configureLink" type="button">Configurar link</button>
      </div>
      <div class="share-actions">
@@ -147,43 +159,70 @@ function linkPage(){
  $('#linkBack').onclick=closeLink;
  const copyClientLink=async()=>{
    try{await navigator.clipboard.writeText(clientUrl);toast('Link copiado')}
-   catch{
-     const ta=document.createElement('textarea');ta.value=clientUrl;document.body.appendChild(ta);ta.select();
-     try{document.execCommand('copy');toast('Link copiado')}catch{toast('Não foi possível copiar')}
-     ta.remove();
-   }
+   catch{const ta=document.createElement('textarea');ta.value=clientUrl;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Link copiado')}catch{toast('Não foi possível copiar')}ta.remove()}
  };
  $('#copyLink').onclick=copyClientLink;
- $('#configureLink').onclick=()=>openLinkConfig(clientUrl);
+ $('#configureLink').onclick=openLinkConfig;
  $('#shareWhats').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(shareText+' '+clientUrl),'_blank','noopener');
  $('#shareFacebook').onclick=()=>window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(clientUrl),'_blank','noopener');
- $('#shareMore').onclick=async()=>{
-   if(navigator.share){try{await navigator.share({title:'Barbearia Nicácio',text:shareText,url:clientUrl})}catch(e){if(e&&e.name!=='AbortError')toast('Não foi possível compartilhar')}}
-   else copyClientLink();
- };
- $('#showQr').onclick=()=>{
-   $('#qrImage').src='https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=18&data='+encodeURIComponent(clientUrl);
-   $('#qrPanel').classList.remove('hidden');
- };
+ $('#shareMore').onclick=async()=>{if(navigator.share){try{await navigator.share({title:'Barbearia Nicácio',text:shareText,url:clientUrl})}catch(e){if(e&&e.name!=='AbortError')toast('Não foi possível compartilhar')}}else copyClientLink()};
+ $('#showQr').onclick=()=>{$('#qrImage').src='https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=18&data='+encodeURIComponent(clientUrl);$('#qrPanel').classList.remove('hidden')};
  $('#closeQr').onclick=()=>$('#qrPanel').classList.add('hidden');
  $('#qrPanel').addEventListener('click',e=>{if(e.target.id==='qrPanel')$('#qrPanel').classList.add('hidden')});
 }
-function openLinkConfig(clientUrl){
+function openLinkConfig(){
+ const cfg=linkConfig();
  const content=$('#modalContent');
- content.innerHTML=`<div class="link-screen link-config-screen">
-   <button id="configBack" class="link-back" type="button" aria-label="Voltar">←</button>
-   <div class="link-eyebrow">Meu link</div>
-   <h2 class="link-title">Configurar link</h2>
-   <section class="config-link-card">
-     <h3>Link do aplicativo do cliente</h3>
-     <p>Este é o endereço oficial que seus clientes usarão para fazer agendamentos.</p>
-     <div class="configured-url">${clientUrl}</div>
-     <div class="online-config"><i class="online-dot"></i><span>Online e pronto para compartilhar</span></div>
-     <button id="openClientApp" class="primary-btn" type="button">ABRIR APLICATIVO DO CLIENTE</button>
-   </section>
- </div>`;
+ content.innerHTML=`<form id="linkConfigForm" class="link-config-form">
+  <div class="config-topbar"><button id="configBack" class="link-back" type="button" aria-label="Voltar">←</button><div><div class="link-eyebrow">Meu link</div><h2 class="link-title">Configurar link</h2><p>Ajuste os campos abaixo para configurar parâmetros de seu link.</p></div></div>
+
+  <section class="config-switch-card"><label class="switch-row"><span class="switch"><input id="lcEnabled" type="checkbox" ${cfg.enabled?'checked':''}><i></i></span><b>Receber agendamentos pelo link</b></label><p>Desativando essa função você estará desligando seu link de agendamento.</p></section>
+
+  <label class="config-label">LINK PERSONALIZADO</label>
+  <div class="slug-row"><span>barbearia-nicacio.onrender.com/?agenda=</span><input id="lcSlug" maxlength="30" placeholder="seu-link-de-agendamento" value="${escapeHtml(cfg.slug||'')}"></div>
+  <p class="config-help">Escolha um nome único para o seu link e torne sua página mais profissional.</p>
+
+  <label class="config-label">PERÍODO MÁXIMO PARA AGENDAR</label>
+  <select id="lcMaxDays" class="config-select">
+   ${[30,60,90,120,180].map(n=>`<option value="${n}" ${Number(cfg.maxDays)===n?'selected':''}>Até ${n} dias corridos no futuro</option>`).join('')}
+  </select>
+  <p class="config-help">O tempo máximo futuro em que a agenda fica disponível para o cliente agendar um horário.</p>
+
+  <label class="config-label">ANTECEDÊNCIA MÍNIMA PARA AGENDAR</label>
+  <select id="lcMinLead" class="config-select">
+   ${[0,10,15,30,60,120,240,1440].map(n=>`<option value="${n}" ${Number(cfg.minLead)===n?'selected':''}>${n===0?'Sem antecedência':n<60?n+' min antes':n===60?'1 hora antes':n===120?'2 horas antes':n===240?'4 horas antes':'1 dia antes'}</option>`).join('')}
+  </select>
+  <div class="config-help strong-help"><b>EVITE AGENDAMENTO EM CIMA DA HORA:</b><br>Configure um tempo mínimo para agendar, ou seja, o tempo mínimo necessário entre seu cliente agendar e o início do atendimento.</div>
+
+  <label class="config-label">COR PRINCIPAL DA PÁGINA DE AGENDAMENTO</label>
+  <div class="color-picker-row"><input id="lcAccent" type="color" value="${escapeHtml(cfg.accent||'#c67d59')}"><span id="colorPreview" style="background:${escapeHtml(cfg.accent||'#c67d59')}"></span></div>
+  <div class="config-help strong-help"><b>PERSONALIZE SUA PÁGINA DE AGENDAMENTO:</b><br>Configure uma cor principal para a caixa de texto do seu link de agendamento.</div>
+
+  <section class="config-switch-card"><label class="switch-row"><span class="switch"><input id="lcAnonymous" type="checkbox" ${cfg.anonymous?'checked':''}><i></i></span><b>Agendamento em modo anônimo</b></label><p>Seus clientes poderão agendar com navegador em modo anônimo ou privado?</p></section>
+  <section class="config-switch-card"><label class="switch-row"><span class="switch"><input id="lcWaitlist" type="checkbox" ${cfg.waitlist?'checked':''}><i></i></span><b>Lista de espera</b></label><p>Permitir que clientes se inscrevam em uma lista de espera quando todos os horários estiverem ocupados?</p></section>
+  <section class="config-switch-card"><label class="switch-row"><span class="switch"><input id="lcCancel" type="checkbox" ${cfg.allowCancel?'checked':''}><i></i></span><b>Cancelar agendamento pelo chat</b></label><p>Seus clientes poderão cancelar os agendamentos ainda em aberto em nome deles?</p></section>
+
+  <label class="config-label">ANTECEDÊNCIA PARA CANCELAMENTO</label>
+  <select id="lcCancelLead" class="config-select">
+    ${[0,10,15,30,60,120,240,1440].map(n=>`<option value="${n}" ${Number(cfg.cancelLead)===n?'selected':''}>${n===0?'A qualquer momento':n<60?'Até '+n+' min antes':n===60?'Até 1 hora antes':n===120?'Até 2 horas antes':n===240?'Até 4 horas antes':'Até 1 dia antes'}</option>`).join('')}
+  </select>
+  <div class="config-help strong-help"><b>EVITE CANCELAMENTOS EM CIMA DA HORA:</b><br>O tempo mínimo de antecedência para o cliente cancelar um agendamento.</div>
+
+  <section class="config-switch-card"><label class="switch-row"><span class="switch"><input id="lcGif" type="checkbox" ${cfg.gif?'checked':''}><i></i></span><b>GIF no final do chat</b></label><p>Seus clientes verão um GIF de comemoração após a confirmação do agendamento?</p></section>
+
+  <label class="config-label config-counter-label">TEXTO ADICIONAL <span id="textCounter">${String(cfg.extraText||'').length}/120</span></label>
+  <textarea id="lcExtraText" class="config-textarea" maxlength="120" rows="7">${escapeHtml(cfg.extraText||'')}</textarea>
+  <div class="save-bar-wrap"><button class="config-save-btn" type="submit">SALVAR</button></div>
+ </form>`;
  $('#configBack').onclick=linkPage;
- $('#openClientApp').onclick=()=>window.open(clientUrl,'_blank','noopener');
+ const color=$('#lcAccent'),preview=$('#colorPreview');color.oninput=()=>preview.style.background=color.value;
+ const ta=$('#lcExtraText'),counter=$('#textCounter');ta.oninput=()=>counter.textContent=ta.value.length+'/120';
+ $('#lcSlug').addEventListener('input',e=>{e.target.value=e.target.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')});
+ $('#linkConfigForm').onsubmit=e=>{
+   e.preventDefault();
+   const next={enabled:$('#lcEnabled').checked,slug:$('#lcSlug').value.trim(),maxDays:Number($('#lcMaxDays').value),minLead:Number($('#lcMinLead').value),accent:$('#lcAccent').value,anonymous:$('#lcAnonymous').checked,waitlist:$('#lcWaitlist').checked,allowCancel:$('#lcCancel').checked,cancelLead:Number($('#lcCancelLead').value),gif:$('#lcGif').checked,extraText:$('#lcExtraText').value.trim()};
+   saveLinkConfig(next);toast('Configurações do link salvas');setTimeout(linkPage,350);
+ };
 }
 function helpPage(){openModal('Ajuda p/ configurar',`<div class="list-card"><h3>Configuração rápida</h3><p>Use <b>Serviços e preços</b> para alterar valores e duração. Em <b>Configurações</b>, ajuste o expediente e o intervalo dos horários. Para fechar um dia, selecione a data na agenda e toque em <b>Modificar este dia</b>.</p></div>`)}
 function reportPage(){openModal('Reportar erro',`<div class="list-card"><h3>Encontrou algum problema?</h3><p>Anote o que aconteceu, o horário e a tela onde ocorreu. Assim fica mais fácil corrigir sem perder seus agendamentos.</p><textarea id="errorText" class="field-input" rows="5" placeholder="Descreva o erro aqui..."></textarea></div><button id="saveError" class="primary-btn">SALVAR RELATO</button>`);$('#saveError').onclick=()=>{const t=$('#errorText').value.trim();if(!t)return toast('Descreva o erro');localStorage.setItem('nicacio_last_error_report',t);toast('Relato salvo neste aparelho');closeModal()}}
