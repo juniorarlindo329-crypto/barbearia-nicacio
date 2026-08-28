@@ -106,7 +106,85 @@ function recurrencePage(){const rs=recurrings();openModal('Minhas recorrências'
 function recurrenceEditor(){const opts=services().filter(s=>s.active!==false).map(s=>`<option>${escapeHtml(s.name)}</option>`).join('');openModal('Nova recorrência',`<form id="recForm"><div class="field"><label>Cliente</label><input id="rName" required></div><div class="field"><label>Telefone</label><input id="rPhone"></div><div class="field"><label>Serviço</label><select id="rService">${opts}</select></div><div class="field"><label>Primeira data</label><input id="rDate" type="date" required></div><div class="field"><label>Horário</label><input id="rTime" type="time" required></div><div class="field"><label>Repetir a cada</label><select id="rFreq"><option value="1">1 semana</option><option value="2">2 semanas</option><option value="4">4 semanas</option></select></div><button class="primary-btn">SALVAR RECORRÊNCIA</button></form>`);$('#recForm').onsubmit=e=>{e.preventDefault();const item={id:uuid(),clientName:$('#rName').value.trim(),phone:$('#rPhone').value.trim(),serviceName:$('#rService').value,startDate:$('#rDate').value,time:$('#rTime').value,frequency:Number($('#rFreq').value)};const a=recurrings();a.push(item);saveRecurrings(a);generateRecurring(item,8);recurrencePage();toast('Recorrência criada')}}
 function generateRecurring(r,count){const srv=services().find(s=>s.name===r.serviceName);if(!srv)return;const all=bookings(),base=new Date(r.startDate+'T12:00:00');for(let i=0;i<count;i++){const d=addDays(base,i*r.frequency*7),date=key(d);if(d.getDay()===0||blockedDays().includes(date)||all.some(b=>b.date===date&&b.time===r.time&&b.status!=='cancelado'))continue;all.push({id:uuid(),clientName:r.clientName,clientPhone:r.phone,serviceName:srv.name,price:srv.price,duration:srv.duration,date,dateLabel:d.toLocaleDateString('pt-BR'),time:r.time,status:'confirmado',source:'recorrencia',recurrenceId:r.id})}saveBookings(all);renderAll()}
 function settingsPage(){const s=settings(),p=load(KEYS.barber,{name:'Nicácio'});openModal('Configurações',`<form id="settingsForm"><div class="field"><label>Nome exibido</label><input id="setName" value="${escapeHtml(p.name||'Nicácio')}"></div><div class="field"><label>Início do expediente</label><input id="setStart" type="time" value="${s.start}"></div><div class="field"><label>Fim do expediente</label><input id="setEnd" type="time" value="${s.end}"></div><div class="field"><label>Intervalo da agenda</label><select id="setInterval"><option value="10" ${s.interval==10?'selected':''}>10 minutos</option><option value="20" ${s.interval==20?'selected':''}>20 minutos</option><option value="30" ${s.interval==30?'selected':''}>30 minutos</option><option value="60" ${s.interval==60?'selected':''}>60 minutos</option></select></div><button class="primary-btn">SALVAR CONFIGURAÇÕES</button></form>`);$('#settingsForm').onsubmit=e=>{e.preventDefault();saveSettings({start:$('#setStart').value,end:$('#setEnd').value,interval:Number($('#setInterval').value)});save(KEYS.barber,{name:$('#setName').value.trim()||'Nicácio'});closeModal();renderAll();toast('Configurações salvas')}}
-function linkPage(){openModal('Meu link',`<p>Compartilhe este endereço com seus clientes:</p><div class="field"><input id="clientLink" value="https://barbearia-nicacio.onrender.com" readonly></div><button id="copyLink" class="primary-btn">COPIAR LINK</button>`);$('#copyLink').onclick=async()=>{try{await navigator.clipboard.writeText($('#clientLink').value);toast('Link copiado')}catch{toast('Selecione e copie o link')}}}
+function linkPage(){
+ const clientUrl='https://barbearia-nicacio.onrender.com/';
+ const shareText='Agende seu horário na Barbearia Nicácio:';
+ openModal('',`<div class="link-screen">
+   <button id="linkBack" class="link-back" type="button" aria-label="Voltar">←</button>
+   <div class="link-eyebrow">Compartilhar</div>
+   <h2 class="link-title">Meu link</h2>
+   <section class="share-card">
+     <h3>Fale de sua agenda para seus clientes.</h3>
+     <p>Compartilhe seu link com seus clientes para que eles possam realizar o agendamento dos serviços.</p>
+     <div class="link-box">
+       <div id="clientLinkText" class="link-url">${clientUrl}</div>
+       <button id="copyLink" class="copy-link-btn" type="button">Copiar link</button>
+     </div>
+     <div class="link-status-row">
+       <span><i class="online-dot"></i> Seu link está online</span>
+       <button id="configureLink" type="button">Configurar link</button>
+     </div>
+     <div class="share-actions">
+       <button id="shareWhats" type="button"><span class="share-icon whatsapp">☎</span><b>WhatsApp</b></button>
+       <button id="showQr" type="button"><span class="share-icon qr">▦</span><b>QRCode</b></button>
+       <button id="shareFacebook" type="button"><span class="share-icon facebook">f</span><b>Facebook</b></button>
+       <button id="shareMore" type="button"><span class="share-icon more">•••</span><b>Mais</b></button>
+     </div>
+   </section>
+   <div id="qrPanel" class="qr-panel hidden">
+     <div class="qr-card">
+       <button id="closeQr" class="qr-close" type="button" aria-label="Fechar QR Code">✕</button>
+       <h3>QR Code do agendamento</h3>
+       <p>Aponte a câmera do celular para abrir o aplicativo do cliente.</p>
+       <img id="qrImage" alt="QR Code para o aplicativo da Barbearia Nicácio">
+       <strong>Barbearia Nicácio</strong>
+       <small>${clientUrl}</small>
+     </div>
+   </div>
+ </div>`);
+ $('#modal').classList.add('link-modal');
+ const closeLink=()=>{$('#modal').classList.remove('link-modal');closeModal()};
+ $('#linkBack').onclick=closeLink;
+ const copyClientLink=async()=>{
+   try{await navigator.clipboard.writeText(clientUrl);toast('Link copiado')}
+   catch{
+     const ta=document.createElement('textarea');ta.value=clientUrl;document.body.appendChild(ta);ta.select();
+     try{document.execCommand('copy');toast('Link copiado')}catch{toast('Não foi possível copiar')}
+     ta.remove();
+   }
+ };
+ $('#copyLink').onclick=copyClientLink;
+ $('#configureLink').onclick=()=>openLinkConfig(clientUrl);
+ $('#shareWhats').onclick=()=>window.open('https://wa.me/?text='+encodeURIComponent(shareText+' '+clientUrl),'_blank','noopener');
+ $('#shareFacebook').onclick=()=>window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(clientUrl),'_blank','noopener');
+ $('#shareMore').onclick=async()=>{
+   if(navigator.share){try{await navigator.share({title:'Barbearia Nicácio',text:shareText,url:clientUrl})}catch(e){if(e&&e.name!=='AbortError')toast('Não foi possível compartilhar')}}
+   else copyClientLink();
+ };
+ $('#showQr').onclick=()=>{
+   $('#qrImage').src='https://api.qrserver.com/v1/create-qr-code/?size=360x360&margin=18&data='+encodeURIComponent(clientUrl);
+   $('#qrPanel').classList.remove('hidden');
+ };
+ $('#closeQr').onclick=()=>$('#qrPanel').classList.add('hidden');
+ $('#qrPanel').addEventListener('click',e=>{if(e.target.id==='qrPanel')$('#qrPanel').classList.add('hidden')});
+}
+function openLinkConfig(clientUrl){
+ const content=$('#modalContent');
+ content.innerHTML=`<div class="link-screen link-config-screen">
+   <button id="configBack" class="link-back" type="button" aria-label="Voltar">←</button>
+   <div class="link-eyebrow">Meu link</div>
+   <h2 class="link-title">Configurar link</h2>
+   <section class="config-link-card">
+     <h3>Link do aplicativo do cliente</h3>
+     <p>Este é o endereço oficial que seus clientes usarão para fazer agendamentos.</p>
+     <div class="configured-url">${clientUrl}</div>
+     <div class="online-config"><i class="online-dot"></i><span>Online e pronto para compartilhar</span></div>
+     <button id="openClientApp" class="primary-btn" type="button">ABRIR APLICATIVO DO CLIENTE</button>
+   </section>
+ </div>`;
+ $('#configBack').onclick=linkPage;
+ $('#openClientApp').onclick=()=>window.open(clientUrl,'_blank','noopener');
+}
 function helpPage(){openModal('Ajuda p/ configurar',`<div class="list-card"><h3>Configuração rápida</h3><p>Use <b>Serviços e preços</b> para alterar valores e duração. Em <b>Configurações</b>, ajuste o expediente e o intervalo dos horários. Para fechar um dia, selecione a data na agenda e toque em <b>Modificar este dia</b>.</p></div>`)}
 function reportPage(){openModal('Reportar erro',`<div class="list-card"><h3>Encontrou algum problema?</h3><p>Anote o que aconteceu, o horário e a tela onde ocorreu. Assim fica mais fácil corrigir sem perder seus agendamentos.</p><textarea id="errorText" class="field-input" rows="5" placeholder="Descreva o erro aqui..."></textarea></div><button id="saveError" class="primary-btn">SALVAR RELATO</button>`);$('#saveError').onclick=()=>{const t=$('#errorText').value.trim();if(!t)return toast('Descreva o erro');localStorage.setItem('nicacio_last_error_report',t);toast('Relato salvo neste aparelho');closeModal()}}
 function ratePage(){openModal('Avaliar app',`<div class="list-card" style="text-align:center"><h3>Como está o aplicativo?</h3><p>Escolha uma nota para registrar sua avaliação neste aparelho.</p><div id="rateStars" style="font-size:36px;letter-spacing:8px;margin:18px 0">☆ ☆ ☆ ☆ ☆</div></div>`);const box=$('#rateStars');box.innerHTML=[1,2,3,4,5].map(n=>`<button type="button" data-rate="${n}" style="border:0;background:transparent;color:#e5a16f;font-size:36px;padding:4px">☆</button>`).join('');box.querySelectorAll('button').forEach(b=>b.onclick=()=>{localStorage.setItem('nicacio_barber_rating',b.dataset.rate);box.querySelectorAll('button').forEach((x,i)=>x.textContent=i<Number(b.dataset.rate)?'★':'☆');toast('Avaliação registrada')})}
