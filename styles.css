@@ -388,3 +388,16 @@ h3{margin-bottom:12px;font-size:13px;letter-spacing:.5px;font-weight:800;color:#
   #stepService .check{width:32px;height:32px;top:11px;right:11px}
   #stepService .service-icon{font-size:22px;left:14px;top:16px}
 }
+
+/* V27 — textos claros: sem letras pretas */
+#stepService .service-name,
+#stepService .service-meta,
+#stepService .service-meta span,
+#stepService .card,
+.primary,
+.time-btn.selected,
+.date-card.selected{
+  color:#fff !important;
+}
+#stepService .service-meta span{color:#c7c9ce !important;}
+#stepService .card.selected .check::after{color:#fff !important;background:#c47b58;border-radius:10px;}
