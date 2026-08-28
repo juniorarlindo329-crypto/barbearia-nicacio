@@ -170,10 +170,46 @@ function clientsPage(){
  render();
 }
 function clientEditor(id=''){
- const all=syncClientsFromBookings(),c=all.find(x=>x.id===id)||{name:'',phone:'',favorite:false,notes:''};
- openModal(id?'Editar cliente':'Novo cliente',`<form id="clientEditForm" class="client-edit-form"><div class="field"><label>Nome do cliente</label><input id="ceName" required maxlength="80" value="${escapeHtml(c.name||'')}" placeholder="Nome e sobrenome"></div><div class="field"><label>Telefone</label><input id="cePhone" inputmode="tel" maxlength="20" value="${escapeHtml(c.phone||'')}" placeholder="(00) 00000-0000"></div><label class="client-fav-switch"><input id="ceFavorite" type="checkbox" ${c.favorite?'checked':''}><span>★ Marcar como favorito</span></label><div class="field"><label>Observações</label><textarea id="ceNotes" rows="4" maxlength="500" placeholder="Observações sobre o cliente">${escapeHtml(c.notes||'')}</textarea></div><button class="primary-btn" type="submit">SALVAR CLIENTE</button>${id?'<button id="deleteClient" class="danger-btn" type="button">EXCLUIR CLIENTE</button>':''}</form>`);
- $('#clientEditForm').onsubmit=e=>{e.preventDefault();const name=$('#ceName').value.trim(),phone=$('#cePhone').value.trim();if(!name){toast('Digite o nome do cliente');return}let arr=storedClients();const obj={...c,id:id||clientIdFrom(name,phone),name,phone,favorite:$('#ceFavorite').checked,notes:$('#ceNotes').value.trim(),updatedAt:new Date().toISOString()};if(id){arr=arr.filter(x=>x.id!==id)};const duplicate=arr.findIndex(x=>x.id===obj.id);if(duplicate>=0)arr[duplicate]={...arr[duplicate],...obj};else arr.push(obj);saveClients(arr);clientsPage();toast(id?'Cliente atualizado':'Cliente cadastrado')};
- if(id)$('#deleteClient').onclick=()=>{if(confirm('Excluir este cliente da lista? Os agendamentos não serão apagados.')){saveClients(storedClients().filter(x=>x.id!==id));clientsPage();toast('Cliente excluído')}};
+ const all=syncClientsFromBookings(),c=all.find(x=>x.id===id)||{name:'',phone:'',favorite:false,notes:'',birthMonth:'',subscriber:false,subscriberValue:0,address:'',addressNumber:'',addressComplement:'',neighborhood:'',city:''};
+ document.querySelector('.client-editor-overlay')?.remove();
+ const months=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+ const monthOptions=months.map((m,i)=>`<option value="${i||''}" ${String(c.birthMonth||'')===String(i||'')?'selected':''}>${m||'Mês de aniversário'}</option>`).join('');
+ const overlay=document.createElement('div');
+ overlay.className='client-editor-overlay';
+ overlay.innerHTML=`<div class="client-editor-sheet" role="dialog" aria-modal="true" aria-label="${id?'Editar cliente':'Novo cliente'}">
+  <div class="client-sheet-handle"></div>
+  <div class="client-sheet-head"><h2>${id?'Editar cliente':'Novo cliente'}</h2><p>${id?'Edite os dados do cliente se necessário.':'Preencha os dados do novo cliente.'}</p></div>
+  <form id="clientEditForm" class="client-sheet-form">
+   <input id="ceName" class="sheet-input" required maxlength="80" value="${escapeHtml(c.name||'')}" placeholder="Nome do cliente" aria-label="Nome do cliente">
+   <div class="sheet-phone"><span class="flag-br">🇧🇷</span><span class="flag-arrow">⌄</span><input id="cePhone" inputmode="tel" maxlength="20" value="${escapeHtml(c.phone||'')}" placeholder="+55 33 98835-1853" aria-label="Telefone"></div>
+   <select id="ceBirthMonth" class="sheet-input sheet-select" aria-label="Mês de aniversário">${monthOptions}</select>
+   <textarea id="ceNotes" class="sheet-input sheet-textarea" maxlength="500" placeholder="Observação" aria-label="Observação">${escapeHtml(c.notes||'')}</textarea>
+   <label class="subscriber-card"><span class="subscriber-title"><span class="sheet-switch"><input id="ceSubscriber" type="checkbox" ${c.subscriber?'checked':''}><i></i></span>Cliente assinante?</span><small>Este cliente é um assinante recorrente do seu estabelecimento?</small></label>
+   <div class="money-sheet-field"><span>R$</span><input id="ceSubscriberValue" inputmode="decimal" value="${Number(c.subscriberValue||0).toFixed(2).replace('.',',')}" aria-label="Valor da assinatura"></div>
+   <h3 class="address-title">Endereço do cliente</h3>
+   <input id="ceAddress" class="sheet-input" maxlength="120" value="${escapeHtml(c.address||'')}" placeholder="Endereço" aria-label="Endereço">
+   <div class="address-grid"><input id="ceAddressNumber" class="sheet-input" maxlength="20" value="${escapeHtml(c.addressNumber||'')}" placeholder="Número" aria-label="Número"><input id="ceAddressComplement" class="sheet-input" maxlength="60" value="${escapeHtml(c.addressComplement||'')}" placeholder="Complemento" aria-label="Complemento"></div>
+   <input id="ceNeighborhood" class="sheet-input" maxlength="80" value="${escapeHtml(c.neighborhood||'')}" placeholder="Bairro" aria-label="Bairro">
+   <input id="ceCity" class="sheet-input" maxlength="80" value="${escapeHtml(c.city||'')}" placeholder="Cidade" aria-label="Cidade">
+   <div class="sheet-actions"><button class="sheet-save" type="submit">SALVAR</button>${id?'<button id="deleteClient" class="sheet-delete" type="button">EXCLUIR CLIENTE</button>':''}<button id="closeClientEditor" class="sheet-cancel" type="button">CANCELAR</button></div>
+  </form>
+ </div>`;
+ document.body.appendChild(overlay);
+ document.body.classList.add('client-editor-open');
+ const closeEditor=()=>{overlay.remove();document.body.classList.remove('client-editor-open')};
+ overlay.addEventListener('click',e=>{if(e.target===overlay)closeEditor()});
+ $('#closeClientEditor').onclick=closeEditor;
+ $('#clientEditForm').onsubmit=e=>{
+  e.preventDefault();
+  const name=$('#ceName').value.trim(),phone=$('#cePhone').value.trim();if(!name){toast('Digite o nome do cliente');return}
+  const rawValue=$('#ceSubscriberValue').value.replace(/\./g,'').replace(',','.').replace(/[^0-9.]/g,'');
+  let arr=storedClients();
+  const obj={...c,id:id||clientIdFrom(name,phone),name,phone,favorite:!!c.favorite,notes:$('#ceNotes').value.trim(),birthMonth:$('#ceBirthMonth').value,subscriber:$('#ceSubscriber').checked,subscriberValue:Number(rawValue||0),address:$('#ceAddress').value.trim(),addressNumber:$('#ceAddressNumber').value.trim(),addressComplement:$('#ceAddressComplement').value.trim(),neighborhood:$('#ceNeighborhood').value.trim(),city:$('#ceCity').value.trim(),updatedAt:new Date().toISOString()};
+  if(id)arr=arr.filter(x=>x.id!==id);
+  const duplicate=arr.findIndex(x=>x.id===obj.id);if(duplicate>=0)arr[duplicate]={...arr[duplicate],...obj};else arr.push(obj);
+  saveClients(arr);closeEditor();clientsPage();toast(id?'Cliente atualizado':'Cliente cadastrado');
+ };
+ if(id)$('#deleteClient').onclick=()=>{if(confirm('Excluir este cliente da lista? Os agendamentos não serão apagados.')){saveClients(storedClients().filter(x=>x.id!==id));closeEditor();clientsPage();toast('Cliente excluído')}};
 }
 function clientHistoryPage(id){
  const c=syncClientsFromBookings().find(x=>x.id===id);if(!c){clientsPage();return}

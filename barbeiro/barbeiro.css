@@ -330,3 +330,41 @@ body{background:#151922}
 .analysis-section-label{font-size:14px;color:#b9bec6;letter-spacing:.03em;margin:0 0 16px}.analysis-service-scroller{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px}.analysis-service-scroller::-webkit-scrollbar{display:none}.analysis-service-card{flex:0 0 138px;height:178px;border-radius:20px;background:linear-gradient(145deg,#383d45,#2a2f37);padding:18px 16px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between}.analysis-service-card strong{font-size:42px;color:#e78e62;font-weight:500}.analysis-service-card span{font-size:15px;font-weight:700;color:#f3f4f6;overflow-wrap:anywhere}.analysis-empty{color:#8f97a2;padding:20px 2px}.analysis-drag-hint{text-align:right;color:#8e949e;font-size:11px;margin:8px 0 18px}
 .analysis-bookings{display:flex;flex-direction:column;gap:10px;margin-top:24px}.analysis-booking-card{background:#4a4e56;border-radius:20px;padding:18px 18px 16px;min-height:108px;box-sizing:border-box}.analysis-booking-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}.analysis-booking-top>span{font-size:15px;font-weight:650}.analysis-more{border:0;background:transparent;color:#f7f7f7;font-size:25px;letter-spacing:2px;padding:0 4px}.analysis-booking-card>strong{display:block;font-size:22px;margin-bottom:5px}.analysis-booking-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}.analysis-booking-bottom span{font-size:14px;color:#d2d5da}.analysis-booking-bottom b{font-size:15px;color:#e2e4e7;white-space:nowrap}
 @media(max-width:560px){.client-analysis-screen{padding:24px 14px 80px}.client-analysis-screen h2{font-size:46px}.analysis-phone{font-size:19px;margin-bottom:54px}.analysis-kpis{gap:9px}.analysis-kpi{min-height:132px;padding:20px 16px;border-radius:20px}.analysis-kpi strong{font-size:27px}.analysis-service-card{flex-basis:132px;height:170px}.analysis-booking-card{border-radius:18px}}
+
+/* V14 - Editar cliente em folha branca, igual à referência */
+body.client-editor-open{overflow:hidden}
+.client-editor-overlay{
+ position:fixed;inset:0;z-index:100;
+ background:rgba(0,0,0,.72);
+ display:flex;align-items:flex-end;justify-content:center;
+ padding-top:76px;
+}
+.client-editor-sheet{
+ width:min(760px,100%);max-height:calc(100% - 76px);
+ overflow:auto;overscroll-behavior:contain;
+ background:#fff;color:#15171b;
+ border-radius:34px 34px 0 0;
+ padding:14px 24px 34px;
+ box-shadow:0 -12px 38px rgba(0,0,0,.22);
+ scrollbar-color:#8a8a8a transparent;
+}
+.client-sheet-handle{width:58px;height:6px;border-radius:999px;background:#b9b9b9;margin:0 auto 20px}
+.client-sheet-head{text-align:center;margin-bottom:26px}.client-sheet-head h2{margin:0;font-size:34px;font-weight:500;letter-spacing:-.5px}.client-sheet-head p{margin:8px 0 0;font-size:18px;color:#333}
+.client-sheet-form{display:flex;flex-direction:column;gap:14px}
+.sheet-input,.sheet-phone,.money-sheet-field,.subscriber-card{
+ width:100%;border:0;border-radius:26px;background:#ededed;color:#111;
+ min-height:92px;padding:0 26px;font-size:23px;outline:none;
+}
+.sheet-input::placeholder,.sheet-phone input::placeholder{color:#8c8c8c;opacity:1}
+.sheet-input:focus,.sheet-phone:focus-within,.money-sheet-field:focus-within{box-shadow:0 0 0 3px rgba(211,126,87,.22)}
+.sheet-phone{display:flex;align-items:center;gap:10px}.sheet-phone input{flex:1;min-width:0;border:0;background:transparent;font-size:23px;outline:none;color:#111}.flag-br{font-size:26px}.flag-arrow{font-size:18px;color:#656565}
+.sheet-select{appearance:auto;color:#858585;padding-right:24px}.sheet-select:has(option:checked:not([value=""])){color:#111}
+.sheet-textarea{min-height:112px;padding-top:29px;resize:none;font-family:inherit}
+.subscriber-card{display:flex;flex-direction:column;justify-content:center;gap:16px;padding:24px 26px;min-height:168px}.subscriber-title{display:flex;align-items:center;gap:16px;font-size:23px}.subscriber-card small{font-size:16px;line-height:1.45;color:#666}
+.sheet-switch{position:relative;width:70px;height:38px;display:inline-block;flex:0 0 auto}.sheet-switch input{opacity:0;width:0;height:0}.sheet-switch i{position:absolute;inset:0;background:#c9cdd1;border-radius:999px;transition:.18s}.sheet-switch i:after{content:"";position:absolute;width:32px;height:32px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 4px #0003;transition:.18s}.sheet-switch input:checked+i{background:#34d678}.sheet-switch input:checked+i:after{transform:translateX(32px)}
+.money-sheet-field{display:flex;align-items:center;gap:8px}.money-sheet-field span{font-size:24px}.money-sheet-field input{flex:1;border:0;background:transparent;outline:none;font-size:24px;color:#111;min-width:0}
+.address-title{margin:20px 0 0;font-size:24px;font-weight:500}.address-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sheet-actions{display:flex;flex-direction:column;gap:10px;margin-top:10px;padding-bottom:max(8px,env(safe-area-inset-bottom))}.sheet-save,.sheet-delete,.sheet-cancel{min-height:58px;border:0;border-radius:18px;font-size:18px;font-weight:800}.sheet-save{background:#d87e57;color:white}.sheet-delete{background:#f2dddd;color:#9f3434}.sheet-cancel{background:#ededed;color:#333}
+@media(max-width:560px){
+ .client-editor-overlay{padding-top:124px}.client-editor-sheet{max-height:calc(100% - 124px);padding:12px 24px 28px;border-radius:30px 30px 0 0}.client-sheet-head h2{font-size:30px}.client-sheet-head p{font-size:17px}.sheet-input,.sheet-phone,.money-sheet-field{min-height:84px;border-radius:24px;font-size:20px;padding-left:24px;padding-right:24px}.sheet-phone input{font-size:20px}.subscriber-card{border-radius:24px;min-height:154px}.subscriber-title{font-size:20px}.address-title{font-size:22px}
+}
