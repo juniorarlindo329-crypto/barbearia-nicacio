@@ -431,3 +431,192 @@ h3{margin-bottom:12px;font-size:13px;letter-spacing:.5px;font-weight:800;color:#
 #stepPhone:not(.hidden) > *,
 #stepDone:not(.hidden) > *{will-change:opacity,transform}
 #nameWarning{margin-bottom:12px}
+
+
+/* V23 — Meus Agendamentos com visual profissional */
+.bookings-page{
+  max-width:760px;
+}
+.bookings-page .topbar{
+  padding:10px 0 20px;
+  margin-bottom:18px;
+}
+.bookings-page .brand{
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:-.6px;
+  line-height:1.05;
+}
+.bookings-page .sub{
+  margin-top:7px;
+  color:#8f98a7;
+  font-size:13px;
+  font-weight:600;
+}
+.bookings-page .light-btn{
+  background:linear-gradient(135deg,#d9a17a,#b8754e);
+  color:#10141a;
+  border:1px solid #f4bd921f;
+  border-radius:14px;
+  padding:12px 14px;
+  font-size:11px;
+  letter-spacing:.25px;
+  box-shadow:0 9px 24px #0004;
+}
+.bookings-only{
+  padding-top:4px;
+}
+#bookingsList{
+  display:grid;
+  gap:14px;
+}
+.booking-card{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(145deg,#171f2b 0%,#111822 100%);
+  border:1px solid #ffffff12;
+  border-radius:22px;
+  padding:18px;
+  box-shadow:0 14px 35px #00000035;
+}
+.booking-card::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:4px;
+  background:linear-gradient(180deg,#d8a078,#a96848);
+}
+.booking-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:15px;
+}
+.booking-top > div{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:9px;
+}
+.booking-top strong{
+  font-size:20px;
+  line-height:1.2;
+  font-weight:900;
+  letter-spacing:-.35px;
+  color:#f7f8fa;
+}
+.booking-status{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#264c3a;
+  border:1px solid #59ba862d;
+  color:#80dca6;
+  font-size:9px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.7px;
+}
+.booking-info{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin:0 0 15px;
+}
+.booking-info > div{
+  min-height:54px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:11px 12px;
+  background:#0d141d;
+  border:1px solid #ffffff0f;
+  border-radius:14px;
+}
+.booking-info > div span{
+  width:28px;
+  height:28px;
+  flex:0 0 28px;
+  display:grid;
+  place-items:center;
+  border-radius:9px;
+  background:#232c38;
+  font-size:15px;
+}
+.booking-info > div b{
+  font-size:14px;
+  line-height:1.2;
+  color:#e8ebef;
+  font-weight:800;
+}
+.cancel-booking{
+  width:100%;
+  border:1px solid #e06c6c2a;
+  border-radius:14px;
+  padding:12px 14px;
+  background:#2a171c;
+  color:#f19696;
+  font-size:13px;
+  font-weight:900;
+  cursor:pointer;
+  transition:transform .16s ease,background .16s ease;
+}
+.cancel-booking:active{
+  transform:scale(.985);
+  background:#381d23;
+}
+.empty-bookings{
+  text-align:center;
+  background:linear-gradient(145deg,#171f2b,#111822);
+  border:1px solid #ffffff12;
+  border-radius:24px;
+  padding:36px 18px;
+  box-shadow:0 14px 35px #0000002b;
+}
+.empty-bookings .empty-icon{
+  width:58px;
+  height:58px;
+  display:grid;
+  place-items:center;
+  margin:0 auto 15px;
+  border-radius:18px;
+  background:#242d38;
+  font-size:27px;
+}
+.empty-bookings h2{
+  margin:0;
+  font-size:20px;
+}
+.empty-bookings p{
+  margin:9px auto 18px;
+  color:#929baa;
+  font-size:13px;
+  line-height:1.5;
+  max-width:340px;
+}
+.link-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+@media(max-width:560px){
+  .bookings-page{padding:14px 13px 34px}
+  .bookings-page .topbar{align-items:center;gap:10px}
+  .bookings-page .brand{font-size:22px}
+  .bookings-page .sub{font-size:12px}
+  .bookings-page .light-btn{font-size:9px!important;padding:10px 11px!important;white-space:nowrap}
+  .booking-card{padding:16px 14px 14px;border-radius:19px}
+  .booking-top strong{font-size:18px}
+  .booking-status{font-size:8px;padding:5px 8px}
+  .booking-info{gap:7px}
+  .booking-info > div{min-height:50px;padding:9px 10px;border-radius:12px}
+  .booking-info > div span{width:25px;height:25px;flex-basis:25px;font-size:13px;border-radius:8px}
+  .booking-info > div b{font-size:13px}
+  .cancel-booking{padding:11px 12px;font-size:12px}
+}
