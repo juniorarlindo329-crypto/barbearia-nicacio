@@ -516,7 +516,7 @@ function settingsPage(){
  <button data-extra="account"><span class="sicon">ⓘ</span><span>CONTA</span><span></span><span class="arrow">›</span></button></div></section>
  <div class="settings-footer"><div>${escapeHtml((pros[0]||{}).name||'Nicácio')}<br><small>nicaciobarbearia@gmail.com</small></div><button type="button" id="v19Exit">Sair →</button></div></div>`);
  document.querySelector('[data-v19-back]').onclick=closeModal;$('#v19EditCompany').onclick=v19CompanyEditor;$('#v19EditServices').onclick=v19ServicesPage;$('#v19AddService').onclick=()=>v19ServiceEditor(-1);$('#v19AddPro').onclick=()=>v19ProEditor(-1);$('#v19EditPro').onclick=()=>v19ProEditor(0);
- document.querySelectorAll('[data-extra]').forEach(b=>b.onclick=()=>{const x=b.dataset.extra;if(x==='link')return linkPage();if(x==='general')return v19GeneralSettings();if(x==='notifications'){const e=v19Extra();e.notifications=!e.notifications;save(V19_EXTRA_KEY,e);settingsPage();toast('Notificações atualizadas');return}openModal('Configuração',`<div class="summary-box"><strong>${b.children[1].textContent}</strong><p>Opção disponível no painel do barbeiro.</p></div>`)});$('#v19Exit').onclick=()=>toast('Sessão mantida neste aparelho');
+ document.querySelectorAll('[data-extra]').forEach(b=>b.onclick=()=>{const x=b.dataset.extra;if(x==='link')return linkPage();if(x==='general')return v19GeneralSettings();if(x==='products')return v22ProductsPage();if(x==='notifications'){const e=v19Extra();e.notifications=!e.notifications;save(V19_EXTRA_KEY,e);settingsPage();toast('Notificações atualizadas');return}openModal('Configuração',`<div class="summary-box"><strong>${b.children[1].textContent}</strong><p>Opção disponível no painel do barbeiro.</p></div>`)});$('#v19Exit').onclick=()=>toast('Sessão mantida neste aparelho');
 }
 function v19CompanyEditor(){const c=v19Company();v19Open(`<div class="editor-screen">${v19BackBtn()}<h1 class="editor-title">Editar empresa</h1><form id="v19CompanyForm"><div class="editor-field"><div class="editor-label">NOME FANTASIA</div><input class="editor-input" id="vcName" value="${escapeHtml(c.name)}"></div><div class="editor-field"><div class="editor-label">ENDEREÇO</div><input class="editor-input" id="vcStreet" value="${escapeHtml(c.street)}"></div><div class="editor-grid2"><div class="editor-field"><div class="editor-label">NÚMERO</div><input class="editor-input" id="vcNumber" value="${escapeHtml(c.number)}"></div><div class="editor-field"><div class="editor-label">COMPLEMENTO</div><input class="editor-input" id="vcComp" value="${escapeHtml(c.complement)}"></div></div><div class="editor-field"><div class="editor-label">BAIRRO</div><input class="editor-input" id="vcDistrict" value="${escapeHtml(c.district)}"></div><div class="editor-field"><div class="editor-label">CIDADE</div><input class="editor-input" id="vcCity" value="${escapeHtml(c.city)}"></div><div class="editor-grid2"><div class="editor-field"><div class="editor-label">ESTADO</div><input class="editor-input" id="vcState" value="${escapeHtml(c.state)}"></div><div class="editor-field"><div class="editor-label">CEP</div><input class="editor-input" id="vcCep" value="${escapeHtml(c.cep)}"></div></div><div class="editor-field"><div class="editor-label">TELEFONE</div><input class="editor-input" id="vcPhone" value="${escapeHtml(c.phone)}"></div><button class="editor-save">SALVAR</button></form></div>`);document.querySelector('[data-v19-back]').onclick=settingsPage;$('#v19CompanyForm').onsubmit=e=>{e.preventDefault();save(V19_COMPANY_KEY,{name:$('#vcName').value,street:$('#vcStreet').value,number:$('#vcNumber').value,complement:$('#vcComp').value,district:$('#vcDistrict').value,city:$('#vcCity').value,state:$('#vcState').value,cep:$('#vcCep').value,phone:$('#vcPhone').value});toast('Dados da empresa salvos');settingsPage()}}
 function v19ServicesPage(){const a=services();v19Open(`<div class="editor-screen">${v19BackBtn()}<h1 class="editor-title">Serviços</h1><p class="editor-sub">Cadastre e edite os serviços<br>fornecidos pela empresa.</p><div class="editor-label">INSIRA UM NOVO SERVIÇO</div><div class="service-create-grid"><div><div class="editor-label">FOTO</div><div class="editor-photo">📷</div></div><div><div class="editor-label">NOME DO SERVIÇO</div><input class="editor-input" id="newSvcName" placeholder="Ex: CORTE SOCIAL"></div></div><div class="service-create-row2"><div><div class="editor-label">DURAÇÃO (MIN)</div><select class="editor-select" id="newSvcDur">${v19DurationOptions(30)}</select></div><div><div class="editor-label">PREÇO</div><input class="editor-input" id="newSvcPrice" inputmode="decimal" placeholder="R$ 0,00"></div></div><button class="orange-wide" id="v19AddToList">ADICIONAR À LISTA</button><div class="editor-label">LISTA DE SERVIÇOS</div><div class="service-list-ref">${a.map((s,i)=>`<div class="service-row-ref"><span class="drag">⋮</span><div><b>${escapeHtml(s.name)}</b><br><small>${s.duration} min - ${money(s.price)}</small></div><button class="v19-edit-svc" data-i="${i}">✎</button><button class="v19-del-svc" data-i="${i}">⌫</button></div>`).join('')}</div><button class="editor-save" id="v19SaveServices">SALVAR SERVIÇOS</button></div>`);document.querySelector('[data-v19-back]').onclick=settingsPage;$('#v19AddToList').onclick=()=>{const n=$('#newSvcName').value.trim(),p=Number(String($('#newSvcPrice').value).replace(',','.').replace(/[^0-9.]/g,'')),d=Number($('#newSvcDur').value);if(!n)return alert('Digite o nome do serviço.');const x=services();x.push({name:n,price:p||0,duration:d||30,active:true});saveServices(x);v19ServicesPage();toast('Serviço adicionado')};document.querySelectorAll('.v19-edit-svc').forEach(b=>b.onclick=()=>v19ServiceEditor(Number(b.dataset.i)));document.querySelectorAll('.v19-del-svc').forEach(b=>b.onclick=()=>{if(confirm('Excluir este serviço?')){const x=services();x.splice(Number(b.dataset.i),1);saveServices(x);v19ServicesPage()}});$('#v19SaveServices').onclick=()=>{toast('Serviços salvos');settingsPage()}}
@@ -565,3 +565,50 @@ function v21Picker(key,title,items,current,back){
 }
 /* substitui apenas o destino de CONFIGURAÇÕES GERAIS */
 v19GeneralSettings=v21GeneralSettings;
+
+
+/* V22 — Produtos igual à referência */
+const V22_PRODUCTS_KEY='nicacio_products';
+function v22Products(){return load(V22_PRODUCTS_KEY,[])}
+function v22SaveProducts(v){save(V22_PRODUCTS_KEY,v)}
+function v22MoneyInput(v){return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function v22ProductsPage(){
+ const list=v22Products();
+ v19Open(`<div class="products-ref-screen">
+  <button class="products-ref-back" type="button" id="v22ProductsBack">‹</button>
+  <h1>Produtos</h1>
+  <p class="products-ref-sub"><span class="products-ref-dot"></span><span>Cadastre e edite os produtos<br>fornecidos pela empresa.</span></p>
+  <div class="products-ref-section-title"><span>INSIRA UM NOVO PRODUTO</span><i></i></div>
+  <form id="v22ProductForm" autocomplete="off">
+   <div class="products-ref-grid">
+    <label><span>NOME DO PRODUTO</span><input id="v22ProductName" placeholder="Ex: POMADA" required></label>
+    <label><span>COMISSÃO (%)</span><input id="v22ProductCommission" inputmode="decimal" placeholder="Ex: 20%"></label>
+    <label><span>QUANTIDADE (ESTOQUE)</span><input id="v22ProductStock" inputmode="numeric" placeholder="Ex: 100"></label>
+    <label><span>PREÇO</span><input id="v22ProductPrice" inputmode="decimal" placeholder="R$ 0,00"></label>
+   </div>
+   <button class="products-ref-add" type="submit">ADICIONAR À LISTA</button>
+  </form>
+  <div id="v22ProductList" class="products-ref-list">${list.length?`<div class="products-ref-list-title">LISTA DE PRODUTOS</div>${list.map(p=>`<div class="products-ref-item" data-id="${escapeHtml(p.id)}"><div><b>${escapeHtml(p.name)}</b><small>${Number(p.stock||0)} un. · R$ ${v22MoneyInput(p.price)} · Comissão ${Number(p.commission||0)}%</small></div><button type="button" data-product-edit="${escapeHtml(p.id)}">✎</button><button type="button" data-product-delete="${escapeHtml(p.id)}">⌫</button></div>`).join('')}`:''}</div>
+  <button class="products-ref-save" type="button" id="v22ProductsSave">SALVAR PRODUTOS</button>
+ </div>`);
+ document.getElementById('v22ProductsBack').onclick=settingsPage;
+ const parseNum=v=>Number(String(v||'').replace(/[^0-9,.-]/g,'').replace(',','.'))||0;
+ document.getElementById('v22ProductForm').onsubmit=e=>{
+   e.preventDefault();
+   const name=document.getElementById('v22ProductName').value.trim();
+   if(!name)return toast('Informe o nome do produto');
+   const arr=v22Products();
+   arr.push({id:uuid(),name,commission:parseNum(document.getElementById('v22ProductCommission').value),stock:Math.max(0,Math.floor(parseNum(document.getElementById('v22ProductStock').value))),price:Math.max(0,parseNum(document.getElementById('v22ProductPrice').value))});
+   v22SaveProducts(arr);toast('Produto adicionado');v22ProductsPage();
+ };
+ document.querySelectorAll('[data-product-delete]').forEach(b=>b.onclick=()=>{const id=b.dataset.productDelete;v22SaveProducts(v22Products().filter(p=>p.id!==id));toast('Produto removido');v22ProductsPage()});
+ document.querySelectorAll('[data-product-edit]').forEach(b=>b.onclick=()=>{const p=v22Products().find(x=>x.id===b.dataset.productEdit);if(!p)return;v22EditProduct(p.id)});
+ document.getElementById('v22ProductsSave').onclick=()=>{toast('Produtos salvos');setTimeout(settingsPage,300)};
+}
+function v22EditProduct(id){
+ const p=v22Products().find(x=>x.id===id);if(!p)return v22ProductsPage();
+ v19Open(`<div class="products-ref-screen products-ref-edit"><button class="products-ref-back" type="button" id="v22EditBack">‹</button><h1>Editar produto</h1><p class="products-ref-sub">Edite o produto selecionado<br>e salve ao terminar.</p><form id="v22EditForm"><div class="products-ref-grid"><label><span>NOME DO PRODUTO</span><input id="v22EditName" value="${escapeHtml(p.name)}" required></label><label><span>COMISSÃO (%)</span><input id="v22EditCommission" inputmode="decimal" value="${Number(p.commission||0)}"></label><label><span>QUANTIDADE (ESTOQUE)</span><input id="v22EditStock" inputmode="numeric" value="${Number(p.stock||0)}"></label><label><span>PREÇO</span><input id="v22EditPrice" inputmode="decimal" value="${v22MoneyInput(p.price)}"></label></div><button class="products-ref-add" type="submit">CONFIRMAR EDIÇÃO</button></form></div>`);
+ document.getElementById('v22EditBack').onclick=v22ProductsPage;
+ const parseNum=v=>Number(String(v||'').replace(/[^0-9,.-]/g,'').replace(',','.'))||0;
+ document.getElementById('v22EditForm').onsubmit=e=>{e.preventDefault();const arr=v22Products();const x=arr.find(z=>z.id===id);if(!x)return;x.name=document.getElementById('v22EditName').value.trim();x.commission=parseNum(document.getElementById('v22EditCommission').value);x.stock=Math.max(0,Math.floor(parseNum(document.getElementById('v22EditStock').value)));x.price=Math.max(0,parseNum(document.getElementById('v22EditPrice').value));v22SaveProducts(arr);toast('Produto atualizado');v22ProductsPage()};
+}
