@@ -612,3 +612,82 @@ function v22EditProduct(id){
  const parseNum=v=>Number(String(v||'').replace(/[^0-9,.-]/g,'').replace(',','.'))||0;
  document.getElementById('v22EditForm').onsubmit=e=>{e.preventDefault();const arr=v22Products();const x=arr.find(z=>z.id===id);if(!x)return;x.name=document.getElementById('v22EditName').value.trim();x.commission=parseNum(document.getElementById('v22EditCommission').value);x.stock=Math.max(0,Math.floor(parseNum(document.getElementById('v22EditStock').value)));x.price=Math.max(0,parseNum(document.getElementById('v22EditPrice').value));v22SaveProducts(arr);toast('Produto atualizado');v22ProductsPage()};
 }
+
+/* V23 — Mensagens manuais editáveis igual à referência */
+const V23_MESSAGES_KEY='nicacio_manual_messages';
+const V23_MESSAGE_DEFAULTS={
+ reminder:`Olá, {nome_cliente} tudo bem?\n\nSeu horário *{data_agendamento} às {hora_agendamento}* está confirmado!\n\n*{servicos} - {valor_servicos}*\n\nFAVOR, NÃO ATRASAR\nA TOLERÂNCIA PARA ATRASOS\nSERA DE 5 MINUTOS.`,
+ confirmation:`*Agendamento realizado com sucesso pelo estabelecimento!*\n\nOlá {nome_cliente}, tudo bem?\n\nSeu horário *{data_agendamento} às {hora_agendamento}* está confirmado!\n\nFAVOR, NÃO ATRASAR\nCHEGAR 5 MINUTOS DE ANTECEDÊNCIA.\nA TOLERÂNCIA PARA ATRASOS SERÁ DE 5 MINUTOS.`,
+ cancellation:`*Agendamento cancelado pelo estabelecimento!*\n\nOlá {nome_cliente}, tudo bem?\n\nSeu horário *{data_agendamento} às {hora_agendamento}* foi cancelado!\n\nEm caso de dúvidas, responda a essa mensagem!`,
+ remarketing:`Olá, {nome_cliente}! Tudo bem?\n\nJá faz um tempinho desde o seu último atendimento. Que tal reservar seu próximo horário?\n\n✅ {link_agendamento}\n\nAguardamos você na(o) {nome_estabelecimento}!`,
+ bookingLink:`Olá, tudo bem?\n\nSe deseja *agendar algum de nossos serviços* use nosso novo assistente pessoal abaixo, é rápido e fácil.\n\n✅ {link_agendamento}\n\nAguardo você aqui na(o) {nome_estabelecimento}\n👊👊`,
+ waitlist:`Olá, {nome_cliente}! O espaço na nossa agenda foi liberado e você pode agendar seu horário agora mesmo. Não perca essa oportunidade!\n\nClique no link para garantir seu atendimento:\n{link_agendamento}\n\nEstamos ansiosos para recebê-lo!`
+};
+function v23Messages(){return {...V23_MESSAGE_DEFAULTS,...load(V23_MESSAGES_KEY,{})}}
+function v23MessageSections(){return [
+ ['reminder','LEMBRETE RÁPIDO DE AGENDAMENTO','O texto personalizado será preparado para o cliente ao confirmar um agendamento.'],
+ ['confirmation','CONFIRMAÇÃO DE AGENDAMENTO','Mensagem preparada para o cliente confirmando que o agendamento foi realizado com sucesso.'],
+ ['cancellation','CONFIRMAÇÃO DE CANCELAMENTO','Mensagem preparada para o cliente informando que o agendamento foi cancelado.'],
+ ['remarketing','MENSAGEM DE REMARKETING','Mensagem para convidar o cliente a realizar um novo agendamento.'],
+ ['bookingLink','MENSAGEM DE LINK DE AGENDAMENTO','Mensagem para compartilhar um link direto para o cliente agendar um serviço.'],
+ ['waitlist','MENSAGEM DE FILA DE ESPERA','Mensagem para informar o cliente sobre uma vaga liberada na agenda.']
+]}
+function v23MessagesPage(){
+ const m=v23Messages();
+ v19Open(`<div class="messages-ref-screen">
+  <button class="messages-ref-back" type="button" id="v23MessagesBack">‹</button>
+  <h1>Mensagens manuais</h1>
+  <p class="messages-ref-sub">Ajuste os campos abaixo para personalizar<br>parâmetros e mensagens enviadas.</p>
+  <div class="messages-ref-vars">Use: <b>{nome_cliente}</b> <b>{data_agendamento}</b> <b>{hora_agendamento}</b> <b>{servicos}</b> <b>{valor_servicos}</b> <b>{link_agendamento}</b></div>
+  <form id="v23MessagesForm">
+   ${v23MessageSections().map(([key,title,help])=>`<section class="messages-ref-section">
+     <div class="messages-ref-head"><span>${title}</span><button type="button" data-msg-reset="${key}">Resetar para o padrão</button></div>
+     <textarea data-msg-key="${key}" spellcheck="true">${escapeHtml(m[key]||'')}</textarea>
+     <p>${help}</p>
+   </section>`).join('')}
+   <button class="messages-ref-save" type="submit">SALVAR</button>
+  </form>
+ </div>`);
+ document.getElementById('v23MessagesBack').onclick=settingsPage;
+ document.querySelectorAll('[data-msg-reset]').forEach(b=>b.onclick=()=>{
+   const key=b.dataset.msgReset;
+   const ta=document.querySelector(`[data-msg-key="${key}"]`);
+   ta.value=V23_MESSAGE_DEFAULTS[key]||'';
+   toast('Mensagem restaurada');
+ });
+ document.getElementById('v23MessagesForm').onsubmit=e=>{
+   e.preventDefault();
+   const out={};document.querySelectorAll('[data-msg-key]').forEach(ta=>out[ta.dataset.msgKey]=ta.value.trim());
+   save(V23_MESSAGES_KEY,out);
+   const ex=v19Extra();ex.messages=true;save(V19_EXTRA_KEY,ex);
+   toast('Mensagens salvas');setTimeout(settingsPage,300);
+ };
+}
+function v23FillMessage(type,b={}){
+ const m=v23Messages()[type]||'';
+ const c=v19Company();
+ const replacements={
+  nome_cliente:b.clientName||b.name||'cliente',
+  data_agendamento:b.dateLabel||b.date||'',
+  hora_agendamento:b.time||'',
+  servicos:b.serviceName||'',
+  valor_servicos:b.price!=null?money(b.price):'',
+  link_agendamento:publicClientUrl(),
+  nome_estabelecimento:c.name||'Barbearia Nicácio'
+ };
+ return m.replace(/\{([a-z_]+)\}/g,(all,k)=>replacements[k]??all);
+}
+function v23OpenWhatsAppMessage(type,b){
+ const phone=String(b?.clientPhone||'').replace(/\D/g,'');
+ if(!phone){toast('Cliente sem WhatsApp cadastrado');return}
+ const br=phone.startsWith('55')?phone:'55'+phone;
+ window.open(`https://wa.me/${br}?text=${encodeURIComponent(v23FillMessage(type,b))}`,'_blank');
+}
+
+/* envia a opção Mensagens manuais para a nova tela */
+const _v23SettingsPage=settingsPage;
+settingsPage=function(){
+ _v23SettingsPage();
+ const btn=document.querySelector('[data-extra="messages"]');
+ if(btn) btn.onclick=()=>v23MessagesPage();
+};
