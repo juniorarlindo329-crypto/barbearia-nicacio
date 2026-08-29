@@ -533,3 +533,35 @@ function v19GeneralSettings(){const s=settings();v19Open(`<div class="editor-scr
     settingsBtn.onclick=()=>{ closeMenu(); settingsPage(); };
   }
 })();
+
+/* V21 — Configurações gerais idênticas à referência */
+const V21_GENERAL_KEY='nicacio_general_settings';
+function v21General(){return {...{scale:'smart',currency:'BRL',timezone:'America/Sao_Paulo'},...load(V21_GENERAL_KEY,{})}}
+const V21_SCALES=[['smart','Inteligente'],['10','De 10 em 10 minutos'],['15','De 15 em 15 minutos'],['20','De 20 em 20 minutos'],['30','De 30 em 30 minutos'],['40','De 40 em 40 minutos'],['60','De 60 em 60 minutos']];
+const V21_CURRENCIES=[['BRL','Real (R$) BRL'],['USD','Dólar americano ($) USD'],['EUR','Euro (€) EUR'],['ARS','Peso argentino (ARS) ARS'],['PYG','Guarani (PYG) PYG'],['AOA','Kwanza (Kz) AOA'],['CLP','Peso chileno ($) CLP'],['UYU','Peso uruguaio ($U) UYU'],['GBP','Libra esterlina (£) GBP'],['COP','Peso colombiano ($) COP'],['PEN','Sol peruano (S/) PEN'],['BOB','Boliviano (Bs) BOB']];
+const V21_TIMEZONES=[['America/Sao_Paulo','Brasília (UTC-3:00)'],['America/Argentina/Buenos_Aires','Buenos Aires (UTC-3:00)'],['America/Montevideo','Montevidéu (UTC-3:00)'],['Atlantic/South_Georgia','South Georgia/Sandwich Islands (UTC-2:00)'],['Atlantic/Azores','Azores (UTC-1:00)'],['Europe/London','London (UTC+0:00)'],['Europe/Lisbon','Lisboa (UTC+0:00)'],['Europe/Berlin','Berlin (UTC+1:00)'],['Europe/Paris','Paris (UTC+1:00)'],['Africa/Cairo','Cairo (UTC+2:00)'],['Europe/Moscow','Moscow (UTC+3:00)'],['Asia/Riyadh','Riyadh (UTC+3:00)'],['Asia/Dubai','Dubai (UTC+4:00)']];
+function v21Label(list,val){return (list.find(x=>x[0]===val)||list[0])[1]}
+function v21GeneralSettings(){
+ const g=v21General();
+ v19Open(`<div class="general-ref-screen">
+  <button class="general-ref-back" type="button" id="v21GeneralBack">‹</button>
+  <h1>Configurações</h1>
+  <p class="general-ref-sub">Ajuste os campos abaixo para<br>configurar parâmetros de seu app ou link.</p>
+  <div class="general-ref-field"><div class="general-ref-label">ESCALA DE HORÁRIOS</div><button class="general-ref-select" id="v21Scale"><span>${escapeHtml(v21Label(V21_SCALES,g.scale))}</span><b>▾</b></button><div class="general-ref-help">Modo inteligente: ajusta os horários automaticamente com base<br>na duração dos serviços. É a opção recomendada para aproveitar<br>melhor a agenda.</div></div>
+  <div class="general-ref-field"><div class="general-ref-label">QUAL SUA MOEDA?</div><button class="general-ref-select" id="v21Currency"><span>${escapeHtml(v21Label(V21_CURRENCIES,g.currency))}</span><b>▾</b></button></div>
+  <div class="general-ref-field"><div class="general-ref-label">QUAL O SEU HORÁRIO LOCAL?</div><button class="general-ref-select" id="v21Timezone"><span>${escapeHtml(v21Label(V21_TIMEZONES,g.timezone))}</span><b>▾</b></button></div>
+  <button class="general-ref-save" id="v21GeneralSave">SALVAR</button>
+ </div>`);
+ $('#v21GeneralBack').onclick=settingsPage;
+ $('#v21Scale').onclick=()=>v21Picker('scale','Escala de horários',V21_SCALES,g.scale,v21GeneralSettings);
+ $('#v21Currency').onclick=()=>v21Picker('currency','Moeda',V21_CURRENCIES,g.currency,v21GeneralSettings);
+ $('#v21Timezone').onclick=()=>v21Picker('timezone','Horário local',V21_TIMEZONES,g.timezone,v21GeneralSettings);
+ $('#v21GeneralSave').onclick=()=>{const x=v21General();save(V21_GENERAL_KEY,x);if(x.scale!=='smart')saveSettings({interval:Number(x.scale)});toast('Configurações salvas');settingsPage();renderAll()};
+}
+function v21Picker(key,title,items,current,back){
+ v19Open(`<div class="general-ref-picker-screen"><button class="general-ref-back" type="button" id="v21PickBack">‹</button><div class="general-ref-picker">${items.map(([v,l])=>`<button type="button" class="general-ref-option ${v===current?'active':''}" data-v="${escapeHtml(v)}"><span>${escapeHtml(l)}</span><i></i></button>`).join('')}</div></div>`);
+ $('#v21PickBack').onclick=back;
+ document.querySelectorAll('.general-ref-option').forEach(b=>b.onclick=()=>{const x=v21General();x[key]=b.dataset.v;save(V21_GENERAL_KEY,x);back()});
+}
+/* substitui apenas o destino de CONFIGURAÇÕES GERAIS */
+v19GeneralSettings=v21GeneralSettings;
