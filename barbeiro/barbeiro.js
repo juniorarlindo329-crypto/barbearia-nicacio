@@ -724,3 +724,56 @@ function v24SaveBanned(name,phone){
  a.push({id:uuid(),name,phone,bannedAt:new Date().toISOString()});save(V24_BANNED_KEY,a);toast('Cliente banido');v24BannedClientsPage();
 }
 function v24IsBanned(phone){const p=v24NormalizePhone(phone);return !!p&&v24BannedClients().some(x=>v24NormalizePhone(x.phone)===p)}
+
+/* V25 — Configurações locais igual à referência */
+const V25_LOCAL_KEY='nicacio_local_settings';
+const V25_LOCAL_DEFAULTS={language:'pt'};
+const V25_LANGUAGES=[
+ {id:'pt',label:'Português'},
+ {id:'en',label:'English'},
+ {id:'es',label:'Español'}
+];
+function v25LocalSettings(){return {...V25_LOCAL_DEFAULTS,...load(V25_LOCAL_KEY,{})}}
+function v25LanguageLabel(id){return (V25_LANGUAGES.find(x=>x.id===id)||V25_LANGUAGES[0]).label}
+function v25LocalSettingsPage(){
+ const s=v25LocalSettings();
+ v19Open(`<div class="local-ref-screen">
+   <button class="local-ref-back" id="v25LocalBack">‹</button>
+   <h1>Configurações locais</h1>
+   <p class="local-ref-sub">Ajustes que valem somente neste aparelho.<br>Não alteram nada para os outros usuários da agenda.</p>
+   <section class="local-ref-section">
+     <div class="local-ref-label">IDIOMA DO APLICATIVO</div>
+     <button class="local-ref-select" type="button" id="v25LanguageSelect"><span>${escapeHtml(v25LanguageLabel(s.language))}</span><b>▼</b></button>
+     <div class="local-ref-help">Define o idioma dos textos do aplicativo apenas para você, neste aparelho.</div>
+   </section>
+   <button class="local-ref-save" id="v25LocalSave">SALVAR</button>
+ </div>`);
+ $('#v25LocalBack').onclick=settingsPage;
+ $('#v25LanguageSelect').onclick=()=>v25LanguagePicker(s.language);
+ $('#v25LocalSave').onclick=()=>{save(V25_LOCAL_KEY,s);toast('Configurações locais salvas');settingsPage()};
+}
+function v25LanguagePicker(selected){
+ v19Open(`<div class="local-ref-screen local-ref-picker-screen">
+   <button class="local-ref-back" id="v25LangBack">‹</button>
+   <h1>Configurações locais</h1>
+   <p class="local-ref-sub">Ajustes que valem somente neste aparelho.<br>Não alteram nada para os outros usuários da agenda.</p>
+   <div class="local-ref-label">IDIOMA DO APLICATIVO</div>
+   <button class="local-ref-select" type="button" id="v25FakeSelect"><span>${escapeHtml(v25LanguageLabel(selected))}</span><b>▼</b></button>
+   <div class="local-ref-help">Define o idioma dos textos do aplicativo apenas para você, neste aparelho.</div>
+   <div class="local-ref-overlay"></div>
+   <div class="local-ref-picker">
+     ${V25_LANGUAGES.map(x=>`<button class="local-ref-option ${x.id===selected?'active':''}" data-v25-lang="${x.id}"><span>${x.label}</span><i></i></button>`).join('')}
+   </div>
+   <button class="local-ref-save dim" type="button">SALVAR</button>
+ </div>`);
+ $('#v25LangBack').onclick=v25LocalSettingsPage;
+ document.querySelectorAll('[data-v25-lang]').forEach(b=>b.onclick=()=>{save(V25_LOCAL_KEY,{...v25LocalSettings(),language:b.dataset.v25Lang});v25LocalSettingsPage()});
+}
+
+/* envia a opção Configurações locais para a nova tela */
+const _v25SettingsPage=settingsPage;
+settingsPage=function(){
+ _v25SettingsPage();
+ const btn=document.querySelector('[data-extra="local"]');
+ if(btn) btn.onclick=()=>v25LocalSettingsPage();
+};
