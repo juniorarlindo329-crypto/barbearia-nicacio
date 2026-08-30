@@ -777,3 +777,91 @@ settingsPage=function(){
  const btn=document.querySelector('[data-extra="local"]');
  if(btn) btn.onclick=()=>v25LocalSettingsPage();
 };
+
+/* V26 — Notificações estilo referência + controles funcionais da PWA */
+const V26_NOTIF_KEY='nicacio_notification_settings';
+function v26NotifSettings(){
+ return {...{
+   master:true,highlight:true,badges:true,floating:true,lockscreen:true,sound:true,vibrate:true,persistent:false,
+   all:true,appointments:true
+ },...load(V26_NOTIF_KEY,{})};
+}
+function v26SaveNotif(v){save(V26_NOTIF_KEY,v);const ex=v19Extra();ex.notifications=!!v.master;save(V19_EXTRA_KEY,ex)}
+function v26ToggleRow(key,label,sub=''){
+ const n=v26NotifSettings();
+ return `<button class="notif-ref-row" type="button" data-v26-toggle="${key}"><span class="notif-ref-copy"><b>${label}</b>${sub?`<small>${sub}</small>`:''}</span><span class="notif-ref-switch ${n[key]?'on':''}"><i></i></span></button>`;
+}
+function v26NotificationsPage(){
+ const perm=('Notification' in window)?Notification.permission:'unsupported';
+ v19Open(`<div class="notif-ref-screen">
+   <button class="notif-ref-back" id="v26NotifBack" type="button">‹</button>
+   <h1>Nicácio</h1>
+   <div class="notif-ref-topcard">
+     ${v26ToggleRow('master','Mostrar notificações')}
+   </div>
+   <div class="notif-ref-topcard">
+     ${v26ToggleRow('highlight','Destaque de notificações','Utilizar formato de notificação personalizado para destacar informações importantes')}
+   </div>
+   <h2>Permissões de notificação</h2>
+   <div class="notif-ref-card">
+     ${v26ToggleRow('badges','Emblemas de notificação','Permitir a exibição de um ponto numerado nos ícones da tela inicial para indicar notificações ou novos conteúdos')}
+     ${v26ToggleRow('floating','Notificações flutuantes','Permitir notificações flutuantes')}
+     ${v26ToggleRow('lockscreen','Notificações na Tela de bloqueio','Permitir notificações na Tela de bloqueio')}
+     ${v26ToggleRow('sound','Som')}
+     ${v26ToggleRow('vibrate','Vibração')}
+     ${v26ToggleRow('persistent','Notificações permanentes','Permitir notificações que só podem ser excluídas manualmente')}
+   </div>
+   <h2>Categorias de notificação</h2>
+   <div class="notif-ref-card notif-ref-categories">
+     <button type="button" data-v26-toggle="all"><span><b>Nicácio</b><small>Todas as notificações</small></span><em>›</em></button>
+     <button type="button" data-v26-toggle="appointments"><span><b>Atualizações de agendamentos</b><small>Novos agendamentos, mudanças ou cancelamentos</small></span><em>›</em></button>
+   </div>
+   <div class="notif-ref-actions">
+     <button id="v26PermissionBtn" type="button">${perm==='granted'?'PERMISSÃO DO CELULAR ATIVADA':'ATIVAR PERMISSÃO DO CELULAR'}</button>
+     <button id="v26TestBtn" type="button">ENVIAR NOTIFICAÇÃO DE TESTE</button>
+     <small>${perm==='denied'?'A permissão foi bloqueada no navegador. Abra as permissões do site para liberar.':perm==='unsupported'?'Este navegador não oferece notificações da web.':'As opções acima ficam salvas neste aparelho.'}</small>
+   </div>
+ </div>`);
+ $('#v26NotifBack').onclick=settingsPage;
+ document.querySelectorAll('[data-v26-toggle]').forEach(btn=>btn.onclick=()=>{
+   const key=btn.dataset.v26Toggle,n=v26NotifSettings(); n[key]=!n[key];
+   if(key==='all' && !n.all) n.appointments=false;
+   if(key==='appointments' && n.appointments) n.all=true;
+   v26SaveNotif(n); v26NotificationsPage();
+ });
+ $('#v26PermissionBtn').onclick=async()=>{
+   if(!('Notification' in window)) return alert('Este navegador não suporta notificações.');
+   try{const p=await Notification.requestPermission(); if(p==='granted'){const n=v26NotifSettings();n.master=true;v26SaveNotif(n);toast('Notificações permitidas');}else toast('Permissão não concedida');v26NotificationsPage()}catch(e){alert('Não foi possível abrir a permissão de notificações.')}
+ };
+ $('#v26TestBtn').onclick=()=>v26SendNotification('Barbearia Nicácio','Notificações funcionando ✅','appointments');
+}
+async function v26SendNotification(title,body,category='all'){
+ const n=v26NotifSettings();
+ if(!n.master || !n.all || (category==='appointments'&&!n.appointments)) return false;
+ if(!('Notification' in window)){toast('Notificações não são suportadas neste navegador');return false}
+ if(Notification.permission!=='granted'){const p=await Notification.requestPermission();if(p!=='granted'){toast('Ative a permissão de notificações');return false}}
+ const options={body,tag:'nicacio-'+category,renotify:!!n.highlight,requireInteraction:!!n.persistent,silent:!n.sound};
+ if(n.vibrate) options.vibrate=[180,80,180];
+ try{
+   if('serviceWorker' in navigator){
+     const reg=await navigator.serviceWorker.ready; await reg.showNotification(title,options);
+   }else new Notification(title,options);
+   if(n.badges && navigator.setAppBadge){try{await navigator.setAppBadge(1)}catch{}}
+   return true;
+ }catch(e){try{new Notification(title,options);return true}catch{return false}}
+}
+window.nicacioNotify=v26SendNotification;
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+
+/* envia a opção Notificações para a tela completa V26 */
+const _v26SettingsPage=settingsPage;
+settingsPage=function(){
+ _v26SettingsPage();
+ const btn=document.querySelector('[data-extra="notifications"]');
+ if(btn){
+   const n=v26NotifSettings();
+   const pill=btn.querySelector('.settings-pill');
+   if(pill) pill.textContent=n.master?'HABILITADAS':'DESATIVADAS';
+   btn.onclick=v26NotificationsPage;
+ }
+};
