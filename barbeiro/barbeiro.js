@@ -939,3 +939,73 @@ const v27Bottom=document.getElementById('editDayBtnBottom');if(v27Bottom)v27Bott
 const v27Hours=document.getElementById('editHoursLink');if(v27Hours)v27Hours.onclick=v21GeneralSettings;
 const v27Top=document.getElementById('scrollTopRef');if(v27Top)v27Top.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 renderTimeline();
+
+// ================= V28: EDITAR HORÁRIOS / PROFISSIONAL COMPLETO =================
+const V28_PRO_KEY='nicacio_professional_v28';
+const V28_DAYS=[
+  ['0','DOMINGO'],['1','SEGUNDA-FEIRA'],['2','TERÇA-FEIRA'],['3','QUARTA-FEIRA'],['4','QUINTA-FEIRA'],['5','SEXTA-FEIRA'],['6','SÁBADO']
+];
+function v28Defaults(){
+  const pro=(v19Pros&&v19Pros()[0])||{};
+  const sv=services();
+  const schedule={};V28_DAYS.forEach(([d])=>schedule[d]={active:d!=='0',start:d==='0'?'09:00':'08:00',lunchStart:d==='0'?'12:00':'11:30',lunchEnd:'13:00',end:'18:00'});
+  return {name:pro.name||'Gustavo Nicacio Nascimento',phone:'+55 33 98886-9797',email:'nicaciobarbearia@gmail.com',commission:100,leader:true,photo:'',schedule,serviceIds:sv.map((s,i)=>String(s.id||s.name||i))};
+}
+function v28Pro(){const d=v28Defaults(),x=load(V28_PRO_KEY,null);if(!x)return d;return {...d,...x,schedule:{...d.schedule,...(x.schedule||{})},serviceIds:Array.isArray(x.serviceIds)?x.serviceIds:d.serviceIds}}
+function v28SavePro(x){save(V28_PRO_KEY,x)}
+function v28ServiceId(s,i){return String(s.id||s.name||i)}
+function v28TimePicker(current,cb){
+  const overlay=document.createElement('div');overlay.className='v28-time-overlay';
+  const list=document.createElement('div');list.className='v28-time-list';let arr=[];for(let m=0;m<1440;m+=10)arr.push(timeFromMins(m));
+  list.innerHTML=arr.map(t=>`<button class="v28-time-option ${t===current?'selected':''}" data-t="${t}" type="button"><span>${t}</span><i></i></button>`).join('');
+  overlay.appendChild(list);document.body.appendChild(overlay);overlay.onclick=e=>{if(e.target===overlay)overlay.remove()};
+  list.querySelectorAll('button').forEach(b=>b.onclick=()=>{const t=b.dataset.t;overlay.remove();cb(t)});
+  requestAnimationFrame(()=>{const e=list.querySelector(`[data-t="${current}"]`);if(e)e.scrollIntoView({block:'center'})});
+}
+function v28ProfessionalPage(){
+  const p=v28Pro(),sv=services();
+  const days=V28_DAYS.map(([d,label])=>{const x=p.schedule[d];return `<section class="v28-day ${x.active?'':'off'}" data-day="${d}">
+    <div class="v28-day-head"><span class="v28-day-name">${label}</span><i class="v28-day-line"></i><span class="v28-day-status">${x.active?'ATENDENDO':'NÃO ATENDENDO'}</span><button class="v28-switch ${x.active?'on':''}" data-day-switch="${d}" type="button"></button></div>
+    <div class="v28-day-times">
+      <div class="v28-time-field"><button data-time-day="${d}" data-field="start" type="button">${x.start}</button><small>INÍCIO</small></div>
+      <div class="v28-time-field"><button data-time-day="${d}" data-field="lunchStart" type="button">${x.lunchStart}</button><small></small></div>
+      <div class="v28-time-field"><button data-time-day="${d}" data-field="lunchEnd" type="button">${x.lunchEnd}</button><small></small></div>
+      <div class="v28-time-field"><button data-time-day="${d}" data-field="end" type="button">${x.end}</button><small>FIM</small></div>
+      <div></div><div class="v28-lunch-label">⌞ &nbsp;&nbsp; ALMOÇO &nbsp;&nbsp; ⌟</div><div></div>
+    </div></section>`}).join('');
+  v19Open(`<div class="v28-pro-screen"><button class="v28-pro-back" id="v28Back" type="button">‹</button>
+    <div class="v28-avatar-wrap"><button class="v28-avatar" id="v28Avatar" type="button" ${p.photo?`style="background-image:url('${p.photo}')"`:''}></button><button class="v28-avatar-btn" id="v28PhotoBtn" type="button">●</button><input class="v28-hidden-file" id="v28Photo" type="file" accept="image/*"></div>
+    <label class="v28-label">NOME (APARECERÁ NA AGENDA)</label><input class="v28-input" id="v28Name" value="${escapeHtml(p.name)}">
+    <label class="v28-label">TELEFONE</label><div class="v28-phone"><span>🇧🇷</span><input id="v28Phone" value="${escapeHtml(p.phone)}"></div>
+    <label class="v28-label">E-MAIL</label><input class="v28-input" id="v28Email" type="email" value="${escapeHtml(p.email)}" readonly>
+    <label class="v28-label">COMISSÃO (%)</label><input class="v28-input" id="v28Commission" type="number" min="0" max="100" value="${Number(p.commission||0)}">
+    <div class="v28-leader-card"><div class="v28-row"><button class="v28-switch ${p.leader?'on':''}" id="v28Leader" type="button"></button><span>Este profissional é um líder?</span></div><p>Um líder pode visualizar, agendar e gerenciar a agenda de outros profissionais.</p></div>
+    <h2 class="v28-schedule-title">Configure o horário de funcionamento deste profissional</h2>${days}
+    <h2 class="v28-service-question">Quais dos serviços oferecidos este profissional realiza em seus clientes?</h2>
+    <div>${sv.map((s,i)=>{const id=v28ServiceId(s,i),on=p.serviceIds.includes(id);return `<div class="v28-service-toggle"><span>${escapeHtml(s.name)}</span><button class="v28-switch ${on?'on':''}" data-service-id="${escapeHtml(id)}" type="button"></button></div>`}).join('')}</div>
+    <button class="v28-savebar" id="v28Save" type="button">SALVAR</button></div>`);
+  const draft=JSON.parse(JSON.stringify(p));
+  $('#v28Back').onclick=()=>{closeModal();renderAll()};
+  const file=$('#v28Photo');$('#v28PhotoBtn').onclick=()=>file.click();$('#v28Avatar').onclick=()=>file.click();file.onchange=()=>{const f=file.files&&file.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{draft.photo=String(r.result);$('#v28Avatar').style.backgroundImage=`url('${draft.photo}')`};r.readAsDataURL(f)};
+  $('#v28Leader').onclick=()=>{draft.leader=!draft.leader;$('#v28Leader').classList.toggle('on',draft.leader)};
+  document.querySelectorAll('[data-day-switch]').forEach(b=>b.onclick=()=>{const d=b.dataset.day;draft.schedule[d].active=!draft.schedule[d].active;b.classList.toggle('on',draft.schedule[d].active);const sec=b.closest('.v28-day');sec.classList.toggle('off',!draft.schedule[d].active);sec.querySelector('.v28-day-status').textContent=draft.schedule[d].active?'ATENDENDO':'NÃO ATENDENDO'});
+  document.querySelectorAll('[data-time-day]').forEach(b=>b.onclick=()=>{const d=b.dataset.timeDay,f=b.dataset.field;v28TimePicker(draft.schedule[d][f],t=>{draft.schedule[d][f]=t;b.textContent=t})});
+  document.querySelectorAll('[data-service-id]').forEach(b=>b.onclick=()=>{const id=b.dataset.serviceId,idx=draft.serviceIds.indexOf(id);if(idx>=0)draft.serviceIds.splice(idx,1);else draft.serviceIds.push(id);b.classList.toggle('on',idx<0)});
+  $('#v28Save').onclick=()=>{draft.name=$('#v28Name').value.trim()||'Profissional';draft.phone=$('#v28Phone').value.trim();draft.commission=Math.max(0,Math.min(100,Number($('#v28Commission').value||0)));v28SavePro(draft);const pros=v19Pros();if(pros[0]){pros[0]={...pros[0],name:draft.name};save(V19_PROS_KEY,pros)};toast('Horários do profissional salvos');closeModal();renderAll()};
+}
+
+// Faz a agenda usar os horários semanais do profissional e pausa de almoço.
+v27DayHours=function(d=selectedDate){
+  const p=v28Pro(),base=settings(),day=String(d.getDay()),w=p.schedule[day]||{};const ov=v27DayOverrides()[key(d)]||{};
+  return {active:w.active!==false,start:ov.start||w.start||base.start,end:ov.end||w.end||base.end,lunchStart:w.lunchStart||'',lunchEnd:w.lunchEnd||'',interval:Number(base.interval||30)};
+};
+slotsForDay=function(d=selectedDate){
+  const s=v27DayHours(d),arr=[];if(!s.active)return arr;
+  for(let m=mins(s.start);m<mins(s.end);m+=Number(s.interval||30)){const t=timeFromMins(m);if(s.lunchStart&&s.lunchEnd&&m>=mins(s.lunchStart)&&m<mins(s.lunchEnd))continue;arr.push(t)}return arr;
+};
+
+// "Editar horários" abre a tela completa do profissional.
+const v28Hours=document.getElementById('editHoursLink');if(v28Hours)v28Hours.onclick=v28ProfessionalPage;
+// O EDITAR do profissional em Configurações também abre a tela completa.
+v19ProEditor=v28ProfessionalPage;
+renderTimeline();
