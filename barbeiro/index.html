@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#151922">
 <title>Agenda • Barbearia Nicácio</title>
 <link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="barbeiro.css?v=25">
+<link rel="stylesheet" href="barbeiro.css?v=27">
 </head>
 <body>
 <main class="barber-app">
@@ -47,6 +47,13 @@
       <button id="editDayBtn" class="mini-btn">Modificar este dia</button>
     </div>
     <div id="timeline" class="timeline"></div>
+    <div class="day-edit-footer">
+      <button id="editDayBtnBottom" class="day-only-btn">MODIFICAR APENAS ESTE DIA</button>
+      <p class="business-hours" id="businessHoursText"></p>
+      <button id="editHoursLink" class="edit-hours-link" type="button">Editar horários</button>
+      <div class="app-version">Versão Barbearia Nicácio</div>
+      <button id="scrollTopRef" class="scroll-top-ref" type="button" aria-label="Voltar ao topo">⌃</button>
+    </div>
   </section>
 
   <div class="bottom-spacer"></div>
@@ -84,6 +91,6 @@
 </section>
 
 <div id="toast" class="toast hidden" role="status"></div>
-<script src="barbeiro.js?v=26"></script>
+<script src="barbeiro.js?v=27"></script>
 </body>
 </html>

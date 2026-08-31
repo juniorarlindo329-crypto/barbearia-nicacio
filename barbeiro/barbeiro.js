@@ -865,3 +865,77 @@ settingsPage=function(){
    btn.onclick=v26NotificationsPage;
  }
 };
+
+// ================= V27: MODIFICAR APENAS ESTE DIA =================
+const V27_DAY_OVERRIDES_KEY='nicacio_day_overrides';
+function v27DayOverrides(){return load(V27_DAY_OVERRIDES_KEY,{})}
+function v27SaveDayOverrides(v){save(V27_DAY_OVERRIDES_KEY,v)}
+function v27DayHours(d=selectedDate){
+  const base=settings(), ov=v27DayOverrides()[key(d)]||{};
+  return {start:ov.start||base.start,end:ov.end||base.end,interval:Number(base.interval||30)};
+}
+
+// Agenda respeita o horário especial daquele dia.
+slotsForDay=function(d=selectedDate){
+  const s=v27DayHours(d),arr=[];
+  for(let m=mins(s.start);m<mins(s.end);m+=Number(s.interval||30))arr.push(timeFromMins(m));
+  return arr;
+};
+
+const _v27RenderTimeline=renderTimeline;
+renderTimeline=function(){
+  _v27RenderTimeline();
+  const el=document.getElementById('businessHoursText');
+  if(el){const h=v27DayHours(selectedDate);el.innerHTML=`Seu horário de funcionamento cadastrado<br>é das <b>${h.start}hrs</b> às <b>${h.end}hrs</b>.`;}
+};
+
+function v27TimesFor(mode){
+  const base=settings(), a=[];
+  if(mode==='open'){
+    for(let m=0;m<mins(base.start);m+=10)a.push(timeFromMins(m));
+  }else{
+    for(let m=mins(base.end)+10;m<24*60;m+=10)a.push(timeFromMins(m));
+  }
+  return a;
+}
+function v27OpenTimeList(mode,current,onPick){
+  const overlay=document.createElement('div');overlay.className='day-time-overlay';
+  const list=document.createElement('div');list.className='day-time-list';
+  const times=v27TimesFor(mode);
+  list.innerHTML=times.map(t=>`<button type="button" class="day-time-option ${t===current?'selected':''}" data-time="${t}"><span>${t}</span><i class="day-time-radio"></i></button>`).join('');
+  overlay.appendChild(list);document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()});
+  list.querySelectorAll('.day-time-option').forEach(b=>b.onclick=()=>{const t=b.dataset.time;overlay.remove();onPick(t)});
+  // Abre a lista próximo do horário comercial, como na referência.
+  requestAnimationFrame(()=>{const target=list.querySelector(current?`.day-time-option[data-time="${current}"]`:mode==='open'?'.day-time-option:last-child':'.day-time-option:first-child');if(target)target.scrollIntoView({block:'center'});});
+}
+
+editDayPage=function(){
+  const date=key(selectedDate), base=settings(), current=v27DayOverrides()[date]||{};
+  let mode='open'; let chosen=current.start&&current.start!==base.start?current.start:'';
+  $('#modal').classList.remove('settings-mode');$('#modal').classList.add('day-only-mode');
+  $('#modalContent').innerHTML=`<div class="day-only-sheet">
+    <h2>Modifique apenas o dia ${selectedDate.toLocaleDateString('pt-BR')}</h2>
+    <div class="day-only-tabs"><button id="v27OpenTab" class="active" type="button">ABRIR ANTES</button><button id="v27CloseTab" type="button">FECHAR DEPOIS</button></div>
+    <button id="v27TimeSelect" class="day-only-select" type="button"><span id="v27TimeText">Selecione um horário para começar seu dia</span><span class="caret">⌄</span></button>
+    <div class="day-only-actions"><button id="v27No" class="day-only-no" type="button">NÃO</button><button id="v27Yes" class="day-only-yes" type="button">SIM</button></div>
+    <button id="v27Clear" class="day-only-clear" type="button">Restaurar horário normal deste dia</button>
+  </div>`;
+  $('#modal').classList.remove('hidden');$('#modal').setAttribute('aria-hidden','false');
+  const timeText=$('#v27TimeText');
+  const setMode=(m)=>{mode=m;chosen=m==='open'?(current.start&&current.start!==base.start?current.start:''):(current.end&&current.end!==base.end?current.end:'');$('#v27OpenTab').classList.toggle('active',m==='open');$('#v27CloseTab').classList.toggle('active',m==='close');timeText.textContent=chosen|| (m==='open'?'Selecione um horário para começar seu dia':'Selecione um horário para terminar seu dia');};
+  $('#v27OpenTab').onclick=()=>setMode('open'); $('#v27CloseTab').onclick=()=>setMode('close');
+  $('#v27TimeSelect').onclick=()=>v27OpenTimeList(mode,chosen,t=>{chosen=t;timeText.textContent=t});
+  $('#v27No').onclick=()=>closeModal();
+  $('#v27Yes').onclick=()=>{if(!chosen){toast('Selecione um horário');return}const all=v27DayOverrides(),item={...(all[date]||{})};if(mode==='open')item.start=chosen;else item.end=chosen;all[date]=item;v27SaveDayOverrides(all);closeModal();renderAll();toast('Horário deste dia atualizado')};
+  $('#v27Clear').onclick=()=>{const all=v27DayOverrides();delete all[date];v27SaveDayOverrides(all);closeModal();renderAll();toast('Horário normal restaurado')};
+};
+
+// Garante que o fechamento do modal remova o modo branco.
+const _v27CloseModal=closeModal;
+closeModal=function(){$('#modal').classList.remove('day-only-mode');_v27CloseModal()};
+
+const v27Bottom=document.getElementById('editDayBtnBottom');if(v27Bottom)v27Bottom.onclick=editDayPage;
+const v27Hours=document.getElementById('editHoursLink');if(v27Hours)v27Hours.onclick=v21GeneralSettings;
+const v27Top=document.getElementById('scrollTopRef');if(v27Top)v27Top.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+renderTimeline();
