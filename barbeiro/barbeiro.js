@@ -97,7 +97,7 @@ function changeStatus(id,status){const all=bookings(),b=all.find(x=>x.id===id);i
 function newBookingModal(prefillTime=''){
  const opts=services().filter(s=>s.active!==false).map((s,i)=>`<option value="${encodeURIComponent(s.name)}">${escapeHtml(s.name)} — ${money(s.price)}</option>`).join('');
  openModal('Novo Agendamento',`<form id="manualForm" class="form-grid"><div class="field full"><label>Nome do cliente</label><input id="mName" required placeholder="Nome da pessoa"></div><div class="field"><label>Telefone</label><input id="mPhone" inputmode="tel" placeholder="(00) 00000-0000"></div><div class="field"><label>Serviço</label><select id="mService" required>${opts}</select></div><div class="field"><label>Data</label><input id="mDate" type="date" value="${key(selectedDate)}" required></div><div class="field"><label>Horário</label><input id="mTime" type="time" step="600" value="${prefillTime}" required></div><div class="field full"><label>Observação</label><textarea id="mNote" placeholder="Opcional"></textarea></div><button class="primary-btn full" type="submit">SALVAR AGENDAMENTO</button></form>`);
- $('#manualForm').onsubmit=e=>{e.preventDefault();const srv=services().find(s=>s.name===decodeURIComponent($('#mService').value));if(!srv)return;const date=$('#mDate').value,time=$('#mTime').value;if(blockedDays().includes(date)||new Date(date+'T12:00:00').getDay()===0||isSlotClosed(date,time)){alert('Esse horário está fechado.');return}const all=bookings();if(all.some(b=>b.date===date&&b.time===time&&b.status!=='cancelado')){alert('Já existe agendamento nesse horário.');return}const item={id:uuid(),clientName:$('#mName').value.trim(),clientPhone:$('#mPhone').value.trim(),serviceName:srv.name,price:Number(srv.price),duration:Number(srv.duration),date,dateLabel:new Date(date+'T12:00:00').toLocaleDateString('pt-BR'),time,status:'confirmado',note:$('#mNote').value.trim(),createdAt:new Date().toISOString(),source:'barbeiro'};all.push(item);saveBookings(all);selectedDate=new Date(date+'T12:00:00');currentWeekStart=startOfWeek(selectedDate);closeModal();renderAll();toast('Agendamento criado')}
+ $('#manualForm').onsubmit=e=>{e.preventDefault();const srv=services().find(s=>s.name===decodeURIComponent($('#mService').value));if(!srv)return;const date=$('#mDate').value,time=$('#mTime').value;if(blockedDays().includes(date)||new Date(date+'T12:00:00').getDay()===0||isSlotClosed(date,time)){alert('Esse horário está fechado.');return}const all=bookings();if(all.some(b=>{if(b.date!==date||b.status==='cancelado')return false;const a1=mins(time),a2=a1+Number(srv.duration||30),b1=mins(b.time||'00:00'),b2=b1+Number(b.duration||30);return a1<b2&&a2>b1})){alert('Esse período já está ocupado por outro agendamento.');return}const dh=v27DayHours(new Date(date+'T12:00:00'));const a1=mins(time),a2=a1+Number(srv.duration||30);if(dh.lunchStart&&dh.lunchEnd&&a1<mins(dh.lunchEnd)&&a2>mins(dh.lunchStart)){alert('Esse período passa pelo horário de almoço.');return}const item={id:uuid(),clientName:$('#mName').value.trim(),clientPhone:$('#mPhone').value.trim(),serviceName:srv.name,price:Number(srv.price),duration:Number(srv.duration),date,dateLabel:new Date(date+'T12:00:00').toLocaleDateString('pt-BR'),time,status:'confirmado',note:$('#mNote').value.trim(),createdAt:new Date().toISOString(),source:'barbeiro'};all.push(item);saveBookings(all);selectedDate=new Date(date+'T12:00:00');currentWeekStart=startOfWeek(selectedDate);closeModal();renderAll();toast('Agendamento criado')}
 }
 
 function toggleDayBlock(){const k=key(selectedDate);if(selectedDate.getDay()===0){toast('Domingo já é bloqueado');return}let all=blockedDays();const nowBlocked=all.includes(k);all=nowBlocked?all.filter(x=>x!==k):[...all,k];saveBlockedDays(all);renderAll();toast(nowBlocked?'Dia liberado':'Dia bloqueado')}
@@ -1025,4 +1025,85 @@ slotsForDay=function(d=selectedDate){
 const v28Hours=document.getElementById('editHoursLink');if(v28Hours)v28Hours.onclick=v28ProfessionalPage;
 // O EDITAR do profissional em Configurações também abre a tela completa.
 v19ProEditor=v28ProfessionalPage;
+renderTimeline();
+
+
+// ================= V36: AGENDA CONTÍNUA PROFISSIONAL =================
+// Um agendamento vira um único bloco e sua altura representa a duração real.
+// Ex.: 12:30 + 60 min => bloco visual de 12:30 até 13:30.
+renderTimeline=function(){
+  const dkey=key(selectedDate), wrap=$('#timeline');
+  $('#selectedDayTitle').textContent=selectedDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+  wrap.innerHTML='';
+  wrap.className='timeline continuous-timeline';
+
+  const h=v27DayHours(selectedDate);
+  const startMin=mins(h.start), endMin=mins(h.end);
+  const fullBlocked=selectedDate.getDay()===0||blockedDays().includes(dkey)||h.active===false;
+  const pxPerHour=520;
+  const totalMinutes=Math.max(60,endMin-startMin);
+  const totalHeight=(totalMinutes/60)*pxPerHour;
+
+  const board=document.createElement('div');
+  board.className='continuous-board';
+  board.style.height=totalHeight+'px';
+  board.style.setProperty('--hour-px',pxPerHour+'px');
+  wrap.appendChild(board);
+
+  // Linhas e rótulos somente em horas cheias.
+  const firstHour=Math.floor(startMin/60);
+  const lastHour=Math.ceil(endMin/60);
+  for(let hr=firstHour;hr<=lastHour;hr++){
+    const m=hr*60;
+    if(m<startMin||m>endMin)continue;
+    const y=((m-startMin)/60)*pxPerHour;
+    const line=document.createElement('div');line.className='continuous-hour-line';line.style.top=y+'px';
+    line.innerHTML=`<span>${timeFromMins(m)}</span>`;
+    board.appendChild(line);
+  }
+
+  // Áreas vazias continuam clicáveis para criar um novo agendamento.
+  for(let hr=firstHour;hr<lastHour;hr++){
+    const m=Math.max(hr*60,startMin), e=Math.min((hr+1)*60,endMin);if(e<=m)continue;
+    const hit=document.createElement('button');hit.type='button';hit.className='continuous-hour-hit';
+    hit.style.top=(((m-startMin)/60)*pxPerHour+8)+'px';
+    hit.style.height=Math.max(40,((e-m)/60)*pxPerHour-16)+'px';
+    hit.addEventListener('click',()=>newBookingModal(timeFromMins(m)));
+    board.appendChild(hit);
+  }
+
+  // Horário de almoço como um bloco único, igual a um período fechado.
+  if(!fullBlocked&&h.lunchStart&&h.lunchEnd){
+    const ls=mins(h.lunchStart),le=mins(h.lunchEnd);
+    if(le>startMin&&ls<endMin&&le>ls){
+      const top=((Math.max(ls,startMin)-startMin)/60)*pxPerHour;
+      const height=((Math.min(le,endMin)-Math.max(ls,startMin))/60)*pxPerHour;
+      const c=document.createElement('div');c.className='continuous-card continuous-closed-card';
+      c.style.top=(top+8)+'px';c.style.height=Math.max(84,height-16)+'px';
+      c.innerHTML=`<div class="continuous-card-head"><strong>${timeFromMins(ls)} - ${timeFromMins(le)}</strong><span>✎</span></div><div class="continuous-card-bottom"><b>Fechado</b><small>Horário de almoço configurado</small></div>`;
+      board.appendChild(c);
+    }
+  }
+
+  if(fullBlocked){
+    const c=document.createElement('div');c.className='continuous-card continuous-closed-card full-day';
+    c.style.top='8px';c.style.height=Math.max(100,totalHeight-16)+'px';
+    c.innerHTML='<div class="continuous-card-bottom"><b>Fechado</b><small>Dia não disponível para atendimento</small></div>';
+    board.appendChild(c);
+  }
+
+  const list=dayBookings(selectedDate).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  list.forEach(appt=>{
+    const bm=mins(appt.time||h.start),dur=Math.max(10,Number(appt.duration||30)),em=bm+dur;
+    if(em<=startMin||bm>=endMin)return;
+    const visStart=Math.max(bm,startMin),visEnd=Math.min(em,endMin);
+    const top=((visStart-startMin)/60)*pxPerHour;
+    const height=((visEnd-visStart)/60)*pxPerHour;
+    const c=document.createElement('article');c.className='continuous-card continuous-appointment-card';
+    c.style.top=(top+8)+'px';c.style.height=Math.max(90,height-16)+'px';
+    c.innerHTML=`<div class="continuous-card-head"><strong>${timeFromMins(bm)} - ${timeFromMins(em)}</strong><button class="mini-icon more-btn" type="button">•••</button></div><div class="continuous-card-center"><b>${escapeHtml(appt.clientName||'Cliente')}</b><span>${escapeHtml(appt.serviceName||'Serviço')}</span></div><div class="continuous-price">${valuesHidden?'••••':money(appt.price)}</div>`;
+    c.querySelector('.more-btn').addEventListener('click',e=>{e.stopPropagation();bookingActions(appt.id)});
+    board.appendChild(c);
+  });
+};
 renderTimeline();

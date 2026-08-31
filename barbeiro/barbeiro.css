@@ -737,3 +737,46 @@ body.client-editor-open{overflow:hidden}
   .hour-lane{height:360px!important}
   .hour-empty{padding-top:132px!important}
 }
+
+/* V35 — espaço GIGANTE entre cada hora da agenda */
+.hour-row{min-height:560px!important}
+.hour-lane{height:560px!important}
+.hour-empty{font-size:20px!important;padding-top:220px!important}
+@media(max-width:560px){
+  .hour-row{min-height:520px!important;padding-left:64px}
+  .hour-lane{height:520px!important}
+  .hour-empty{padding-top:205px!important}
+}
+
+/* V36 — agenda contínua: bloco ocupa exatamente a duração do serviço */
+.continuous-timeline{margin-top:28px!important;position:relative!important}
+.continuous-board{position:relative!important;width:100%!important;margin-bottom:24px!important;overflow:visible!important}
+.continuous-hour-line{position:absolute!important;left:0!important;right:0!important;height:1px!important;border-top:1px solid rgba(255,255,255,.24)!important;z-index:1!important}
+.continuous-hour-line span{position:absolute!important;left:0!important;top:-18px!important;width:68px!important;color:#858d99!important;font-size:17px!important;background:var(--bg,#171c24)!important;padding-right:8px!important;z-index:2!important}
+.continuous-hour-line:after{content:'';position:absolute;left:72px;right:0;top:-1px;border-top:1px solid rgba(255,255,255,.12)}
+.continuous-hour-hit{position:absolute!important;left:72px!important;right:0!important;border:0!important;background:transparent!important;z-index:2!important;border-radius:24px!important}
+.continuous-card{position:absolute!important;left:86px!important;right:0!important;border-radius:28px!important;padding:24px 26px!important;box-sizing:border-box!important;z-index:6!important;overflow:hidden!important;box-shadow:0 8px 30px rgba(0,0,0,.14)!important}
+.continuous-appointment-card{background:#565a62!important;color:#fff!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important}
+.continuous-card-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;font-size:18px!important;color:#fff!important}
+.continuous-card-head strong{font-size:18px!important}
+.continuous-card-center{display:flex!important;flex-direction:column!important;gap:8px!important;margin:auto 0!important}
+.continuous-card-center b{font-size:28px!important;line-height:1.08!important}
+.continuous-card-center span{font-size:16px!important;color:#e0e3e8!important;text-transform:uppercase!important;font-weight:700!important}
+.continuous-price{align-self:flex-end!important;background:#ffffff1a!important;border-radius:12px!important;padding:7px 10px!important;font-size:14px!important}
+.continuous-closed-card{background:#a9a9a9!important;color:#fff!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important}
+.continuous-closed-card .continuous-card-head span{font-size:22px!important}
+.continuous-card-bottom{display:flex!important;flex-direction:column!important;gap:6px!important;margin-top:auto!important}
+.continuous-card-bottom b{font-size:29px!important;line-height:1!important}
+.continuous-card-bottom small{font-size:16px!important;font-weight:700!important;color:#fff!important}
+.continuous-closed-card.full-day{background:repeating-linear-gradient(45deg,#3d424b 0,#3d424b 14px,#484d56 14px,#484d56 28px)!important}
+@media(max-width:560px){
+  .continuous-hour-line span{font-size:15px!important;width:58px!important;top:-16px!important}
+  .continuous-hour-line:after{left:64px!important}
+  .continuous-hour-hit{left:64px!important}
+  .continuous-card{left:74px!important;right:0!important;border-radius:24px!important;padding:20px 20px!important}
+  .continuous-card-head,.continuous-card-head strong{font-size:16px!important}
+  .continuous-card-center b{font-size:24px!important}
+  .continuous-card-center span{font-size:14px!important}
+  .continuous-card-bottom b{font-size:25px!important}
+  .continuous-card-bottom small{font-size:14px!important}
+}
