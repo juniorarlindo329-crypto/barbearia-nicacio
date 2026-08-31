@@ -694,3 +694,26 @@ body.client-editor-open{overflow:hidden}
   .v31-services-section .v28-service-question{font-size:17px!important;margin-bottom:22px!important}
   .v31-services-section .v28-service-toggle{min-height:64px!important;height:64px!important;font-size:17px!important;padding:0 16px!important;border-radius:17px!important}
 }
+
+
+/* V32 — agenda por hora inteira, sem linhas de 30 minutos */
+.timeline{margin-top:24px!important}
+.hour-row{position:relative;min-height:190px;border-top:1px solid rgba(255,255,255,.2);padding-left:72px}
+.hour-time{position:absolute;left:0;top:-12px;width:62px;color:#8c939e;font-size:16px;line-height:24px}
+.hour-lane{position:relative;height:190px;padding:10px 0 8px}
+.hour-empty{position:absolute;inset:16px 0 12px 0;border:0;background:transparent;color:#6f7681;font-size:17px;text-align:center;border-radius:18px}
+.hour-card{position:absolute;left:0;right:0;border-radius:18px;background:#545861;padding:10px 14px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.appointment-hour-card{min-height:68px;display:flex;flex-direction:column;justify-content:center}
+.hour-appt-head{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#fff;font-size:12px;font-weight:800}
+.hour-client{font-size:20px;font-weight:800;color:#fff;line-height:1.15;margin-top:4px}
+.hour-service{font-size:11px;color:#d0d3d9;text-transform:uppercase;font-weight:800;margin-top:3px}
+.hour-price{position:absolute;right:12px;bottom:8px;background:#ffffff17;border-radius:9px;padding:4px 7px;font-size:11px;color:#fff}
+.hour-closed{inset:14px 0 14px 0;background:repeating-linear-gradient(45deg,#3d424b 0,#3d424b 12px,#484d56 12px,#484d56 24px);display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff}
+.hour-closed strong{font-size:18px}.hour-closed small{margin-top:5px;color:#d0d3d8}
+@media(max-width:560px){
+ .hour-row{min-height:178px;padding-left:64px}
+ .hour-time{font-size:15px;width:56px}
+ .hour-lane{height:178px}
+ .hour-empty{font-size:16px}
+ .hour-client{font-size:19px}
+}

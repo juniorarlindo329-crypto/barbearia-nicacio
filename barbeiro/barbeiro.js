@@ -43,39 +43,47 @@ function renderTimeline(){
  $('#selectedDayTitle').textContent=selectedDate.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
  wrap.innerHTML='';
  const fullBlocked=selectedDate.getDay()===0||blockedDays().includes(dkey);
- const slots=slotsForDay();
- const interval=Number(settings().interval||30);
- const consumed=new Set();
- slots.forEach(time=>{
-   if(consumed.has(time)) return;
+ const cfg=settings();
+ const startMin=mins(cfg.start),endMin=mins(cfg.end);
+ const firstHour=Math.floor(startMin/60),lastHour=Math.ceil(endMin/60);
+ for(let h=firstHour;h<lastHour;h++){
+   const hourStart=h*60,hourEnd=(h+1)*60;
+   if(hourEnd<=startMin||hourStart>=endMin) continue;
    const row=document.createElement('div');
-   row.className='slot-row';
-   row.innerHTML=`<div class="slot-time">${time}</div>`;
-   const appt=list.find(b=>b.time===time);
-   const closed=fullBlocked||isSlotClosed(dkey,time);
-   if(closed){
-     row.classList.add('has-card');
-     const c=document.createElement('div');c.className='slot-card closed';
-     c.innerHTML=`<div class="slot-head"><span>${time} - ${timeFromMins(mins(time)+interval)}</span><button class="mini-icon" title="Abrir horário">▣</button></div><strong>Horário fechado</strong>`;
-     c.querySelector('button').addEventListener('click',()=>toggleSlot(dkey,time));row.appendChild(c);
-   } else if(appt){
-     row.classList.add('has-card');
-     const span=Math.max(1,Math.ceil(Number(appt.duration||interval)/interval));
-     if(span>1) row.classList.add(`span-${Math.min(span,3)}`);
-     for(let i=1;i<span;i++){
-       const t=timeFromMins(mins(time)+interval*i);
-       if(slots.includes(t)) consumed.add(t);
-     }
-     const c=document.createElement('div');c.className='slot-card';
-     c.innerHTML=`<div class="slot-head"><span>${appt.time} - ${timeFromMins(mins(appt.time)+Number(appt.duration||interval))}</span><div><button class="mini-icon more-btn">•••</button></div></div><div><div class="client-name">${escapeHtml(appt.clientName||'Cliente')}</div><div class="service-name">${escapeHtml(appt.serviceName||'Serviço')}</div></div><div class="slot-price">${valuesHidden?'••••':money(appt.price)}</div>`;
-     c.querySelector('.more-btn').addEventListener('click',()=>bookingActions(appt.id));row.appendChild(c);
+   row.className='hour-row';
+   const label=timeFromMins(hourStart);
+   row.innerHTML=`<div class="hour-time">${label}</div><div class="hour-lane"></div>`;
+   const lane=row.querySelector('.hour-lane');
+   const hourAppointments=list.filter(b=>{
+      const bm=mins(b.time||'00:00');
+      const dur=Math.max(1,Number(b.duration||30));
+      return bm < hourEnd && (bm+dur) > hourStart;
+   });
+   const closedHour=fullBlocked;
+   if(closedHour){
+      const c=document.createElement('div');c.className='hour-card hour-closed';
+      c.innerHTML=`<strong>Horário fechado</strong><small>${label} - ${timeFromMins(hourEnd)}</small>`;
+      lane.appendChild(c);
+   } else if(hourAppointments.length){
+      hourAppointments.forEach(appt=>{
+        const bm=mins(appt.time||label),dur=Math.max(10,Number(appt.duration||30));
+        const visibleStart=Math.max(bm,hourStart),visibleEnd=Math.min(bm+dur,hourEnd);
+        const top=((visibleStart-hourStart)/60)*100;
+        const height=Math.max(18,((visibleEnd-visibleStart)/60)*100);
+        const c=document.createElement('div');c.className='hour-card appointment-hour-card';
+        c.style.top=`${top}%`; c.style.height=`calc(${height}% - 6px)`;
+        c.innerHTML=`<div class="hour-appt-head"><span>${appt.time} - ${timeFromMins(bm+dur)}</span><button class="mini-icon more-btn">•••</button></div><div class="hour-client">${escapeHtml(appt.clientName||'Cliente')}</div><div class="hour-service">${escapeHtml(appt.serviceName||'Serviço')}</div><div class="hour-price">${valuesHidden?'••••':money(appt.price)}</div>`;
+        c.querySelector('.more-btn').addEventListener('click',e=>{e.stopPropagation();bookingActions(appt.id)});
+        lane.appendChild(c);
+      });
    } else {
-     const e=document.createElement('div');e.className='empty-slot';e.textContent='Sem agendamento';
-     e.addEventListener('click',()=>newBookingModal(time));row.appendChild(e);
+      const e=document.createElement('button');e.type='button';e.className='hour-empty';e.textContent='Sem agendamento';
+      e.addEventListener('click',()=>newBookingModal(label));lane.appendChild(e);
    }
    wrap.appendChild(row);
- });
+ }
 }
+
 function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function renderAll(){renderProfile();renderWeek();renderStats();renderTimeline()}
 
