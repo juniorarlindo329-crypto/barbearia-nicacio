@@ -971,7 +971,7 @@ function v28ProfessionalPage(){
       <div class="v28-time-field"><button data-time-day="${d}" data-field="lunchStart" type="button">${x.lunchStart}</button><small></small></div>
       <div class="v28-time-field"><button data-time-day="${d}" data-field="lunchEnd" type="button">${x.lunchEnd}</button><small></small></div>
       <div class="v28-time-field"><button data-time-day="${d}" data-field="end" type="button">${x.end}</button><small>FIM</small></div>
-      <div></div><div class="v28-lunch-label"><i></i><span>ALMOÇO</span><i></i></div><div></div>
+      <div></div><div class="v28-lunch-label">⌞ &nbsp;&nbsp; ALMOÇO &nbsp;&nbsp; ⌟</div><div></div>
     </div></section>`}).join('');
   v19Open(`<div class="v28-pro-screen"><button class="v28-pro-back" id="v28Back" type="button">‹</button>
     <div class="v28-avatar-wrap"><button class="v28-avatar" id="v28Avatar" type="button" ${p.photo?`style="background-image:url('${p.photo}')"`:''}></button><button class="v28-avatar-btn" id="v28PhotoBtn" type="button">●</button><input class="v28-hidden-file" id="v28Photo" type="file" accept="image/*"></div>
@@ -982,7 +982,7 @@ function v28ProfessionalPage(){
     <div class="v28-leader-card"><div class="v28-row"><button class="v28-switch ${p.leader?'on':''}" id="v28Leader" type="button"></button><span>Este profissional é um líder?</span></div><p>Um líder pode visualizar, agendar e gerenciar a agenda de outros profissionais.</p></div>
     <h2 class="v28-schedule-title">Configure o horário de funcionamento deste profissional</h2>${days}
     <h2 class="v28-service-question">Quais dos serviços oferecidos este profissional realiza em seus clientes?</h2>
-    <div class="v28-services-list">${sv.map((s,i)=>{const id=v28ServiceId(s,i),on=p.serviceIds.includes(id);return `<div class="v28-service-toggle"><span>${escapeHtml(s.name)}</span><button class="v28-switch ${on?'on':''}" data-service-id="${escapeHtml(id)}" type="button" aria-label="Ativar ou desativar ${escapeHtml(s.name)}"></button></div>`}).join('')}</div>
+    <div class="v30-services-list">${sv.map((s,i)=>{const id=v28ServiceId(s,i),on=p.serviceIds.includes(id);return `<div class="v28-service-toggle"><span>${escapeHtml(s.name)}</span><button class="v28-switch ${on?'on':''}" data-service-id="${escapeHtml(id)}" type="button"></button></div>`}).join('')}</div>
     <button class="v28-savebar" id="v28Save" type="button">SALVAR</button></div>`);
   const draft=JSON.parse(JSON.stringify(p));
   $('#v28Back').onclick=()=>{closeModal();renderAll()};
