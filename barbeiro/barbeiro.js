@@ -963,7 +963,14 @@ function v28TimePicker(current,cb){
   requestAnimationFrame(()=>{const e=list.querySelector(`[data-t="${current}"]`);if(e)e.scrollIntoView({block:'center'})});
 }
 function v28ProfessionalPage(){
-  const p=v28Pro(),sv=services();
+  const p=v28Pro();
+  let sv=services();
+  // V31: garante que a lista de serviços sempre apareça logo abaixo do título,
+  // mesmo se o armazenamento local estiver vazio ou incompleto.
+  if(!Array.isArray(sv)||!sv.length){
+    sv=DEFAULT_SERVICES.map(x=>({...x,active:x.active!==false}));
+    saveServices(sv);
+  }
   const days=V28_DAYS.map(([d,label])=>{const x=p.schedule[d];return `<section class="v28-day ${x.active?'':'off'}" data-day="${d}">
     <div class="v28-day-head"><span class="v28-day-name">${label}</span><i class="v28-day-line"></i><span class="v28-day-status">${x.active?'ATENDENDO':'NÃO ATENDENDO'}</span><button class="v28-switch ${x.active?'on':''}" data-day-switch="${d}" type="button"></button></div>
     <div class="v28-day-times">
@@ -981,8 +988,10 @@ function v28ProfessionalPage(){
     <label class="v28-label">COMISSÃO (%)</label><input class="v28-input" id="v28Commission" type="number" min="0" max="100" value="${Number(p.commission||0)}">
     <div class="v28-leader-card"><div class="v28-row"><button class="v28-switch ${p.leader?'on':''}" id="v28Leader" type="button"></button><span>Este profissional é um líder?</span></div><p>Um líder pode visualizar, agendar e gerenciar a agenda de outros profissionais.</p></div>
     <h2 class="v28-schedule-title">Configure o horário de funcionamento deste profissional</h2>${days}
-    <h2 class="v28-service-question">Quais dos serviços oferecidos este profissional realiza em seus clientes?</h2>
-    <div class="v30-services-list">${sv.map((s,i)=>{const id=v28ServiceId(s,i),on=p.serviceIds.includes(id);return `<div class="v28-service-toggle"><span>${escapeHtml(s.name)}</span><button class="v28-switch ${on?'on':''}" data-service-id="${escapeHtml(id)}" type="button"></button></div>`}).join('')}</div>
+    <section class="v31-services-section">
+      <h2 class="v28-service-question">Quais dos serviços oferecidos este profissional realiza em seus clientes?</h2>
+      <div class="v30-services-list">${sv.map((s,i)=>{const id=v28ServiceId(s,i),on=p.serviceIds.includes(id);return `<div class="v28-service-toggle"><span>${escapeHtml(s.name)}</span><button class="v28-switch ${on?'on':''}" data-service-id="${escapeHtml(id)}" type="button" aria-label="${on?'Desativar':'Ativar'} ${escapeHtml(s.name)}"></button></div>`}).join('')}</div>
+    </section>
     <button class="v28-savebar" id="v28Save" type="button">SALVAR</button></div>`);
   const draft=JSON.parse(JSON.stringify(p));
   $('#v28Back').onclick=()=>{closeModal();renderAll()};
