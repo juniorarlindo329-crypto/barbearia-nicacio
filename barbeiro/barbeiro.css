@@ -780,3 +780,51 @@ body.client-editor-open{overflow:hidden}
   .continuous-card-bottom b{font-size:25px!important}
   .continuous-card-bottom small{font-size:14px!important}
 }
+
+/* V37 — cards de faturamento mais compactos + versão numérica */
+.stats-grid{
+  gap:12px !important;
+  margin-top:28px !important;
+}
+.stat-card{
+  min-height:132px !important;
+  height:132px !important;
+  border-radius:24px !important;
+  padding:16px 16px !important;
+}
+.stat-card strong{
+  font-size:17px !important;
+  line-height:1.05 !important;
+}
+.money-line{
+  margin-top:7px !important;
+  height:20px !important;
+  gap:6px !important;
+}
+.money-line b{font-size:14px !important}
+.coin-icon{font-size:17px !important}
+.stat-number{
+  font-size:42px !important;
+  margin-top:10px !important;
+  line-height:1 !important;
+}
+.barber-chair{
+  width:52px !important;
+  height:52px !important;
+  right:14px !important;
+  bottom:10px !important;
+}
+@media(max-width:560px){
+  .stats-grid{gap:9px !important;margin-top:26px !important}
+  .stat-card{
+    min-height:124px !important;
+    height:124px !important;
+    border-radius:22px !important;
+    padding:14px 14px !important;
+  }
+  .stat-card strong{font-size:16px !important}
+  .money-line b{font-size:13px !important}
+  .coin-icon{font-size:16px !important}
+  .stat-number{font-size:39px !important;margin-top:9px !important}
+  .barber-chair{width:46px !important;height:46px !important;right:12px !important;bottom:9px !important}
+}
