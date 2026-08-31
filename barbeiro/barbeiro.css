@@ -727,3 +727,13 @@ body.client-editor-open{overflow:hidden}
   .hour-lane{height:235px!important}
   .hour-empty{padding-top:72px!important}
 }
+
+/* V34 — espaço BEM maior entre cada hora da agenda */
+.hour-row{min-height:390px!important}
+.hour-lane{height:390px!important}
+.hour-empty{font-size:19px!important;padding-top:145px!important}
+@media(max-width:520px){
+  .hour-row{min-height:360px!important;padding-left:64px}
+  .hour-lane{height:360px!important}
+  .hour-empty{padding-top:132px!important}
+}
