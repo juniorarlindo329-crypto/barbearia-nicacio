@@ -717,3 +717,13 @@ body.client-editor-open{overflow:hidden}
  .hour-empty{font-size:16px}
  .hour-client{font-size:19px}
 }
+
+/* V33 — mais espaço entre cada hora da agenda */
+.hour-row{min-height:250px!important}
+.hour-lane{height:250px!important}
+.hour-empty{font-size:18px!important;padding-top:78px!important}
+@media(max-width:520px){
+  .hour-row{min-height:235px!important;padding-left:64px}
+  .hour-lane{height:235px!important}
+  .hour-empty{padding-top:72px!important}
+}
